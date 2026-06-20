@@ -96,7 +96,7 @@ export async function generateFillBlankQuestions(
   count = 10
 ): Promise<FillBlankQuestion[]> {
   const model = getGenAI().getGenerativeModel({
-    model: "gemini-1.5-flash-latest",
+    model: "gemini-3.5-flash",
     generationConfig: { responseMimeType: "application/json" }
   });
 
@@ -120,7 +120,7 @@ export async function generateFillBlankQuestions(
 
 export async function generateReadingQuiz(hskLevel: number): Promise<ReadingQuiz> {
   const model = getGenAI().getGenerativeModel({
-    model: "gemini-1.5-flash-latest",
+    model: "gemini-3.5-flash",
     generationConfig: { responseMimeType: "application/json" }
   });
 
