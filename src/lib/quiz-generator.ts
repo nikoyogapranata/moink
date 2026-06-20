@@ -1,9 +1,17 @@
-import { createClient } from '@supabase/supabase-js'
+'use server'
 
+import { createClient } from '@supabase/supabase-js'
+import { GoogleGenerativeAI } from '@google/generative-ai'
+
+// ── Supabase ───────────────────────────────────────────────────────────────────
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
+
+// ── Gemini ─────────────────────────────────────────────────────────────────────
+// Initializes safely on the server using the key you just added to .env.local
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -36,7 +44,7 @@ export type ReadingQuiz = {
   questions: ReadingQuestion[]
 }
 
-// ── Flashcard ──────────────────────────────────────────────────────────────────
+// ── Flashcard (Database via Supabase) ──────────────────────────────────────────
 
 export async function generateFlashcardQuestions(
   hskLevel: number,
@@ -80,46 +88,58 @@ export async function generateFlashcardQuestions(
   })
 }
 
-// ── Fill-in-the-blank (via API route — server-side Anthropic call) ─────────────
+// ── Fill-in-the-blank (Server-Side Gemini Call) ────────────────────────────────
 
 export async function generateFillBlankQuestions(
   hskLevel: number,
   count = 10
 ): Promise<FillBlankQuestion[]> {
-  const res = await fetch('/api/quiz/fillblank', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ hskLevel, count }),
-  })
+  const model = genAI.getGenerativeModel({
+    model: "gemini-1.5-flash",
+    generationConfig: { responseMimeType: "application/json" }
+  });
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}))
-    throw new Error((err as { error?: string }).error ?? 'Failed to generate fill-in-blank questions')
-  }
+  const prompt = `Generate ${count} HSK level ${hskLevel} fill-in-the-blank questions in JSON format.
+  Return an array of objects, where each object has exactly these keys:
+  "sentence" (a Chinese sentence with exactly one '___' for the missing word),
+  "translation" (the English translation of the sentence),
+  "answer" (the correct Chinese word that belongs in the blank),
+  "options" (an array of 4 different Chinese words, including the correct answer).`;
 
-  const data = await res.json() as { questions: Array<{ sentence: string; answer: string; options: string[]; translation: string }> }
-  return data.questions.map(q => ({ type: 'fillblank' as const, ...q }))
+  const result = await model.generateContent(prompt);
+  const text = result.response.text();
+  
+  // Parse the JSON strictly returned by Gemini
+  const questionsData = JSON.parse(text) as Array<{ sentence: string; answer: string; options: string[]; translation: string }>;
+  
+  return questionsData.map(q => ({ type: 'fillblank' as const, ...q }));
 }
 
-// ── Reading (via API route — server-side Anthropic call) ──────────────────────
+// ── Reading (Server-Side Gemini Call) ──────────────────────────────────────────
 
 export async function generateReadingQuiz(hskLevel: number): Promise<ReadingQuiz> {
-  const res = await fetch('/api/quiz/reading', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ hskLevel }),
-  })
+  const model = genAI.getGenerativeModel({
+    model: "gemini-1.5-flash",
+    generationConfig: { responseMimeType: "application/json" }
+  });
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}))
-    throw new Error((err as { error?: string }).error ?? 'Failed to generate reading quiz')
-  }
+  const prompt = `Generate an HSK level ${hskLevel} reading comprehension quiz in JSON format.
+  Return a single JSON object with these two keys:
+  "passage" (a short Chinese paragraph appropriate for HSK ${hskLevel} reading practice),
+  "questions" (an array of exactly 3 objects. Each object must have: 
+     "question" (an English question about the passage), 
+     "answer" (the correct English answer), 
+     "options" (an array of 4 different English answers including the correct one)).`;
 
-  const data = await res.json() as { passage: string; questions: Array<{ question: string; options: string[]; answer: string }> }
+  const result = await model.generateContent(prompt);
+  const text = result.response.text();
+  
+  const quizData = JSON.parse(text) as { passage: string; questions: Array<{ question: string; options: string[]; answer: string }> };
+
   return {
-    passage: data.passage,
-    questions: data.questions.map(q => ({ type: 'reading' as const, ...q })),
-  }
+    passage: quizData.passage,
+    questions: quizData.questions.map(q => ({ type: 'reading' as const, ...q })),
+  };
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
