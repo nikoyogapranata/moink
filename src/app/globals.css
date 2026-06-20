@@ -1,26 +1,197 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ─── Moink Design System ────────────────────────────────────────────────────
+   Source of truth: /design.json
+   North Star: "The Ink Study" — clean paper, one red stamp, ink-black type.
+   All token values derived from design.json > colors / colorMeta / extensions.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+@theme {
+  /* Colors
+     Hex equivalents:
+     red-stamp       → #dc2626
+     ink-black       → #111111
+     ink-soft        → warm dark brown
+     muted-text      → warm medium brown
+     brush-gray      → #e5d5c2  (warm cream border)
+     paper-medium    → #FFF3E4  (deeper cream, section alternates)
+     paper-warm      → #FFF8F0  (primary bg, warm rice paper)
+     paper-highlight → #FFF0C2  (soft warm yellow, special elements)
+     card-surface    → warm near-white for card backgrounds            */
+  --color-red-stamp: oklch(53% 0.22 27);
+  --color-ink-black: oklch(17% 0.004 50);
+  --color-ink-soft: oklch(32% 0.012 60);
+  --color-muted-text: oklch(50% 0.015 65);
+  --color-brush-gray: oklch(87% 0.022 72);
+  --color-paper-medium: oklch(97% 0.025 70);
+  --color-paper-warm: oklch(98.5% 0.013 75);
+  --color-paper-highlight: oklch(96% 0.055 87);
+  --color-card-surface: oklch(99.5% 0.008 80);
+
+  /* Typography
+     Nunito for all UI text — rounded, warm, confident.
+     Geist Mono for pinyin, HSK tags, stroke counts, metadata.
+     CJK font stack specified per-element via .font-cjk utility.             */
+  --font-sans: var(--font-nunito), ui-sans-serif, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  /* Border Radius
+     Overrides Tailwind v4 defaults with Moink's warm-tactile scale.
+     rounded-pill covers chips and HSK tags.                                  */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 9999px;
+
+  /* Spacing
+     Named semantic scale alongside v4's numeric defaults.
+     Generates p-xs, m-sm, gap-md, etc.                                       */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 40px;
+  --spacing-2xl: 64px;
+
+  /* Shadows — warm amber tint instead of cold grey.
+     shadow-card:      ambient lift on rounded cards.
+     shadow-flashcard: deeper lift for the hero flashcard and vocab cards.
+     shadow-lift:      floating elements like the mascot circle.
+     shadow-hover:     interactive state signal.
+     shadow-popover:   dropdowns, tooltips, context menus.                    */
+  --shadow-card: 0 2px 10px rgba(150, 90, 30, 0.07), 0 1px 3px rgba(150, 90, 30, 0.04);
+  --shadow-flashcard: 0 8px 28px rgba(150, 90, 30, 0.10), 0 3px 8px rgba(150, 90, 30, 0.06);
+  --shadow-lift: 0 12px 36px rgba(150, 90, 30, 0.12), 0 4px 10px rgba(150, 90, 30, 0.07);
+  --shadow-hover: 0 4px 16px rgba(150, 90, 30, 0.10);
+  --shadow-popover: 0 8px 24px rgba(150, 90, 30, 0.12);
+
+  /* Easing (from design.json > extensions.motion)
+     ease-out-quart: hover transitions, card reveals. Responsive, no bounce.
+     ease-standard: state changes, focus rings, border color shifts.          */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* ─── Base Layer ─────────────────────────────────────────────────────────── */
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    color-scheme: light;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-paper-warm);
+    color: var(--color-ink-black);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Headings: Nunito 900, tight tracking, Ink Black */
+  h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    color: var(--color-ink-black);
+  }
+
+  h2 {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 900;
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    color: var(--color-ink-black);
+  }
+
+  h3 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--color-ink-black);
+  }
+
+  /* Body copy: max line length 65ch per DESIGN.md */
+  p {
+    max-width: 65ch;
+    color: var(--color-ink-soft);
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* Focus: Red Stamp ring, no default outline */
+  :focus-visible {
+    outline: 2px solid var(--color-red-stamp);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Mono elements: Geist Mono for pinyin, HSK labels, code */
+  code,
+  kbd,
+  samp,
+  pre {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+  }
+
+  /* Reduce motion: blanket override for Framer Motion and Hanzi Writer */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ─── Utilities ──────────────────────────────────────────────────────────── */
+
+@layer utilities {
+  /* Hide scrollbar visually while keeping scroll functionality */
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* CJK character display stack.
+     Applied to Hanzi characters rendered outside of Hanzi Writer.
+     Never combined with font-sans on the same text node.                     */
+  .font-cjk {
+    font-family: "Noto Serif SC", "Source Han Serif CN", "Songti SC",
+      "STSong", serif;
+  }
+
+  /* Pinyin / phonetic label shorthand */
+  .text-label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+
+  /* Body prose: enforces 65ch cap without a wrapper */
+  .prose-body {
+    max-width: 65ch;
+    line-height: 1.6;
+    color: var(--color-ink-soft);
+  }
 }

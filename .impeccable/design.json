@@ -1,0 +1,273 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-15T00:00:00Z",
+  "title": "Design System: Moink",
+  "extensions": {
+    "colorMeta": {
+      "red-stamp": {
+        "role": "primary",
+        "displayName": "Red Stamp",
+        "canonical": "oklch(53% 0.22 27)",
+        "tonalRamp": [
+          "oklch(15% 0.12 27)",
+          "oklch(25% 0.17 27)",
+          "oklch(35% 0.21 27)",
+          "oklch(43% 0.22 27)",
+          "oklch(53% 0.22 27)",
+          "oklch(63% 0.19 27)",
+          "oklch(76% 0.13 27)",
+          "oklch(91% 0.06 27)"
+        ]
+      },
+      "ink-black": {
+        "role": "neutral",
+        "displayName": "Ink Black",
+        "canonical": "oklch(17% 0.004 50)",
+        "tonalRamp": [
+          "oklch(10% 0.003 50)",
+          "oklch(17% 0.004 50)",
+          "oklch(25% 0.006 50)",
+          "oklch(35% 0.008 50)",
+          "oklch(45% 0.010 50)",
+          "oklch(60% 0.010 50)",
+          "oklch(75% 0.008 50)",
+          "oklch(95% 0.006 50)"
+        ]
+      },
+      "ink-soft": {
+        "role": "neutral",
+        "displayName": "Ink Soft",
+        "canonical": "oklch(29% 0.008 50)",
+        "tonalRamp": [
+          "oklch(10% 0.003 50)",
+          "oklch(17% 0.004 50)",
+          "oklch(25% 0.006 50)",
+          "oklch(35% 0.008 50)",
+          "oklch(45% 0.010 50)",
+          "oklch(60% 0.010 50)",
+          "oklch(75% 0.008 50)",
+          "oklch(95% 0.006 50)"
+        ]
+      },
+      "muted-text": {
+        "role": "neutral",
+        "displayName": "Muted Text",
+        "canonical": "oklch(45% 0.010 50)",
+        "tonalRamp": [
+          "oklch(10% 0.003 50)",
+          "oklch(17% 0.004 50)",
+          "oklch(25% 0.006 50)",
+          "oklch(35% 0.008 50)",
+          "oklch(45% 0.010 50)",
+          "oklch(60% 0.010 50)",
+          "oklch(75% 0.008 50)",
+          "oklch(95% 0.006 50)"
+        ]
+      },
+      "brush-gray": {
+        "role": "neutral",
+        "displayName": "Brush Gray",
+        "canonical": "oklch(80% 0.008 50)",
+        "tonalRamp": [
+          "oklch(10% 0.003 50)",
+          "oklch(17% 0.004 50)",
+          "oklch(25% 0.006 50)",
+          "oklch(35% 0.008 50)",
+          "oklch(50% 0.010 50)",
+          "oklch(65% 0.010 50)",
+          "oklch(80% 0.008 50)",
+          "oklch(95% 0.006 50)"
+        ]
+      },
+      "paper-medium": {
+        "role": "neutral",
+        "displayName": "Paper Medium",
+        "canonical": "oklch(93% 0.008 60)",
+        "tonalRamp": [
+          "oklch(10% 0.003 60)",
+          "oklch(25% 0.005 60)",
+          "oklch(40% 0.007 60)",
+          "oklch(55% 0.008 60)",
+          "oklch(70% 0.008 60)",
+          "oklch(82% 0.008 60)",
+          "oklch(93% 0.008 60)",
+          "oklch(98% 0.006 60)"
+        ]
+      },
+      "paper-warm": {
+        "role": "neutral",
+        "displayName": "Paper Warm",
+        "canonical": "oklch(97.5% 0.006 60)",
+        "tonalRamp": [
+          "oklch(10% 0.003 60)",
+          "oklch(25% 0.005 60)",
+          "oklch(40% 0.007 60)",
+          "oklch(55% 0.008 60)",
+          "oklch(70% 0.008 60)",
+          "oklch(82% 0.008 60)",
+          "oklch(93% 0.008 60)",
+          "oklch(97.5% 0.006 60)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Section heroes and landing headings. Used once per page." },
+      "headline": { "displayName": "Headline", "purpose": "Page titles, card headers, and vocabulary word displays." },
+      "title": { "displayName": "Title", "purpose": "Section labels, group headings, and quiz question stems." },
+      "body": { "displayName": "Body", "purpose": "Explanations, cultural descriptions, quiz feedback. Max 65ch." },
+      "label": { "displayName": "Label", "purpose": "HSK tags, pinyin, stroke counts, timestamps, metadata. Monospaced for alignment." }
+    },
+    "shadows": [
+      {
+        "name": "interactive-hover",
+        "value": "0 2px 8px rgba(17, 17, 17, 0.08)",
+        "purpose": "Applied on hover to interactive cards, buttons, and list items. Signals clickability."
+      },
+      {
+        "name": "popover",
+        "value": "0 8px 24px rgba(17, 17, 17, 0.12)",
+        "purpose": "Reserved for tooltips, autocomplete results, and context menus that float above the surface."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out-quart",
+        "value": "cubic-bezier(0.25, 1, 0.5, 1)",
+        "purpose": "Default easing for hover transitions, card reveals, and exits. Responsive without bounce."
+      },
+      {
+        "name": "ease-standard",
+        "value": "cubic-bezier(0.4, 0, 0.2, 1)",
+        "purpose": "State transitions: focus rings, border color changes, chip selection."
+      },
+      {
+        "name": "card-flip",
+        "value": "cubic-bezier(0.25, 1, 0.5, 1)",
+        "purpose": "Flashcard perspective flip. 380ms duration. Disabled when prefers-reduced-motion is set."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Default action button. Ink Black at rest, Red Stamp on hover.",
+      "html": "<button class=\"ds-btn-primary\">Start Lesson</button>",
+      "css": ".ds-btn-primary { background: #111111; color: #faf7f4; padding: 12px 24px; border-radius: 8px; border: none; font-family: Geist, -apple-system, sans-serif; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: background 180ms cubic-bezier(0.25, 1, 0.5, 1); } .ds-btn-primary:hover { background: #dc2626; } .ds-btn-primary:focus-visible { outline: 2px solid #dc2626; outline-offset: 2px; } .ds-btn-primary:active { background: #b91c1c; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Secondary action button. Transparent with a warm border.",
+      "html": "<button class=\"ds-btn-ghost\">See All</button>",
+      "css": ".ds-btn-ghost { background: transparent; color: #111111; padding: 12px 24px; border-radius: 8px; border: 1px solid #c8bfb8; font-family: Geist, -apple-system, sans-serif; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: background 180ms cubic-bezier(0.25, 1, 0.5, 1), border-color 180ms; } .ds-btn-ghost:hover { background: #f2ede8; border-color: #3d3835; } .ds-btn-ghost:focus-visible { outline: 2px solid #dc2626; outline-offset: 2px; }"
+    },
+    {
+      "name": "HSK Chip (Default)",
+      "kind": "chip",
+      "refersTo": "chip-hsk",
+      "description": "HSK level filter tag. Monospaced for alignment in rows.",
+      "html": "<span class=\"ds-chip-hsk\">HSK 2</span>",
+      "css": ".ds-chip-hsk { display: inline-flex; align-items: center; background: #f2ede8; color: #3d3835; padding: 4px 10px; border-radius: 9999px; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.04em; cursor: pointer; transition: background 120ms, color 120ms; } .ds-chip-hsk:hover { background: #e4ddd6; color: #111111; }"
+    },
+    {
+      "name": "HSK Chip (Active)",
+      "kind": "chip",
+      "refersTo": "chip-hsk-active",
+      "description": "Selected HSK level filter. Red Stamp background.",
+      "html": "<span class=\"ds-chip-hsk-active\">HSK 1</span>",
+      "css": ".ds-chip-hsk-active { display: inline-flex; align-items: center; background: #dc2626; color: #faf7f4; padding: 4px 10px; border-radius: 9999px; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.04em; }"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Text input for search, quiz answers, and authentication.",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"Search characters...\" />",
+      "css": ".ds-input { background: #faf7f4; color: #111111; border: 1px solid #c8bfb8; border-radius: 8px; padding: 10px 14px; font-family: Geist, -apple-system, sans-serif; font-size: 1rem; width: 100%; outline: none; transition: border-color 150ms, border-width 150ms; } .ds-input::placeholder { color: #6b6055; } .ds-input:focus { border-color: #111111; border-width: 1.5px; }"
+    },
+    {
+      "name": "Vocabulary Card",
+      "kind": "card",
+      "refersTo": null,
+      "description": "Primary learning surface. Character large on front, decomposition on back.",
+      "html": "<div class=\"ds-vocab-card\"><span class=\"ds-vocab-hsk\">HSK 1</span><div class=\"ds-vocab-char\">你</div><div class=\"ds-vocab-pinyin\">nǐ</div><div class=\"ds-vocab-meaning\">you</div></div>",
+      "css": ".ds-vocab-card { background: #faf7f4; border: 1px solid #c8bfb8; border-radius: 8px; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; transition: box-shadow 180ms cubic-bezier(0.25, 1, 0.5, 1); cursor: pointer; } .ds-vocab-card:hover { box-shadow: 0 2px 8px rgba(17, 17, 17, 0.08); } .ds-vocab-hsk { position: absolute; top: 12px; right: 12px; background: #f2ede8; color: #3d3835; padding: 3px 8px; border-radius: 9999px; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 0.7rem; font-weight: 500; letter-spacing: 0.04em; } .ds-vocab-char { font-size: 4rem; line-height: 1; color: #111111; } .ds-vocab-pinyin { font-family: 'Geist Mono', ui-monospace, monospace; font-size: 0.875rem; font-weight: 500; color: #6b6055; letter-spacing: 0.04em; } .ds-vocab-meaning { font-family: Geist, -apple-system, sans-serif; font-size: 1rem; color: #3d3835; font-weight: 400; }"
+    },
+    {
+      "name": "Navigation",
+      "kind": "nav",
+      "refersTo": null,
+      "description": "App shell tab navigation. Active state uses the only permitted Red Stamp border in the system.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-item\" href=\"#\">Vocabulary</a><a class=\"ds-nav-item ds-nav-item--active\" href=\"#\">Culture</a><a class=\"ds-nav-item\" href=\"#\">Quizzes</a></nav>",
+      "css": ".ds-nav { display: flex; border-bottom: 1px solid #c8bfb8; background: #faf7f4; } .ds-nav-item { padding: 12px 16px; font-family: Geist, -apple-system, sans-serif; font-size: 0.9rem; font-weight: 500; color: #6b6055; text-decoration: none; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 150ms, background 150ms; } .ds-nav-item:hover { color: #111111; background: #f2ede8; } .ds-nav-item--active { color: #111111; border-bottom-color: #dc2626; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Ink Study",
+    "overview": "A focused desk: clean paper, a single red stamp, characters written with deliberate care. Nothing competes with the work in front of you. The Moink design system is the desk, not the decoration.\n\nEvery surface is paper: warm white, slightly textured in feel if not in fact. Text is ink: high-contrast, intentional, unadorned. The red stamp appears once per surface, where it matters most, and then it is done. Motion is unhurried but not slow, like a brush drawn with purpose.\n\nThis system rejects the Duolingo gamification overload, the generic SaaS dashboard, the tourist-trap China aesthetic, and the academic/sterile tool. What remains is a tool that respects the learner's intelligence while remaining genuinely human.",
+    "keyCharacteristics": [
+      "Warm paper neutrals, high-contrast ink text, single red stamp accent used on at most 10% of any surface",
+      "Flat by default: surfaces separated by tint and border, never by shadow",
+      "Warm and tactile components: gently rounded, confident hover states with perceptible weight",
+      "Geist Sans for all UI text; Geist Mono for pinyin, labels, and phonetic notation",
+      "CJK character rendering via Hanzi Writer and a specified CJK font stack",
+      "One job per screen; no competing elements"
+    ],
+    "rules": [
+      {
+        "name": "The Red Stamp Rule",
+        "body": "The red accent is permitted on one element per semantic region. If two elements on the same screen are both red, one of them is wrong. Rarity is the point.",
+        "section": "colors"
+      },
+      {
+        "name": "The No-White Rule",
+        "body": "Pure #ffffff is prohibited as any background or surface value. Paper Warm (#faf7f4) is the floor. Surfaces layer upward from there.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Family Rule",
+        "body": "Geist handles all UI text. No decorative display face is introduced to add personality. Personality comes from content and culture, not from a script font overlay.",
+        "section": "typography"
+      },
+      {
+        "name": "The CJK Separation Rule",
+        "body": "Chinese characters are rendered by Hanzi Writer or a specified CJK font stack, never styled with Geist. The two type systems must not compete on the same text line.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat-By-Default Rule",
+        "body": "No element casts a shadow at rest. Interactive elements may introduce a minimal ambient shadow on hover to signal elevation. Dropdowns and popovers use one defined shadow level only. Depth is earned by state, not by decoration.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do use Red Stamp (#dc2626) on at most one element per semantic region.",
+      "Do keep Paper Warm (#faf7f4) as the minimum background value. Never use pure #ffffff for any surface.",
+      "Do use Geist Mono for pinyin, stroke counts, HSK tags, and all phonetic notation.",
+      "Do keep body text within 65ch.",
+      "Do respect prefers-reduced-motion on every Framer Motion animation and every Hanzi Writer stroke animation without exception.",
+      "Do let the Chinese character be the visual hero on learning screens.",
+      "Do use tint and 1px Brush Gray borders to separate surfaces. Shadow is for state only.",
+      "Do vary internal padding across card types. Uniform padding is monotony."
+    ],
+    "donts": [
+      "Don't run gamification overload: competing badge animations, guilt-streak timers, or constant mascot presence.",
+      "Don't build generic SaaS UI: teal-white-rounded layouts, hero metric dashboards, identical card grids.",
+      "Don't use tourist-trap China aesthetics: red lanterns, dragon motifs, or overwrought cultural ornamentation.",
+      "Don't let the UI feel academic or sterile: no textbook-grey schemes, no dense unlabeled tables.",
+      "Don't use gradient text (background-clip: text with a gradient).",
+      "Don't use a modal as the first solution for flashcard reveals or quiz answers.",
+      "Don't introduce a second accent color to add energy.",
+      "Don't use border-left or border-right greater than 1px as a colored accent stripe on cards or callouts."
+    ]
+  }
+}
