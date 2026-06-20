@@ -4,14 +4,15 @@ import { createClient } from '@supabase/supabase-js'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
 // ── Supabase ───────────────────────────────────────────────────────────────────
+// Added fallbacks so it doesn't crash Next.js during the build phase
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder'
 )
 
 // ── Gemini ─────────────────────────────────────────────────────────────────────
-// Initializes safely on the server using the key you just added to .env.local
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+// Delay initialization until the function is called to prevent SSR crashes
+const getGenAI = () => new GoogleGenerativeAI(process.env.GEMINI_API_KEY || 'missing_key');
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -94,7 +95,7 @@ export async function generateFillBlankQuestions(
   hskLevel: number,
   count = 10
 ): Promise<FillBlankQuestion[]> {
-  const model = genAI.getGenerativeModel({
+  const model = getGenAI().getGenerativeModel({
     model: "gemini-1.5-flash",
     generationConfig: { responseMimeType: "application/json" }
   });
@@ -118,7 +119,7 @@ export async function generateFillBlankQuestions(
 // ── Reading (Server-Side Gemini Call) ──────────────────────────────────────────
 
 export async function generateReadingQuiz(hskLevel: number): Promise<ReadingQuiz> {
-  const model = genAI.getGenerativeModel({
+  const model = getGenAI().getGenerativeModel({
     model: "gemini-1.5-flash",
     generationConfig: { responseMimeType: "application/json" }
   });
