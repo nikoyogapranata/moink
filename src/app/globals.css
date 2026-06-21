@@ -1,23 +1,15 @@
 @import "tailwindcss";
 
-/* ─── Moink Design System ────────────────────────────────────────────────────
-   Source of truth: /design.json
-   North Star: "The Ink Study" — clean paper, one red stamp, ink-black type.
-   All token values derived from design.json > colors / colorMeta / extensions.
+/* Class-based dark mode for next-themes */
+@custom-variant dark (&:is(.dark, .dark *));
+
+/* ─── Moink Design System ─────────────────────────────────────────────────────
+   Tailwind v4: @theme vars become :root CSS vars. Utilities reference var(--color-*).
+   Dark mode overrides MUST be unlayered (outside @layer) so they beat @theme.
    ─────────────────────────────────────────────────────────────────────────── */
 
 @theme {
-  /* Colors
-     Hex equivalents:
-     red-stamp       → #dc2626
-     ink-black       → #111111
-     ink-soft        → warm dark brown
-     muted-text      → warm medium brown
-     brush-gray      → #e5d5c2  (warm cream border)
-     paper-medium    → #FFF3E4  (deeper cream, section alternates)
-     paper-warm      → #FFF8F0  (primary bg, warm rice paper)
-     paper-highlight → #FFF0C2  (soft warm yellow, special elements)
-     card-surface    → warm near-white for card backgrounds            */
+  /* Palette */
   --color-red-stamp: oklch(53% 0.22 27);
   --color-ink-black: oklch(17% 0.004 50);
   --color-ink-soft: oklch(32% 0.012 60);
@@ -28,24 +20,26 @@
   --color-paper-highlight: oklch(96% 0.055 87);
   --color-card-surface: oklch(99.5% 0.008 80);
 
-  /* Typography
-     Nunito for all UI text — rounded, warm, confident.
-     Geist Mono for pinyin, HSK tags, stroke counts, metadata.
-     CJK font stack specified per-element via .font-cjk utility.             */
+  /* Semantic surface tokens — generate bg-card, bg-bg, etc. utilities */
+  --color-bg: #faf7f4;
+  --color-card: #ffffff;
+  --color-card-hover: #f5f0eb;
+  --color-border: #e2d9d0;
+  --color-text: #111111;
+  --color-text-secondary: #3d3835;
+  --color-text-muted: #6b6055;
+
+  /* Typography */
   --font-sans: var(--font-nunito), ui-sans-serif, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, "SFMono-Regular", Menlo, monospace;
 
-  /* Border Radius
-     Overrides Tailwind v4 defaults with Moink's warm-tactile scale.
-     rounded-pill covers chips and HSK tags.                                  */
+  /* Border Radius */
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
   --radius-pill: 9999px;
 
-  /* Spacing
-     Named semantic scale alongside v4's numeric defaults.
-     Generates p-xs, m-sm, gap-md, etc.                                       */
+  /* Spacing */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
   --spacing-md: 16px;
@@ -53,33 +47,84 @@
   --spacing-xl: 40px;
   --spacing-2xl: 64px;
 
-  /* Shadows — warm amber tint instead of cold grey.
-     shadow-card:      ambient lift on rounded cards.
-     shadow-flashcard: deeper lift for the hero flashcard and vocab cards.
-     shadow-lift:      floating elements like the mascot circle.
-     shadow-hover:     interactive state signal.
-     shadow-popover:   dropdowns, tooltips, context menus.                    */
+  /* Shadows */
   --shadow-card: 0 2px 10px rgba(150, 90, 30, 0.07), 0 1px 3px rgba(150, 90, 30, 0.04);
   --shadow-flashcard: 0 8px 28px rgba(150, 90, 30, 0.10), 0 3px 8px rgba(150, 90, 30, 0.06);
   --shadow-lift: 0 12px 36px rgba(150, 90, 30, 0.12), 0 4px 10px rgba(150, 90, 30, 0.07);
   --shadow-hover: 0 4px 16px rgba(150, 90, 30, 0.10);
   --shadow-popover: 0 8px 24px rgba(150, 90, 30, 0.12);
 
-  /* Easing (from design.json > extensions.motion)
-     ease-out-quart: hover transitions, card reveals. Responsive, no bounce.
-     ease-standard: state changes, focus rings, border color shifts.          */
+  /* Easing */
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
   --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Component-level CSS vars (quiz page inline styles + misc) ─────────────
+   These are unlayered :root vars — NOT in @theme — so .dark can override them. */
+
+:root {
+  --card-bg: #ffffff;
+  --card-shadow: 0 4px 32px rgba(0,0,0,0.06);
+  --card-shadow-lg: 0 8px 40px rgba(0,0,0,0.12);
+  --border-subtle: rgba(0,0,0,0.07);
+  --text-secondary: rgba(0,0,0,0.4);
+  --text-faint: rgba(0,0,0,0.25);
+  --text-softer: rgba(0,0,0,0.45);
+  --opt-idle: #ffffff;
+  --opt-correct: #dcfce7;
+  --opt-correct-border: #16a34a;
+  --opt-correct-text: #15803d;
+  --opt-wrong: #fee2e2;
+  --opt-wrong-border: #dc2626;
+  --opt-wrong-text: #dc2626;
+}
+
+/* ─── Dark mode — UNLAYERED so it beats @theme vars via higher specificity ──
+   .dark (0,1,0) > :root (0,0,1) — overrides ALL @theme token values too.     */
+
+.dark {
+  color-scheme: dark;
+
+  /* Override @theme palette tokens */
+  --color-paper-warm: #111111;
+  --color-paper-medium: #1a1a1a;
+  --color-paper-highlight: #222222;
+  --color-card-surface: #1c1c1c;
+  --color-ink-black: #f0ece8;
+  --color-ink-soft: #c8bfb8;
+  --color-muted-text: rgba(240,236,232,0.5);
+  --color-brush-gray: rgba(255,255,255,0.1);
+
+  /* Override @theme semantic surface tokens */
+  --color-bg: #111111;
+  --color-card: #1c1c1c;
+  --color-card-hover: #242424;
+  --color-border: rgba(255,255,255,0.08);
+  --color-text: #f0ece8;
+  --color-text-secondary: #c8bfb8;
+  --color-text-muted: #6b6055;
+
+  /* Component-level vars */
+  --card-bg: #1c1c1c;
+  --card-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  --card-shadow-lg: 0 8px 40px rgba(0,0,0,0.5);
+  --border-subtle: rgba(255,255,255,0.08);
+  --text-secondary: rgba(240,236,232,0.4);
+  --text-faint: rgba(240,236,232,0.2);
+  --text-softer: rgba(240,236,232,0.45);
+  --opt-idle: #242424;
+  --opt-correct: #052e16;
+  --opt-correct-border: #15803d;
+  --opt-correct-text: #4ade80;
+  --opt-wrong: #450a0a;
+  --opt-wrong-border: #b91c1c;
+  --opt-wrong-text: #fca5a5;
 }
 
 /* ─── Base Layer ─────────────────────────────────────────────────────────── */
 
 @layer base {
-  *,
-  *::before,
-  *::after {
-    box-sizing: border-box;
-  }
+  *, *::before, *::after { box-sizing: border-box; }
 
   html {
     color-scheme: light;
@@ -97,9 +142,8 @@
     text-rendering: optimizeLegibility;
   }
 
-  /* Headings: Nunito 900, tight tracking, Ink Black */
   h1 {
-    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
     font-weight: 900;
     line-height: 1.05;
     letter-spacing: -0.04em;
@@ -121,38 +165,26 @@
     color: var(--color-ink-black);
   }
 
-  /* Body copy: max line length 65ch per DESIGN.md */
   p {
     max-width: 65ch;
     color: var(--color-ink-soft);
   }
 
-  a {
-    color: inherit;
-    text-decoration: none;
-  }
+  a { color: inherit; text-decoration: none; }
 
-  /* Focus: Red Stamp ring, no default outline */
   :focus-visible {
     outline: 2px solid var(--color-red-stamp);
     outline-offset: 2px;
     border-radius: var(--radius-sm);
   }
 
-  /* Mono elements: Geist Mono for pinyin, HSK labels, code */
-  code,
-  kbd,
-  samp,
-  pre {
+  code, kbd, samp, pre {
     font-family: var(--font-mono);
     font-size: 0.875em;
   }
 
-  /* Reduce motion: blanket override for Framer Motion and Hanzi Writer */
   @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
+    *, *::before, *::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
@@ -161,34 +193,23 @@
   }
 }
 
-/* ─── Utilities ──────────────────────────────────────────────────────────── */
+/* ─── Utilities ─────────────────────────────────────────────────────────── */
 
 @layer utilities {
-  /* Hide scrollbar visually while keeping scroll functionality */
-  .no-scrollbar {
-    scrollbar-width: none;
-  }
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
+  .no-scrollbar { scrollbar-width: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
 
-  /* CJK character display stack.
-     Applied to Hanzi characters rendered outside of Hanzi Writer.
-     Never combined with font-sans on the same text node.                     */
   .font-cjk {
-    font-family: "Noto Serif SC", "Source Han Serif CN", "Songti SC",
-      "STSong", serif;
+    font-family: "Noto Serif SC", "Source Han Serif CN", "Songti SC", "STSong", serif;
   }
 
-  /* Pinyin / phonetic label shorthand */
   .text-label {
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
     font-weight: 500;
     letter-spacing: 0.04em;
   }
 
-  /* Body prose: enforces 65ch cap without a wrapper */
   .prose-body {
     max-width: 65ch;
     line-height: 1.6;

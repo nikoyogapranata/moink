@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Nunito, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Providers } from "./providers";
 
 const nunito = Nunito({
   variable: "--font-nunito",
@@ -27,6 +28,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${nunito.variable} ${geistMono.variable} h-full antialiased`}
     >
       <head>
@@ -37,7 +39,9 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }

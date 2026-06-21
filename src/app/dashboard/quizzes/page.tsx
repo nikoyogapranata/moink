@@ -18,13 +18,13 @@ const QUIZ_MODES = [
   {
     id: 'flashcard',
     label: 'Flashcard',
-    desc: 'Flip cards to test recall',
+    desc: 'Flip cards with spaced repetition',
     icon: Zap,
   },
   {
-    id: 'fill',
+    id: 'fillblank',
     label: 'Fill in the Blank',
-    desc: 'Type the missing character or word',
+    desc: 'Complete sentences with missing words',
     icon: PenLine,
   },
   {
@@ -35,7 +35,7 @@ const QUIZ_MODES = [
   },
 ]
 
-const CARD_SHADOW = '0 4px 32px rgba(0,0,0,0.06)'
+const CARD_SHADOW = 'var(--card-shadow)'
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
@@ -57,13 +57,13 @@ function HskLevelCard({
       onClick={onClick}
       className="text-left rounded-3xl p-6 w-full"
       style={{
-        background: selected ? 'var(--color-paper-medium)' : '#FFFFFF',
+        background: selected ? 'var(--color-card-hover)' : 'var(--color-card)',
         boxShadow: CARD_SHADOW,
         border: `2px solid ${selected ? 'var(--color-red-stamp)' : 'transparent'}`,
         transition: 'border-color 200ms, background 200ms',
       }}
     >
-      <span className="font-mono text-[10px] text-muted-text tracking-widest uppercase max-w-none">
+      <span className="font-mono text-muted-text tracking-widest uppercase max-w-none" style={{ fontSize: 13 }}>
         HSK
       </span>
       <span
@@ -72,7 +72,7 @@ function HskLevelCard({
       >
         {level}
       </span>
-      <p className="font-mono text-[11px] text-muted-text mt-2 max-w-none">
+      <p className="font-mono text-muted-text mt-2 max-w-none" style={{ fontSize: 13 }}>
         {count} words · {desc}
       </p>
     </button>
@@ -99,7 +99,7 @@ function QuizModeCard({
       onClick={onClick}
       className="w-full text-left flex items-center gap-4 rounded-2xl px-5 py-4"
       style={{
-        background: selected ? 'var(--color-paper-medium)' : '#FFFFFF',
+        background: selected ? 'var(--color-card-hover)' : 'var(--color-card)',
         boxShadow: CARD_SHADOW,
         border: `2px solid ${selected ? 'var(--color-red-stamp)' : 'transparent'}`,
         transition: 'border-color 200ms, background 200ms',
@@ -116,8 +116,8 @@ function QuizModeCard({
       </div>
 
       <div className="flex-1 min-w-0">
-        <p className="font-bold text-ink-black text-sm max-w-none">{label}</p>
-        <p className="font-mono text-[11px] text-muted-text mt-0.5 max-w-none">{desc}</p>
+        <p className="font-bold text-ink-black max-w-none" style={{ fontSize: 15 }}>{label}</p>
+        <p className="font-mono text-muted-text mt-0.5 max-w-none" style={{ fontSize: 13 }}>{desc}</p>
       </div>
 
       <AnimatePresence>
@@ -151,16 +151,15 @@ export default function QuizzesPage() {
   const [selectedLevel, setSelectedLevel] = useState<number | null>(null)
   const [selectedMode, setSelectedMode] = useState<string | null>(null)
   const prefersReduced = useReducedMotion()
-
   const router = useRouter()
+
   const selectedLevelData = HSK_LEVELS.find(l => l.level === selectedLevel)
   const canStart = selectedLevel !== null && selectedMode !== null
-
   const ease = [0.25, 1, 0.5, 1] as const
 
   function handleStart() {
     if (!canStart) return
-    router.push(`/dashboard/quizzes/session?level=${selectedLevel}&mode=${selectedMode}`)
+    router.push(`/dashboard/quizzes/${selectedMode}?level=${selectedLevel}`)
   }
 
   function handleLevelSelect(level: number) {
@@ -178,12 +177,12 @@ export default function QuizzesPage() {
         transition={{ duration: 0.4, ease }}
         className="mb-8"
       >
-        <p className="font-mono text-xs text-muted-text tracking-[0.08em] uppercase mb-2 max-w-none">
+        <p className="font-mono text-muted-text tracking-[0.08em] uppercase mb-2 max-w-none" style={{ fontSize: 13 }}>
           Quizzes
         </p>
         <h1
           className="font-black text-ink-black"
-          style={{ fontSize: '1.75rem', letterSpacing: '-0.035em', lineHeight: 1.1 }}
+          style={{ fontSize: '2.5rem', letterSpacing: '-0.04em', lineHeight: 1.05 }}
         >
           What are you studying?
         </h1>
@@ -209,7 +208,7 @@ export default function QuizzesPage() {
         </div>
       </motion.div>
 
-      {/* Step 2 — Quiz modes, animate in when level selected */}
+      {/* Step 2 — Quiz modes */}
       <AnimatePresence>
         {selectedLevel !== null && (
           <motion.div
@@ -220,7 +219,7 @@ export default function QuizzesPage() {
             transition={{ duration: 0.4, ease }}
             className="mt-8"
           >
-            <p className="font-mono text-xs text-muted-text tracking-[0.06em] mb-4 max-w-none">
+            <p className="font-mono text-muted-text tracking-[0.06em] mb-4 max-w-none" style={{ fontSize: 13 }}>
               Quizzing from{' '}
               <span className="text-ink-soft font-medium">{selectedLevelData?.count} HSK {selectedLevel}</span>{' '}
               words
@@ -243,7 +242,7 @@ export default function QuizzesPage() {
         )}
       </AnimatePresence>
 
-      {/* Step 3 — Start button, appears when both are selected */}
+      {/* Step 3 — Start button */}
       <AnimatePresence>
         {canStart && (
           <motion.div
@@ -256,8 +255,9 @@ export default function QuizzesPage() {
           >
             <button
               onClick={handleStart}
-              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-bold text-sm"
+              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl font-semibold"
               style={{
+                fontSize: 15,
                 background: 'var(--color-ink-black)',
                 color: 'var(--color-paper-warm)',
                 transition: 'background 200ms cubic-bezier(0.25,1,0.5,1)',

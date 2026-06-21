@@ -5,7 +5,7 @@ import { motion, useReducedMotion } from 'framer-motion'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 
-// ── Mock data (replace with Supabase queries later) ───────────────────────────
+// ── Mock data ─────────────────────────────────────────────────────────────────
 
 const todayWord = {
   character: '学习',
@@ -55,8 +55,6 @@ const cultureSpotlight = {
 
 // ── Shared primitives ─────────────────────────────────────────────────────────
 
-const CARD_SHADOW = '0 4px 32px rgba(0,0,0,0.06)'
-
 function HskBadge({ level }: { level: number }) {
   return (
     <span className="font-mono text-[10px] font-medium px-2 py-[3px] rounded-full bg-red-stamp text-white select-none">
@@ -79,7 +77,7 @@ function FeaturedWordCard() {
   return (
     <div
       className="rounded-2xl p-5 flex flex-col h-full min-h-[200px]"
-      style={{ background: 'var(--color-paper-warm)' }}
+      style={{ background: 'var(--color-card-hover)' }}
     >
       <div className="flex items-start justify-between mb-1">
         <span className="font-mono text-[10px] text-muted-text tracking-widest uppercase max-w-none">
@@ -123,7 +121,7 @@ function RecentVocabSection() {
   return (
     <div
       className="rounded-3xl p-6"
-      style={{ background: '#FFFFFF', boxShadow: CARD_SHADOW }}
+      style={{ background: 'var(--color-card)', boxShadow: 'var(--card-shadow)' }}
     >
       <div className="flex items-center justify-between mb-4">
         <SectionLabel>Recent vocabulary</SectionLabel>
@@ -142,11 +140,9 @@ function RecentVocabSection() {
             <div
               key={word.character}
               className="flex-shrink-0 w-[108px] rounded-2xl p-4 cursor-pointer hover:-translate-y-0.5 transition-transform duration-200"
-              style={{ background: 'var(--color-paper-warm)', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}
+              style={{ background: 'var(--color-card-hover)', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}
             >
-              <p
-                className="font-cjk text-[2rem] text-ink-black leading-none text-center select-none"
-              >
+              <p className="font-cjk text-[2rem] text-ink-black leading-none text-center select-none">
                 {word.character}
               </p>
               <p className="font-mono text-[11px] text-muted-text text-center mt-1.5 max-w-none">
@@ -170,15 +166,14 @@ function ComponentFamilySection() {
   return (
     <div
       className="rounded-3xl p-6"
-      style={{ background: '#FFFFFF', boxShadow: CARD_SHADOW }}
+      style={{ background: 'var(--color-card)', boxShadow: 'var(--card-shadow)' }}
     >
       <SectionLabel>Component family</SectionLabel>
 
-      {/* Radical header */}
       <div className="flex items-center gap-3 mb-5">
         <div
           className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-          style={{ background: 'var(--color-paper-warm)' }}
+          style={{ background: 'var(--color-card-hover)' }}
         >
           <span className="font-cjk text-2xl text-ink-black leading-none select-none">
             {componentFamily.radical}
@@ -194,14 +189,7 @@ function ComponentFamilySection() {
         </div>
       </div>
 
-      {/* SVG connector tree */}
-      <svg
-        viewBox="0 0 300 36"
-        preserveAspectRatio="none"
-        className="w-full"
-        style={{ height: 36 }}
-        aria-hidden="true"
-      >
+      <svg viewBox="0 0 300 36" preserveAspectRatio="none" className="w-full" style={{ height: 36 }} aria-hidden="true">
         <line x1="150" y1="0" x2="150" y2="16" stroke="var(--color-brush-gray)" strokeWidth="1.5" />
         <line x1="50" y1="16" x2="250" y2="16" stroke="var(--color-brush-gray)" strokeWidth="1.5" />
         <line x1="50" y1="16" x2="50" y2="36" stroke="var(--color-brush-gray)" strokeWidth="1.5" />
@@ -212,13 +200,14 @@ function ComponentFamilySection() {
         <circle cx="250" cy="34" r="3" fill="var(--color-brush-gray)" />
       </svg>
 
-      {/* Word cards */}
       <div className="grid grid-cols-3 gap-3 mt-1">
         {componentFamily.words.map(word => (
           <div
             key={word.character}
-            className="rounded-xl p-3 text-center cursor-pointer hover:bg-paper-medium"
-            style={{ background: 'var(--color-paper-warm)', transition: 'background 150ms' }}
+            className="rounded-xl p-3 text-center cursor-pointer"
+            style={{ background: 'var(--color-card-hover)', transition: 'background 150ms' }}
+            onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = 'var(--color-border)')}
+            onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = 'var(--color-card-hover)')}
           >
             <p className="font-cjk text-2xl text-ink-black leading-none select-none">
               {word.character}
@@ -242,7 +231,7 @@ function StreakSection() {
   return (
     <div
       className="rounded-3xl p-6"
-      style={{ background: '#FFFFFF', boxShadow: CARD_SHADOW }}
+      style={{ background: 'var(--color-card)', boxShadow: 'var(--card-shadow)' }}
     >
       <SectionLabel>7-day activity</SectionLabel>
 
@@ -260,13 +249,8 @@ function StreakSection() {
         {streakData.map((studied, i) => (
           <div key={i} className="flex flex-col items-center gap-2">
             <div
-              className={[
-                'w-7 h-7 rounded-full',
-                studied
-                  ? 'bg-red-stamp'
-                  : 'border-2',
-              ].join(' ')}
-              style={studied ? {} : { borderColor: 'var(--color-brush-gray)' }}
+              className={['w-7 h-7 rounded-full', studied ? 'bg-red-stamp' : 'border-2'].join(' ')}
+              style={studied ? {} : { borderColor: 'var(--color-border)' }}
             />
             <span className="font-mono text-[10px] text-muted-text">{DAYS[i]}</span>
           </div>
@@ -280,7 +264,7 @@ function UpNextSection() {
   return (
     <div
       className="rounded-3xl p-6"
-      style={{ background: '#FFFFFF', boxShadow: CARD_SHADOW }}
+      style={{ background: 'var(--color-card)', boxShadow: 'var(--card-shadow)' }}
     >
       <div className="flex items-center justify-between mb-1">
         <SectionLabel>Up next in HSK 2</SectionLabel>
@@ -289,8 +273,11 @@ function UpNextSection() {
       <ul className="space-y-1" role="list">
         {upNextWords.map((word, i) => (
           <li key={i}>
-            <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-paper-warm cursor-pointer group"
+            <div
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer group"
               style={{ transition: 'background 150ms' }}
+              onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = 'var(--color-card-hover)')}
+              onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = 'transparent')}
             >
               <span className="font-cjk text-2xl text-ink-black leading-none w-10 text-center flex-shrink-0 select-none">
                 {word.character}
@@ -299,17 +286,13 @@ function UpNextSection() {
                 <p className="font-mono text-xs text-muted-text max-w-none">{word.pinyin}</p>
                 <p className="text-sm font-medium text-ink-soft truncate max-w-none">{word.meaning}</p>
               </div>
-              <ArrowRight
-                size={14}
-                className="text-muted-text group-hover:text-ink-black flex-shrink-0"
-                style={{ transition: 'color 150ms' }}
-              />
+              <ArrowRight size={14} className="text-muted-text flex-shrink-0" style={{ transition: 'color 150ms' }} />
             </div>
           </li>
         ))}
       </ul>
 
-      <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--color-brush-gray)' }}>
+      <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--color-border)' }}>
         <Link
           href="/dashboard/vocabulary"
           className="flex items-center justify-between text-sm font-semibold text-ink-black hover:text-red-stamp max-w-none"
@@ -327,12 +310,8 @@ function UpNextSection() {
 
 function CultureSpotlight() {
   return (
-    <div
-      className="rounded-3xl overflow-hidden"
-      style={{ background: '#111111', boxShadow: CARD_SHADOW }}
-    >
+    <div className="rounded-3xl overflow-hidden" style={{ background: '#111111', boxShadow: 'var(--card-shadow)' }}>
       <div className="flex flex-col lg:flex-row lg:items-center">
-        {/* Content */}
         <div className="flex-1 p-8 lg:p-10">
           <span className="font-mono text-xs text-red-stamp tracking-[0.14em] uppercase max-w-none">
             {cultureSpotlight.category}
@@ -349,28 +328,14 @@ function CultureSpotlight() {
           <Link
             href="/dashboard/culture"
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border text-white text-sm font-semibold hover:bg-white/[0.08]"
-            style={{
-              borderColor: 'rgba(255,255,255,0.28)',
-              transition: 'background 150ms, border-color 150ms',
-            }}
+            style={{ borderColor: 'rgba(255,255,255,0.28)', transition: 'background 150ms, border-color 150ms' }}
           >
             Explore
             <ArrowRight size={14} />
           </Link>
         </div>
-
-        {/* Decorative characters */}
-        <div
-          className="px-8 pb-8 lg:p-10 lg:pl-0 flex items-center justify-center select-none pointer-events-none"
-          aria-hidden="true"
-        >
-          <span
-            className="font-cjk leading-none"
-            style={{
-              fontSize: 'clamp(5rem, 8vw, 9rem)',
-              color: 'rgba(255,255,255,0.12)',
-            }}
-          >
+        <div className="px-8 pb-8 lg:p-10 lg:pl-0 flex items-center justify-center select-none pointer-events-none" aria-hidden="true">
+          <span className="font-cjk leading-none" style={{ fontSize: 'clamp(5rem, 8vw, 9rem)', color: 'rgba(255,255,255,0.12)' }}>
             {cultureSpotlight.characters}
           </span>
         </div>
@@ -403,15 +368,14 @@ export default function DashboardPage() {
   return (
     <div className="max-w-[1080px] mx-auto px-6 py-8 lg:px-8 lg:py-10 pb-12">
 
-      {/* ── Zone 1: Pick up where you left off ── */}
+      {/* Zone 1 */}
       <motion.div {...zone(0)}>
         <div
           className="rounded-3xl p-6 lg:p-8"
-          style={{ background: '#FFFFFF', boxShadow: CARD_SHADOW }}
+          style={{ background: 'var(--color-card)', boxShadow: 'var(--card-shadow)' }}
         >
           <div className="grid grid-cols-1 lg:grid-cols-[55fr_45fr] gap-6 lg:gap-8">
 
-            {/* Left — greeting */}
             <div className="flex flex-col justify-between gap-6">
               <div>
                 <p className="font-mono text-xs text-muted-text tracking-[0.08em] uppercase mb-3 max-w-none">
@@ -443,30 +407,24 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Right — today's word */}
             <FeaturedWordCard />
           </div>
         </div>
       </motion.div>
 
-      {/* ── Zone 2: Two-column ── */}
+      {/* Zone 2 */}
       <div className="mt-6 grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-6">
-
-        {/* Left column */}
         <motion.div className="space-y-6" {...zone(0.12)}>
           <RecentVocabSection />
           <ComponentFamilySection />
         </motion.div>
-
-        {/* Right column */}
         <motion.div className="space-y-6" {...zone(0.2)}>
           <StreakSection />
           <UpNextSection />
         </motion.div>
-
       </div>
 
-      {/* ── Zone 3: Culture spotlight ── */}
+      {/* Zone 3 */}
       <motion.div className="mt-6" {...zone(0.28)}>
         <CultureSpotlight />
       </motion.div>

@@ -71,12 +71,12 @@ function SkeletonCard() {
   return (
     <div
       className="w-44 flex-shrink-0 rounded-2xl p-4 animate-pulse"
-      style={{ background: '#f5ede3', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}
+      style={{ background: 'var(--color-card-hover)', boxShadow: 'var(--card-shadow)' }}
     >
-      <div className="h-2 w-10 rounded-full mb-5" style={{ background: '#e8d9cc' }} />
-      <div className="h-12 w-10 rounded mb-2" style={{ background: '#e8d9cc' }} />
-      <div className="h-2 w-16 rounded-full mb-2" style={{ background: '#e0d0c0' }} />
-      <div className="h-2 w-24 rounded-full" style={{ background: '#e8ddd5' }} />
+      <div className="h-2 w-10 rounded-full mb-5" style={{ background: 'var(--color-border)' }} />
+      <div className="h-12 w-10 rounded mb-2" style={{ background: 'var(--color-border)' }} />
+      <div className="h-2 w-16 rounded-full mb-2" style={{ background: 'var(--color-border)' }} />
+      <div className="h-2 w-24 rounded-full" style={{ background: 'var(--color-border)' }} />
     </div>
   )
 }
@@ -85,10 +85,10 @@ function SkeletonGroup() {
   return (
     <div className="mb-12">
       <div className="flex items-center gap-4 mb-5">
-        <div className="w-0.5 h-10 rounded-full animate-pulse" style={{ background: '#e8c9b0' }} />
+        <div className="w-0.5 h-10 rounded-full animate-pulse" style={{ background: 'var(--color-border)' }} />
         <div className="space-y-1.5">
-          <div className="h-3 w-20 rounded-full animate-pulse" style={{ background: '#f0e0d0' }} />
-          <div className="h-2 w-16 rounded-full animate-pulse" style={{ background: '#f5e8db' }} />
+          <div className="h-3 w-20 rounded-full animate-pulse" style={{ background: 'var(--color-border)' }} />
+          <div className="h-2 w-16 rounded-full animate-pulse" style={{ background: 'var(--color-border)' }} />
         </div>
       </div>
       <div className="flex gap-4 overflow-hidden">
@@ -123,7 +123,7 @@ function VocabCard({
       }}
       onClick={() => onSelect(word)}
       className="relative w-44 flex-shrink-0 rounded-2xl p-4 cursor-pointer"
-      style={{ background: '#ffffff', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
+      style={{ background: 'var(--color-card)', boxShadow: 'var(--card-shadow)' }}
     >
       <div className="absolute top-3 right-3">
         <HskChip level={word.hsk_level} />
@@ -178,7 +178,7 @@ function GridCard({
       }}
       onClick={() => onSelect(word)}
       className="relative rounded-2xl p-4 cursor-pointer w-full"
-      style={{ background: '#ffffff', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}
+      style={{ background: 'var(--color-card)', boxShadow: 'var(--card-shadow)' }}
     >
       <div className="absolute top-3 right-3">
         <HskChip level={word.hsk_level} />
@@ -380,7 +380,7 @@ function WordDetailModal({
         exit={prefersReduced ? {} : { opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.25, ease: [0.25, 1, 0.5, 1] }}
         style={{
-          background: '#ffffff',
+          background: 'var(--color-card)',
           borderRadius: '1.5rem',
           width: '100%',
           maxWidth: '52rem',
@@ -502,7 +502,7 @@ function WordDetailModal({
                     <span
                       key={i}
                       className="inline-flex items-center gap-2 px-3 py-2 rounded-xl"
-                      style={{ background: '#ffffff', border: '1px solid var(--color-brush-gray)' }}
+                      style={{ background: 'var(--color-card)', border: '1px solid var(--color-brush-gray)' }}
                     >
                       <span className="font-cjk text-ink-black leading-none" style={{ fontSize: '1.6rem' }}>{comp.char}</span>
                       <span className="font-mono text-[11px] text-muted-text">{comp.meaning}</span>
@@ -521,7 +521,7 @@ function WordDetailModal({
                 <button
                   onClick={() => { onFilterByRadical(word.radical); onClose() }}
                   className="group flex items-center gap-3 py-3 px-4 w-full rounded-xl text-left"
-                  style={{ background: '#ffffff', border: '1px solid var(--color-brush-gray)', transition: 'border-color 150ms' }}
+                  style={{ background: 'var(--color-card)', border: '1px solid var(--color-brush-gray)', transition: 'border-color 150ms' }}
                   onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--color-ink-black)')}
                   onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--color-brush-gray)')}
                 >
@@ -545,7 +545,7 @@ function WordDetailModal({
                 Stroke order
               </p>
               <div style={{
-                background: '#ffffff',
+                background: 'var(--color-card)',
                 border: '1px solid var(--color-brush-gray)',
                 borderRadius: '0.75rem',
                 padding: '1rem',
@@ -559,7 +559,7 @@ function WordDetailModal({
                 onClick={() => setReplayTrigger(t => t + 1)}
                 className="flex items-center justify-center gap-1.5 w-full py-2.5 rounded-lg font-mono text-[11px]"
                 style={{
-                  background: '#ffffff',
+                  background: 'var(--color-card)',
                   border: '1px solid var(--color-brush-gray)',
                   color: 'var(--color-ink-soft)',
                   cursor: 'pointer',
@@ -773,7 +773,7 @@ export default function VocabularyPage() {
                 aria-pressed={viewMode === mode}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold"
                 style={{
-                  background: viewMode === mode ? '#fff' : 'transparent',
+                  background: viewMode === mode ? 'var(--color-card)' : 'transparent',
                   color: viewMode === mode ? 'var(--color-ink-black)' : 'var(--color-muted-text)',
                   boxShadow: viewMode === mode ? '0 1px 4px rgba(0,0,0,0.09)' : 'none',
                   transition: 'background 150ms, color 150ms, box-shadow 150ms',

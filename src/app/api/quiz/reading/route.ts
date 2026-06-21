@@ -23,18 +23,18 @@ export async function POST(request: NextRequest) {
     model: 'llama-3.3-70b-versatile',
     messages: [{
       role: 'user',
-      content: `Create a Chinese reading comprehension exercise for HSK ${hskLevel} learners.
-Level: ${desc}
+      content: `Create a Chinese reading comprehension exercise for HSK ${hskLevel} learners (${desc}).
 
-Write a passage (4–6 sentences in Chinese using only HSK ${hskLevel} vocabulary) and exactly 10 comprehension questions.
+Write a passage (4–6 sentences in Chinese using only HSK ${hskLevel} vocabulary) and exactly 10 comprehension questions in Chinese with 4 answer options each in Chinese.
 
 Rules:
-- Questions can be in English or Chinese
-- Each question has exactly 4 answer options
-- "answer" must exactly match one of the options verbatim
+- "passage_translation": English translation of the passage
+- "passage_pinyin": space-separated pinyin, one syllable per Chinese character, skip punctuation
+- Each question: "question" IN CHINESE, "question_translation" in English, "options" array of 4 IN CHINESE, "option_translations" array of 4 English meanings, "answer" must exactly match one option verbatim
+- Each question also has "question_pinyin" (space-sep per CJK char) and "options_pinyin" (array of 4 pinyin strings)
 
-Output ONLY valid JSON with no markdown fences or explanation:
-{"passage":"...","questions":[{"question":"...","options":["A","B","C","D"],"answer":"A"}]}`,
+Output ONLY valid JSON with no markdown fences:
+{"passage":"...","passage_translation":"...","passage_pinyin":"...","questions":[{"question":"...","question_pinyin":"...","question_translation":"...","options":["A","B","C","D"],"options_pinyin":["...","...","...","..."],"option_translations":["...","...","...","..."],"answer":"A"}]}`,
     }],
     response_format: { type: 'json_object' },
   })

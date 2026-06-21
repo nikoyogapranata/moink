@@ -42,7 +42,7 @@ type Answer = {
 // ── Constants ──────────────────────────────────────────────────────────────────
 
 const EASE = [0.25, 1, 0.5, 1] as const
-const CARD_SHADOW = '0 4px 32px rgba(0,0,0,0.06)'
+const CARD_SHADOW = 'var(--card-shadow)'
 const QUESTION_COUNT = 10
 
 // ── Progress Bar ───────────────────────────────────────────────────────────────
@@ -69,10 +69,10 @@ type OptionState = 'idle' | 'correct' | 'wrong' | 'dim'
 
 function OptionButton({ label, state, onClick }: { label: string; state: OptionState; onClick: () => void }) {
   const styles: Record<OptionState, React.CSSProperties> = {
-    idle:    { background: '#FFFFFF', border: '2px solid transparent', boxShadow: CARD_SHADOW, color: 'var(--color-ink-black)', opacity: 1 },
+    idle:    { background: 'var(--opt-idle)', border: '2px solid transparent', boxShadow: CARD_SHADOW, color: 'var(--color-ink-black)', opacity: 1 },
     correct: { background: '#dcfce7', border: '2px solid #16a34a', boxShadow: 'none', color: '#15803d', opacity: 1 },
     wrong:   { background: '#fee2e2', border: '2px solid var(--color-red-stamp)', boxShadow: 'none', color: 'var(--color-red-stamp)', opacity: 1 },
-    dim:     { background: '#FFFFFF', border: '2px solid transparent', boxShadow: 'none', color: 'var(--color-muted-text)', opacity: 0.5 },
+    dim:     { background: 'var(--opt-idle)', border: '2px solid transparent', boxShadow: 'none', color: 'var(--color-muted-text)', opacity: 0.4 },
   }
   return (
     <button
@@ -105,7 +105,7 @@ function FlashcardCard({
 }) {
   return (
     <div>
-      <div className="rounded-3xl p-8 mb-6 text-center" style={{ background: '#FFFFFF', boxShadow: CARD_SHADOW }}>
+      <div className="rounded-3xl p-8 mb-6 text-center" style={{ background: 'var(--card-bg)', boxShadow: CARD_SHADOW }}>
         <p className="font-cjk text-ink-black leading-none select-none max-w-none" style={{ fontSize: 96 }}>
           {question.word}
         </p>
@@ -143,7 +143,7 @@ function FillBlankCard({
   const parts = question.sentence.split('___')
   return (
     <div>
-      <div className="rounded-3xl p-8 mb-6" style={{ background: '#FFFFFF', boxShadow: CARD_SHADOW }}>
+      <div className="rounded-3xl p-8 mb-6" style={{ background: 'var(--card-bg)', boxShadow: CARD_SHADOW }}>
         <p className="font-cjk text-ink-black leading-relaxed text-2xl max-w-none">
           {parts[0]}
           <span
@@ -183,7 +183,7 @@ function ReadingCard({
 }) {
   return (
     <div>
-      <div className="rounded-3xl p-6 mb-5" style={{ background: '#FFFFFF', boxShadow: CARD_SHADOW }}>
+      <div className="rounded-3xl p-6 mb-5" style={{ background: 'var(--card-bg)', boxShadow: CARD_SHADOW }}>
         <div className="flex items-center gap-2 mb-3">
           <BookOpen size={13} style={{ color: 'var(--color-muted-text)' }} />
           <span className="font-mono text-[10px] tracking-widest uppercase text-muted-text">Passage</span>
@@ -259,7 +259,7 @@ function ResultsScreen({
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.4, ease: EASE }}
     >
-      <div className="rounded-3xl p-10 text-center mb-6" style={{ background: '#FFFFFF', boxShadow: CARD_SHADOW }}>
+      <div className="rounded-3xl p-10 text-center mb-6" style={{ background: 'var(--card-bg)', boxShadow: CARD_SHADOW }}>
         <div className="relative flex items-center justify-center mb-4">
           <svg width={100} height={100} viewBox="0 0 100 100">
             <circle cx={50} cy={50} r={44} fill="none" stroke="var(--color-brush-gray)" strokeWidth={6} />
@@ -295,7 +295,7 @@ function ResultsScreen({
               <div
                 key={i}
                 className="flex items-center justify-between rounded-2xl px-4 py-3"
-                style={{ background: '#FFFFFF', boxShadow: CARD_SHADOW }}
+                style={{ background: 'var(--card-bg)', boxShadow: CARD_SHADOW }}
               >
                 <span className="text-sm text-muted-text line-clamp-1 flex-1 mr-3 max-w-none">{a.selected}</span>
                 <span className="font-semibold text-sm text-ink-black flex-shrink-0 max-w-none">→ {a.correct}</span>

@@ -2,6 +2,9 @@
 
 import { motion, useReducedMotion } from 'framer-motion'
 import Link from 'next/link'
+import { Sun, Moon } from 'lucide-react'
+import { useTheme } from 'next-themes'
+import { useEffect, useState } from 'react'
 
 // ── Data ─────────────────────────────────────────────────────────────────────
 
@@ -138,24 +141,45 @@ function Mascot() {
 
 // ── Nav ───────────────────────────────────────────────────────────────────────
 
+function NavThemeToggle() {
+  const { resolvedTheme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+
+  if (!mounted) return <div style={{ width: 36, height: 36 }} />
+
+  const isDark = resolvedTheme === 'dark'
+  return (
+    <button
+      onClick={() => setTheme(isDark ? 'light' : 'dark')}
+      className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-brush-gray dark:border-white/10 text-ink-black dark:text-[#f0ece8] hover:bg-paper-medium dark:hover:bg-white/8"
+      style={{ transition: 'background 150ms', flexShrink: 0 }}
+      aria-label="Toggle theme"
+    >
+      {isDark ? <Sun size={16} strokeWidth={1.75} /> : <Moon size={16} strokeWidth={1.75} />}
+    </button>
+  )
+}
+
 function Nav() {
   return (
-    <header className="sticky top-0 z-50 bg-paper-warm border-b border-brush-gray">
+    <header className="sticky top-0 z-50 bg-paper-warm dark:bg-[#0f0f0f] border-b border-brush-gray dark:border-white/8">
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         <span className="text-xl font-extrabold tracking-tight text-red-stamp select-none">
           MOINK
         </span>
         <div className="flex items-center gap-3">
+          <NavThemeToggle />
           <Link
             href="/sign-in"
-            className="hidden sm:inline-flex h-9 items-center px-4 rounded-lg border border-brush-gray text-sm font-semibold text-ink-black hover:bg-paper-medium"
+            className="hidden sm:inline-flex h-9 items-center px-4 rounded-lg border border-brush-gray dark:border-white/10 text-sm font-semibold text-ink-black dark:text-[#f0ece8] hover:bg-paper-medium dark:hover:bg-white/8"
             style={{ transition: 'background 150ms cubic-bezier(0.4,0,0.2,1)' }}
           >
             Sign in
           </Link>
           <Link
             href="/start"
-            className="inline-flex h-9 items-center px-4 rounded-lg bg-ink-black text-paper-warm text-sm font-bold hover:bg-red-stamp"
+            className="inline-flex h-9 items-center px-4 rounded-lg bg-ink-black dark:bg-[#f0ece8] text-paper-warm dark:text-[#0f0f0f] text-sm font-bold hover:bg-red-stamp dark:hover:bg-red-stamp dark:hover:text-white"
             style={{ transition: 'background 180ms cubic-bezier(0.25,1,0.5,1)' }}
           >
             Start learning
@@ -170,7 +194,7 @@ function Nav() {
 
 function Hero({ anim }: { anim: ReturnType<typeof useAnim> }) {
   return (
-    <section className="bg-paper-warm px-6 py-32">
+    <section className="bg-paper-warm dark:bg-[#0f0f0f] px-6 py-32">
       <div className="max-w-3xl mx-auto text-center">
 
         <motion.div {...anim.scaleUp(0)} className="mb-10">
@@ -223,7 +247,7 @@ function Hero({ anim }: { anim: ReturnType<typeof useAnim> }) {
             {...anim.hero(0.38)}
             className="rounded-3xl p-8 sm:p-10"
             style={{
-              background: '#FFFFFF',
+              background: 'var(--card-bg)',
               boxShadow: '0 16px 48px rgba(150,90,30,0.18), 0 4px 12px rgba(150,90,30,0.10)',
               borderTop: '4px solid #dc2626',
             }}
@@ -279,7 +303,7 @@ function Hero({ anim }: { anim: ReturnType<typeof useAnim> }) {
 
 function Features({ anim }: { anim: ReturnType<typeof useAnim> }) {
   return (
-    <section style={{ background: '#FFFFFF' }}>
+    <section className="dark:bg-[#1a1a1a]" style={{ background: '#FFFFFF' }}>
       <div className="max-w-6xl mx-auto px-6 py-32">
 
         <motion.div {...anim.inView(0)} className="mb-12 text-center">
@@ -299,9 +323,9 @@ function Features({ anim }: { anim: ReturnType<typeof useAnim> }) {
             <motion.div
               key={f.num}
               {...anim.inView(i * 0.09)}
-              className="rounded-[20px] p-8 border border-brush-gray"
+              className="rounded-[20px] p-8 border border-brush-gray dark:border-white/8"
               style={{
-                background: '#FFFFFF',
+                background: 'var(--card-bg)',
                 boxShadow: 'var(--shadow-card)',
                 borderTop: '3px solid #dc2626',
               }}
@@ -323,7 +347,7 @@ function Features({ anim }: { anim: ReturnType<typeof useAnim> }) {
 
 function VocabPreview({ anim }: { anim: ReturnType<typeof useAnim> }) {
   return (
-    <section className="bg-paper-warm">
+    <section className="bg-paper-warm dark:bg-[#0f0f0f]">
       <div className="max-w-6xl mx-auto px-6 py-32">
 
         <motion.div {...anim.inView(0)} className="mb-12">
@@ -349,7 +373,7 @@ function VocabPreview({ anim }: { anim: ReturnType<typeof useAnim> }) {
               {...anim.inView(0.07 + i * 0.09)}
               className="rounded-3xl p-6 relative"
               style={{
-                background: '#FFFFFF',
+                background: 'var(--card-bg)',
                 boxShadow: '0 4px 24px rgba(0,0,0,0.08)',
               }}
             >
