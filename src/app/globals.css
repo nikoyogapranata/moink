@@ -21,6 +21,11 @@
 
   --text-display: 32px;
   --text-display--line-height: 40px;
+  /* Landing page only: oversized marketing type, not for in-app screens. */
+  --text-hero: 52px;
+  --text-hero--line-height: 60px;
+  --text-hero-sub: 19px;
+  --text-hero-sub--line-height: 30px;
   --text-h1: 26px;
   --text-h1--line-height: 32px;
   --text-h2: 20px;
@@ -62,4 +67,107 @@ body {
   background-color: var(--color-background);
   color: var(--color-bark);
   font-family: var(--font-body), sans-serif;
+}
+
+/* Bao mascot animations (landing hero). Loop is seamless: bob starts and
+   ends at translateY(0). */
+@keyframes bao-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes bao-bubble-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(2deg);
+  }
+}
+
+@keyframes float-a {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-6deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(-2deg);
+  }
+}
+
+@keyframes float-b {
+  0%,
+  100% {
+    transform: translateY(0) rotate(5deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(9deg);
+  }
+}
+
+@keyframes float-c {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-4deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(-1deg);
+  }
+}
+
+@keyframes float-d {
+  0%,
+  100% {
+    transform: translateY(0) rotate(4deg);
+  }
+  50% {
+    transform: translateY(-9px) rotate(1deg);
+  }
+}
+
+.bao-bob {
+  animation: bao-bob 3s ease-in-out infinite;
+  will-change: transform;
+}
+
+.bao-bubble-float {
+  animation: bao-bubble-float 3.5s ease-in-out infinite;
+  will-change: transform;
+}
+
+.float-a {
+  animation: float-a 4s ease-in-out infinite;
+  will-change: transform;
+}
+
+.float-b {
+  animation: float-b 5s ease-in-out infinite 0.5s;
+  will-change: transform;
+}
+
+.float-c {
+  animation: float-c 6s ease-in-out infinite 1s;
+  will-change: transform;
+}
+
+.float-d {
+  animation: float-d 7s ease-in-out infinite 1.5s;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bao-bob,
+  .bao-bubble-float,
+  .float-a,
+  .float-b,
+  .float-c,
+  .float-d {
+    animation: none;
+  }
 }

@@ -26,7 +26,7 @@ export async function updateSession(request: NextRequest) {
   );
 
   // Refresh the auth session. Do not run code between createServerClient and
-  // getUser() — it can make the session hard to debug.
+  // getUser(); it can make the session hard to debug.
   await supabase.auth.getUser();
 
   return supabaseResponse;
