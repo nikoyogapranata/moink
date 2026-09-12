@@ -5,6 +5,10 @@
   --color-rust: #e06b2e;
   --color-rust-dark: #b8501c;
   --color-bamboo-gold: #f2a93c;
+  /* Darker than --color-bamboo-gold specifically for icon/text-on-tint use:
+     bamboo-gold itself is ~1.8:1 against a bg-bamboo-gold/15 tint, well under
+     the 3:1 WCAG non-text contrast minimum. */
+  --color-bamboo-gold-dark: #8a5a12;
   --color-bamboo-green: #6fa23a;
   --color-deep-grass: #4a7a2c;
   --color-bark: #3d2a1f;
@@ -12,6 +16,9 @@
   --color-blush: #fbe3c2;
   --color-surface: #fbe3c2;
   --color-danger: #d94f4f;
+  /* Full-saturation bamboo-gold, used as a full-section background band.
+     ~6.8:1 contrast against text-bark. */
+  --color-band-gold: #f2a93c;
 
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -56,11 +63,15 @@
   --color-rust: #f0793c;
   --color-rust-dark: #ff8a4d;
   --color-bamboo-gold: #ffc163;
+  --color-bamboo-gold-dark: #ffcf80;
   --color-bamboo-green: #8bc65a;
   --color-deep-grass: #5fa83a;
   --color-bark: #f2efe9;
   --color-bark-muted: #a8a6a0;
   --color-danger: #ff6b6b;
+  /* Deep, saturated gold rather than a washed-out tint; ~6.3:1 contrast
+     against dark-mode text-bark. */
+  --color-band-gold: #7a4e0e;
 }
 
 body {
@@ -131,6 +142,26 @@ body {
   }
 }
 
+/* How-it-works step cards: gentle idle drift. --card-rotate carries each
+   card's static tilt so the animation's transform (which fully replaces
+   the property per keyframe) doesn't clobber it. */
+@keyframes card-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(var(--card-rotate, 0deg));
+  }
+  50% {
+    transform: translateY(-6px) rotate(var(--card-rotate, 0deg));
+  }
+}
+
+.card-float {
+  animation-name: card-float;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  will-change: transform;
+}
+
 .bao-bob {
   animation: bao-bob 3s ease-in-out infinite;
   will-change: transform;
@@ -167,7 +198,63 @@ body {
   .float-a,
   .float-b,
   .float-c,
-  .float-d {
+  .float-d,
+  .card-float {
     animation: none;
+  }
+}
+
+/* Step card flip: a 3D rotateY flip by default. The two faces are
+   absolutely-positioned siblings filling the same box; the back face is
+   pre-rotated 180deg so it lands right-side-up once the parent flips. */
+.flip-card-inner {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  transition: transform 0.6s ease;
+  transform-style: preserve-3d;
+}
+
+.flip-card-inner.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.flip-card-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.flip-card-face--back {
+  transform: rotateY(180deg);
+}
+
+/* Reduced motion: no 3D rotation, just an opacity crossfade between the
+   two faces, still toggled by the same is-flipped state. */
+@media (prefers-reduced-motion: reduce) {
+  .flip-card-inner {
+    transition: none;
+    transform: none !important;
+    transform-style: flat;
+  }
+
+  .flip-card-face {
+    backface-visibility: visible;
+    -webkit-backface-visibility: visible;
+    transition: opacity 0.3s ease;
+  }
+
+  .flip-card-face--back {
+    transform: none;
+    opacity: 0;
+  }
+
+  .flip-card-inner.is-flipped .flip-card-face--front {
+    opacity: 0;
+  }
+
+  .flip-card-inner.is-flipped .flip-card-face--back {
+    opacity: 1;
   }
 }

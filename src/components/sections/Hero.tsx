@@ -68,7 +68,7 @@ export function Hero() {
 
           <div className="bao-bob relative z-10">
             <Image
-              src="/images/mascot/bao/wave-1-tight.png"
+              src="/images/mascot/bao/wave-1-tight.webp"
               alt="Bao waving hello"
               width={BAO_WIDTH}
               height={BAO_HEIGHT}
