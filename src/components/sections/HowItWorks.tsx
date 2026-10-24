@@ -205,7 +205,10 @@ function SectionHeading() {
 
 export function HowItWorks() {
   return (
-    <div className="relative overflow-hidden py-40 sm:py-52">
+    <div
+      id="how-it-works"
+      className="relative scroll-mt-24 overflow-hidden py-40 sm:py-52"
+    >
       <WavyBand />
       <SectionHeading />
 

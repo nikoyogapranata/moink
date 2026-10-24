@@ -306,7 +306,10 @@ function FeatureRowSection({ row }: { row: FeatureRow }) {
 
 export function Features() {
   return (
-    <section className="relative overflow-hidden bg-background">
+    <section
+      id="features"
+      className="relative scroll-mt-24 overflow-hidden bg-background"
+    >
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
         {rows.map((row) => (
           <FeatureRowSection key={row.title} row={row} />
