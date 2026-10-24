@@ -167,6 +167,23 @@ body {
   will-change: transform;
 }
 
+/* Login peek: moves DOWN only (0 -> 6px -> 0), so Bao sinks a little
+   behind the card and his paws never lift off its top edge. */
+@keyframes peek-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(6px);
+  }
+}
+
+.peek-bob {
+  animation: peek-bob 3.5s ease-in-out infinite;
+  will-change: transform;
+}
+
 .bao-bubble-float {
   animation: bao-bubble-float 3.5s ease-in-out infinite;
   will-change: transform;
@@ -194,6 +211,7 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .bao-bob,
+  .peek-bob,
   .bao-bubble-float,
   .float-a,
   .float-b,
