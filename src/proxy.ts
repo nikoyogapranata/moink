@@ -1,8 +1,35 @@
 import { type NextRequest } from "next/server";
-import { updateSession } from "@/lib/supabase/middleware";
+import { redirectWithSession, updateSession } from "@/lib/supabase/middleware";
+import { getHomePath } from "@/lib/supabase/profile";
+
+// Signed-in screens that need a finished profile. Add new app routes here.
+const APP_ROUTES = ["/dashboard"];
+
+function isAppRoute(pathname: string) {
+  return APP_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`),
+  );
+}
 
 export async function proxy(request: NextRequest) {
-  return updateSession(request);
+  const { supabase, user, response } = await updateSession(request);
+  const { pathname } = request.nextUrl;
+
+  const isOnboarding = pathname === "/onboarding";
+  if (!isOnboarding && !isAppRoute(pathname)) return response;
+
+  if (!user) return redirectWithSession(request, response, "/login");
+
+  // Only these routes pay for the profile lookup.
+  const home = await getHomePath(supabase, user.id);
+  if (isOnboarding && home === "/dashboard") {
+    return redirectWithSession(request, response, "/dashboard");
+  }
+  if (!isOnboarding && home === "/onboarding") {
+    return redirectWithSession(request, response, "/onboarding");
+  }
+
+  return response;
 }
 
 export const config = {

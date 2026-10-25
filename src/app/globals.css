@@ -209,6 +209,54 @@ body {
   will-change: transform;
 }
 
+/* Onboarding: the incoming step fades in and slides 12px. --step-from sets
+   the side it comes from (positive = from the right, going forward). */
+@keyframes step-in {
+  from {
+    opacity: 0;
+    transform: translateX(var(--step-from, 12px));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.step-in {
+  animation: step-in 250ms ease-out both;
+}
+
+/* Speech bubble text: the new line fades in as the old one is replaced. */
+.bubble-text-in {
+  animation: fade-in 250ms ease-out both;
+}
+
+/* Bao's poses are stacked; switching pose crossfades their opacity. */
+.bao-pose {
+  transition: opacity 250ms ease;
+}
+
+/* Own keyframes rather than Tailwind's animate-spin, so the reduced-motion
+   block below can switch it off with everything else. */
+@keyframes spin-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spin {
+  animation: spin-turn 1s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .bao-bob,
   .peek-bob,
@@ -217,8 +265,15 @@ body {
   .float-b,
   .float-c,
   .float-d,
-  .card-float {
+  .card-float,
+  .step-in,
+  .bubble-text-in,
+  .spin {
     animation: none;
+  }
+
+  .bao-pose {
+    transition: none;
   }
 }
 

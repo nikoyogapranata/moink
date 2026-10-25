@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { getHomePath } from "@/lib/supabase/profile";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
@@ -7,14 +8,11 @@ export async function GET(request: NextRequest) {
 
   if (code) {
     const supabase = await createClient();
-    console.log("NEXT_PUBLIC_SUPABASE_URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
-    console.log(
-      "NEXT_PUBLIC_SUPABASE_ANON_KEY (first 20):",
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.slice(0, 20),
-    );
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      return NextResponse.redirect(`${origin}/dashboard`);
+      // New accounts have no username yet, so they land on onboarding.
+      const home = await getHomePath(supabase, data.user.id);
+      return NextResponse.redirect(`${origin}${home}`);
     }
     console.error("exchangeCodeForSession failed:", error);
   }

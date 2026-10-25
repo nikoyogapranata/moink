@@ -27,7 +27,26 @@ export async function updateSession(request: NextRequest) {
 
   // Refresh the auth session. Do not run code between createServerClient and
   // getUser(); it can make the session hard to debug.
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  return supabaseResponse;
+  return { supabase, user, response: supabaseResponse };
+}
+
+/** Redirect while keeping any auth cookies the session refresh just set. */
+export function redirectWithSession(
+  request: NextRequest,
+  sessionResponse: NextResponse,
+  pathname: string,
+) {
+  const url = request.nextUrl.clone();
+  url.pathname = pathname;
+  url.search = "";
+
+  const response = NextResponse.redirect(url);
+  sessionResponse.cookies
+    .getAll()
+    .forEach((cookie) => response.cookies.set(cookie));
+  return response;
 }

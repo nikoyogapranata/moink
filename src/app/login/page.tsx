@@ -3,6 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { HillScene } from "@/components/HillScene";
+import { getHomePath } from "@/lib/supabase/profile";
 import { createClient } from "@/lib/supabase/server";
 
 import { GoogleSignInButton } from "./google-sign-in-button";
@@ -15,26 +17,6 @@ export const metadata: Metadata = {
   title: "Sign in - moink",
 };
 
-// Same wide, low dome as FinalCta's hill (horizontal tangent at the peak).
-// The viewBox runs to y=300, 30 units past where the curve meets the edges
-// at y=270, so a thin solid band keeps the hill's corners off the very
-// bottom of the screen.
-function Hill() {
-  const path =
-    "M0 400 L0 270 C 260 215, 480 130, 720 130 C 960 130, 1180 215, 1440 270 L1440 400 Z";
-
-  return (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 1440 300"
-      preserveAspectRatio="none"
-      className="block h-20 w-full shrink-0 lg:h-35"
-    >
-      <path d={path} fill="var(--color-deep-grass)" />
-    </svg>
-  );
-}
-
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   const supabase = await createClient();
   const {
@@ -42,7 +24,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   } = await supabase.auth.getUser();
 
   if (user) {
-    redirect("/dashboard");
+    redirect(await getHomePath(supabase, user.id));
   }
 
   const { error } = await searchParams;
@@ -110,7 +92,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
         </div>
       </main>
 
-      <Hill />
+      <HillScene />
     </div>
   );
 }

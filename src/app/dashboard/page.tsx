@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { getHomePath } from "@/lib/supabase/profile";
 import { createClient } from "@/lib/supabase/server";
 import SignOutButton from "@/app/dashboard/sign-out-button";
 
@@ -10,6 +11,11 @@ export default async function DashboardPage() {
 
   if (!user) {
     redirect("/login");
+  }
+
+  // proxy.ts already does this; repeated so the page is safe on its own.
+  if ((await getHomePath(supabase, user.id)) === "/onboarding") {
+    redirect("/onboarding");
   }
 
   return (
