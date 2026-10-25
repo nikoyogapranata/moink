@@ -2,8 +2,15 @@ import { type NextRequest } from "next/server";
 import { redirectWithSession, updateSession } from "@/lib/supabase/middleware";
 import { getHomePath } from "@/lib/supabase/profile";
 
-// Signed-in screens that need a finished profile. Add new app routes here.
-const APP_ROUTES = ["/dashboard"];
+// Signed-in screens that need a finished profile: everything in the
+// src/app/(app) route group. Add new app routes here.
+const APP_ROUTES = [
+  "/dashboard",
+  "/training",
+  "/dictionary",
+  "/profile",
+  "/settings",
+];
 
 function isAppRoute(pathname: string) {
   return APP_ROUTES.some(

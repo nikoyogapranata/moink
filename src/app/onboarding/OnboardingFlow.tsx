@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   useEffect,
@@ -14,6 +13,7 @@ import {
 
 import { HillScene, MOUND_PEAK_X, hillSurfaceAt } from "@/components/HillScene";
 import { Button } from "@/components/ui/Button";
+import { Wordmark } from "@/components/Wordmark";
 import { normalizeUsernameInput, usernameProblem } from "@/lib/username";
 
 import { checkUsername, completeOnboarding } from "./actions";
@@ -322,16 +322,7 @@ function TopBar({ step }: { step: Step }) {
   return (
     <header className="relative z-20">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
-        <Link href="/" className="flex shrink-0 items-center gap-2 whitespace-nowrap">
-          <Image
-            src="/images/logo/bao.png"
-            alt="moink logo"
-            width={36}
-            height={36}
-            className="h-8 w-8 rounded-lg sm:h-9 sm:w-9"
-          />
-          <span className="font-heading text-h1 font-bold text-bark">moink</span>
-        </Link>
+        <Wordmark />
 
         <div className="flex items-center gap-3">
           <div aria-hidden="true" className="flex items-center gap-1.5">

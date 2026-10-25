@@ -19,6 +19,13 @@
   /* Full-saturation bamboo-gold, used as a full-section background band.
      ~6.8:1 contrast against text-bark. */
   --color-band-gold: #f2a93c;
+  /* App shell: raised panels (sidebar, tab bar) and their soft blush-tone
+     border. The line is decorative; panel edges don't carry meaning. */
+  --color-surface-raised: #ffffff;
+  --color-line: #f3d9b8;
+  /* Active nav item / hover tint background. Blush in light mode; a deep
+     warm brown in dark mode so text-bark (light there) stays readable. */
+  --color-highlight: #fbe3c2;
 
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -72,6 +79,9 @@
   /* Deep, saturated gold rather than a washed-out tint; ~6.3:1 contrast
      against dark-mode text-bark. */
   --color-band-gold: #7a4e0e;
+  --color-surface-raised: #232325;
+  --color-line: #38383b;
+  --color-highlight: #3d2c22;
 }
 
 body {
