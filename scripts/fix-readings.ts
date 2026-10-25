@@ -16,6 +16,7 @@
 import { createAdminClient, hasFlag, mapLimit } from "./lib/admin";
 import { writeCsv } from "./lib/csv";
 import { buildGloss } from "./lib/gloss";
+import { searchFields } from "./lib/pinyin";
 import {
   assertOverridesValid,
   chooseReading,
@@ -48,6 +49,11 @@ async function main() {
     fetchWords(admin),
   ]);
   assertOverridesValid(entries);
+
+  // The search columns come from the dictionary_search migration; fill
+  // them alongside a fixed reading once they exist.
+  const { error: probe } = await admin.from("words").select("pinyin_plain").limit(1);
+  const hasSearchColumns = !probe;
   if (!migrated) {
     console.log(
       "Note: the learning_core migration isn't applied yet (no gloss columns), " +
@@ -124,6 +130,7 @@ async function main() {
     const fields = {
       ...reading,
       ...(migrated ? { gloss: buildGloss(reading.meanings).gloss } : {}),
+      ...(hasSearchColumns ? searchFields(reading) : {}),
     };
     let query = admin.from("words").update(fields).eq("id", word.id);
     // Second guard: a row reviewed since the read above is left alone.

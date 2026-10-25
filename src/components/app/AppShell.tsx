@@ -21,6 +21,7 @@ import { Wordmark } from "@/components/Wordmark";
 const SHOW_GAME_STATS = false;
 
 export interface AppUser {
+  id: string;
   username: string;
   hskLevel: number | null;
   avatarUrl: string | null;

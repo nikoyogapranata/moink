@@ -1,6 +1,7 @@
 import { config } from "dotenv";
 import { createClient } from "@supabase/supabase-js";
 
+import { searchFields } from "./lib/pinyin";
 import {
   assertOverridesValid,
   chooseReading,
@@ -40,6 +41,8 @@ interface WordRow {
   frequency: number | null;
   pinyin: string;
   pinyin_numeric: string | null;
+  pinyin_plain: string | null;
+  pinyin_num: string | null;
   pos: string[];
   meanings: string[];
   classifiers: string[];
@@ -127,6 +130,7 @@ async function main() {
       frequency: entry.frequency ?? null,
       pos: entry.pos ?? [],
       ...choice.reading,
+      ...searchFields(choice.reading),
     });
   }
 

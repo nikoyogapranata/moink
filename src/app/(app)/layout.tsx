@@ -31,6 +31,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
 
   const meta = user.user_metadata ?? {};
   const appUser: AppUser = {
+    id: user.id,
     username: profile.username,
     hskLevel: profile.hsk_level_target,
     avatarUrl:

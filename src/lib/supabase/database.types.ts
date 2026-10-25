@@ -1,6 +1,7 @@
 // Database types for the Supabase clients, in the shape `supabase gen types
 // typescript` produces. Written by hand from the live schema plus
-// supabase/migrations/20261025120000_learning_core.sql; regenerate with the
+// supabase/migrations/20261025120000_learning_core.sql and
+// 20261101120000_dictionary_search.sql; regenerate with the
 // CLI once it's set up, and keep this file's name so imports don't change.
 
 export type Json =
@@ -79,6 +80,10 @@ export type Database = {
           sort_order: number | null;
           pinyin: string;
           pinyin_numeric: string | null;
+          /** Search form: "zhǔn bèi" -> "zhunbei" (ü as v). */
+          pinyin_plain: string | null;
+          /** Search form: "zhun3 bei4" -> "zhun3bei4". */
+          pinyin_num: string | null;
           pos: string[] | null;
           meanings: string[];
           classifiers: string[] | null;
@@ -97,6 +102,8 @@ export type Database = {
           sort_order?: number | null;
           pinyin: string;
           pinyin_numeric?: string | null;
+          pinyin_plain?: string | null;
+          pinyin_num?: string | null;
           pos?: string[] | null;
           meanings: string[];
           classifiers?: string[] | null;
@@ -115,6 +122,8 @@ export type Database = {
           sort_order?: number | null;
           pinyin?: string;
           pinyin_numeric?: string | null;
+          pinyin_plain?: string | null;
+          pinyin_num?: string | null;
           pos?: string[] | null;
           meanings?: string[];
           classifiers?: string[] | null;
@@ -273,6 +282,35 @@ export type Database = {
       };
       next_new_words: {
         Args: { p_limit?: number };
+        Returns: Database["public"]["Tables"]["words"]["Row"][];
+      };
+      pinyin_num: {
+        Args: { p_text: string };
+        Returns: string | null;
+      };
+      pinyin_plain: {
+        Args: { p_text: string };
+        Returns: string | null;
+      };
+      search_words: {
+        Args: {
+          p_query: string;
+          p_level?: number | null;
+          p_limit?: number;
+          p_offset?: number;
+        };
+        Returns: {
+          id: number;
+          simplified: string;
+          pinyin: string;
+          gloss: string | null;
+          hsk_level: number;
+          hsk3_level: number | null;
+          total_count: number;
+        }[];
+      };
+      word_of_the_day: {
+        Args: { p_date: string };
         Returns: Database["public"]["Tables"]["words"]["Row"][];
       };
       record_review: {

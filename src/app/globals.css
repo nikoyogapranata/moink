@@ -3,7 +3,9 @@
 @theme {
   --color-background: #fdfbf6;
   --color-rust: #e06b2e;
-  --color-rust-dark: #b8501c;
+  /* Darkened from #b8501c so pinyin in rust-dark passes AA (4.68:1) on the
+     highlight (blush) background of a selected row. */
+  --color-rust-dark: #a8481a;
   --color-bamboo-gold: #f2a93c;
   /* Darker than --color-bamboo-gold specifically for icon/text-on-tint use:
      bamboo-gold itself is ~1.8:1 against a bg-bamboo-gold/15 tint, well under
@@ -59,6 +61,13 @@
 @theme inline {
   --font-heading: var(--font-heading), sans-serif;
   --font-body: var(--font-body), sans-serif;
+}
+
+@theme {
+  /* Hanzi: system CJK fonts only (no web font download). Baloo 2 and Plus
+     Jakarta Sans have no CJK glyphs, so hanzi elsewhere already fall back
+     to these. */
+  --font-hanzi: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
 }
 
 /* Dark palette. Overrides the @theme color variables for any subtree with

@@ -16,19 +16,29 @@ interface ButtonProps extends ComponentPropsWithRef<"button"> {
 }
 
 const base =
-  "inline-flex items-center justify-center rounded-pill font-heading font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rust/40 disabled:pointer-events-none disabled:opacity-50";
+  "inline-flex items-center justify-center whitespace-nowrap rounded-pill font-heading transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rust/40 disabled:pointer-events-none disabled:opacity-50";
 
 const variantClasses: Record<ButtonVariant, string> = {
   // text-background: label takes the theme's bg color, so it reads as light
   // text on rust in light mode and dark text on the brighter rust in dark mode.
-  primary: "bg-rust text-background hover:bg-rust-dark",
+  // Cream on rust is 3.2:1, so the label is bold and at least 18.66px (WCAG
+  // large text, where 3:1 passes AA) at every size.
+  primary: "bg-rust font-bold text-background hover:bg-rust-dark",
   secondary:
-    "border border-bamboo-green bg-transparent text-deep-grass hover:bg-bamboo-green/10",
+    "border border-bamboo-green bg-transparent font-medium text-deep-grass hover:bg-bamboo-green/10",
 };
 
-const sizeClasses: Record<ButtonSize, string> = {
-  default: "h-11 px-6 text-body",
-  sm: "h-9 px-4 text-body-sm",
+// Heights are fixed, so the larger primary label doesn't change them; the
+// primary's side padding is a little tighter to offset the wider text.
+const sizeClasses: Record<ButtonSize, Record<ButtonVariant, string>> = {
+  default: {
+    primary: "h-11 px-5 text-[19px] leading-6",
+    secondary: "h-11 px-6 text-body",
+  },
+  sm: {
+    primary: "h-9 px-3.5 text-[19px] leading-6",
+    secondary: "h-9 px-4 text-body-sm",
+  },
 };
 
 export function Button({
@@ -40,7 +50,7 @@ export function Button({
   children,
   ...props
 }: ButtonProps) {
-  const classes = `${base} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`;
+  const classes = `${base} ${variantClasses[variant]} ${sizeClasses[size][variant]} ${className}`;
 
   if (asChild && isValidElement<{ className?: string }>(children)) {
     return cloneElement(children, {
