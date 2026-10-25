@@ -1,6 +1,14 @@
 import { config } from "dotenv";
 import { createClient } from "@supabase/supabase-js";
 
+import {
+  assertOverridesValid,
+  chooseReading,
+  extractHskLevel,
+  fetchDataset,
+  type SourceEntry,
+} from "./lib/readings";
+
 config({ path: ".env.local" });
 config();
 
@@ -12,8 +20,6 @@ console.log("env present:", {
   SUPABASE_SECRET_KEY: Boolean(process.env.SUPABASE_SECRET_KEY),
 });
 
-const SOURCE_URL =
-  "https://raw.githubusercontent.com/drkameleon/complete-hsk-vocabulary/main/complete.json";
 const BATCH_SIZE = 500;
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -24,22 +30,6 @@ if (!SUPABASE_URL || !SUPABASE_SECRET_KEY) {
     "Missing env vars. Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SECRET_KEY (service role key) in .env.local",
   );
   process.exit(1);
-}
-
-interface SourceForm {
-  traditional?: string;
-  transcriptions?: { pinyin?: string; numeric?: string };
-  meanings?: string[];
-  classifiers?: string[];
-}
-
-interface SourceEntry {
-  simplified: string;
-  radical?: string;
-  level?: string[];
-  frequency?: number;
-  pos?: string[];
-  forms?: SourceForm[];
 }
 
 interface WordRow {
@@ -55,60 +45,93 @@ interface WordRow {
   classifiers: string[];
 }
 
-const OLD_LEVEL_RE = /^old-([1-6])$/;
+// HSK 3.0 tags in the dataset: "new-1" to "new-6", and "new-7" for the
+// combined bands 7-9 (stored as 7). The dataset also has "newest-1" to
+// "newest-7", which its README doesn't document; they're ignored here.
+const NEW_LEVEL_RE = /^new-([1-7])$/;
 
-function extractHskLevel(level: string[]): number | null {
+function extractHsk3Level(level: string[]): number | null {
   for (const tag of level) {
-    const match = OLD_LEVEL_RE.exec(tag);
+    const match = NEW_LEVEL_RE.exec(tag);
     if (match) return Number.parseInt(match[1], 10);
   }
   return null;
 }
 
-async function main() {
-  console.log(`Fetching ${SOURCE_URL} ...`);
-  const res = await fetch(SOURCE_URL);
-  if (!res.ok) {
-    console.error(`Fetch failed: ${res.status} ${res.statusText}`);
-    process.exit(1);
+// Optional step, run on its own with --fill-hsk3 (needs the learning_core
+// migration for the hsk3_level column). Sets hsk3_level on the existing
+// rows from the dataset's new-N tags, matched by simplified (unique in the
+// table). Doesn't insert anything; words without a new-N tag keep null.
+async function fillHsk3(entries: SourceEntry[]) {
+  const supabase = createClient(SUPABASE_URL!, SUPABASE_SECRET_KEY!, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+
+  const byLevel = new Map<number, string[]>();
+  for (const entry of entries) {
+    if (extractHskLevel(entry.level) === null) continue;
+    const hsk3 = extractHsk3Level(entry.level ?? []);
+    if (hsk3 === null) continue;
+    byLevel.set(hsk3, [...(byLevel.get(hsk3) ?? []), entry.simplified]);
   }
-  const entries = (await res.json()) as SourceEntry[];
-  console.log(`Fetched ${entries.length} entries`);
+
+  let updated = 0;
+  for (const [hsk3, words] of [...byLevel].sort((a, b) => a[0] - b[0])) {
+    for (let i = 0; i < words.length; i += 200) {
+      const chunk = words.slice(i, i + 200);
+      const { error, count } = await supabase
+        .from("words")
+        .update({ hsk3_level: hsk3 }, { count: "exact" })
+        .in("simplified", chunk);
+      if (error) {
+        console.error(`hsk3_level ${hsk3}, chunk ${i / 200 + 1} failed:`, error);
+        continue;
+      }
+      updated += count ?? 0;
+    }
+    console.log(`hsk3_level ${hsk3}: ${words.length} words`);
+  }
+  console.log(`Done. Set hsk3_level on ${updated} rows.`);
+}
+
+async function main() {
+  const entries = await fetchDataset();
+  assertOverridesValid(entries);
+
+  if (process.argv.includes("--fill-hsk3")) {
+    await fillHsk3(entries);
+    return;
+  }
 
   const rows: WordRow[] = [];
   let skippedEmpty = 0;
+  let noUsableReading = 0;
 
   for (const entry of entries) {
-    if (!entry.level?.some((tag) => OLD_LEVEL_RE.test(tag))) continue;
-
     const hskLevel = extractHskLevel(entry.level);
     if (hskLevel === null) continue;
 
-    const form = entry.forms?.[0];
-    const pinyin = form?.transcriptions?.pinyin ?? "";
-    const meanings = form?.meanings ?? [];
-
-    if (pinyin === "" || meanings.length === 0) {
+    // Not simply forms[0]: that is often a surname, variant or archaic
+    // reading (白 "surname Bai", 听 yǐn). See scripts/lib/readings.ts.
+    const choice = chooseReading(entry);
+    if (!choice) {
       skippedEmpty++;
       continue;
     }
+    if (!choice.usable) noUsableReading++;
 
     rows.push({
       simplified: entry.simplified,
-      traditional: form?.traditional ?? null,
       radical: entry.radical ?? null,
       hsk_level: hskLevel,
       frequency: entry.frequency ?? null,
-      pinyin,
-      pinyin_numeric: form?.transcriptions?.numeric ?? null,
       pos: entry.pos ?? [],
-      meanings,
-      classifiers: form?.classifiers ?? [],
+      ...choice.reading,
     });
   }
 
   console.log(
-    `Filtered to ${rows.length} HSK (old-1..old-6) rows (${skippedEmpty} skipped for empty pinyin/meanings)`,
+    `Filtered to ${rows.length} HSK (old-1..old-6) rows (${skippedEmpty} skipped for empty pinyin/meanings, ${noUsableReading} with no usable reading kept as is)`,
   );
 
   const supabase = createClient(SUPABASE_URL!, SUPABASE_SECRET_KEY!, {
