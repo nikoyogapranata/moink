@@ -11,9 +11,15 @@
 // match any of the word's readings stops seed-words.ts and
 // fix-readings.ts before they do anything.
 //
+// Some words list the same pinyin more than once with different meanings,
+// told apart only by the traditional character (药 yào: 葯 "leaf of the
+// iris" vs 藥 "medicine"). For those, give { pinyin, traditional }.
+//
 // 起来 is not listed: the wanted qǐlái matches neither dataset reading
 // ("qǐ lai", "qi lai").
-export const READING_OVERRIDES: Record<string, string> = {
+export type ReadingOverride = string | { pinyin: string; traditional: string };
+
+export const READING_OVERRIDES: Record<string, ReadingOverride> = {
   // HSK 1
   大: "dà",
   的: "de",
@@ -37,6 +43,7 @@ export const READING_OVERRIDES: Record<string, string> = {
   喂: "wèi",
 
   // HSK 2
+  药: { pinyin: "yào", traditional: "藥" }, // not 葯 "leaf of the iris"
   吧: "ba",
   便宜: "pián yi",
   别: "bié",
@@ -80,7 +87,8 @@ export const READING_OVERRIDES: Record<string, string> = {
   场: "chǎng",
   大夫: "dài fu",
   弹: "tán",
-  当: "dāng",
+  当: { pinyin: "dāng", traditional: "當" }, // not 噹 "(onom.) dong"
+  咸: { pinyin: "xián", traditional: "鹹" }, // not 咸 "all; everyone"
   当时: "dāng shí",
   底: "dǐ",
   发: "fā",

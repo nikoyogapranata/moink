@@ -116,13 +116,19 @@ export function chooseReading(entry: SourceEntry): ReadingChoice | null {
 
   const override = READING_OVERRIDES[entry.simplified];
   if (override !== undefined) {
-    const matches = forms.filter(({ reading }) => samePinyin(reading.pinyin, override));
+    const want = typeof override === "string" ? { pinyin: override } : override;
+    const matches = forms.filter(
+      ({ reading }) =>
+        samePinyin(reading.pinyin, want.pinyin) &&
+        (!("traditional" in want) || reading.traditional === want.traditional),
+    );
     // Some words list the same pinyin twice (a real sense and a "variant
     // of" note); take the usable one.
     const pick = matches.find(({ reading }) => isUsableReading(reading)) ?? matches[0];
     if (!pick) {
+      const label = "traditional" in want ? `${want.pinyin} [${want.traditional}]` : want.pinyin;
       throw new ReadingOverrideError(
-        `${entry.simplified}: override "${override}" matches none of its readings (${forms.map(({ reading }) => reading.pinyin).join(", ") || "none"})`,
+        `${entry.simplified}: override "${label}" matches none of its readings (${forms.map(({ reading }) => `${reading.pinyin} [${reading.traditional ?? "-"}]`).join(", ") || "none"})`,
       );
     }
     return { ...pick, usable: true, overridden: true };
