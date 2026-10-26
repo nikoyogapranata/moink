@@ -9,11 +9,11 @@ import { Button } from "@/components/ui/Button";
 // to the box) so preserveAspectRatio="none" can't squeeze it into a steep
 // spike on narrow screens. The viewBox is cropped at y=270, where the dome
 // meets the viewport edges, so the box ends exactly at the hill's base and
-// the Footer's green (same token) continues straight on from there — no
-// dead band of solid green under the hill. The heights (135 / 189 / 270px)
+// the Footer's green (same token) continues straight on from there, with
+// no dead band of solid green under the hill. The heights (135 / 189 / 270px)
 // are 270/400 of the original 200 / 280 / 400px, so the curve's on-screen
 // shape is unchanged. Peak sits at 130px in viewBox units (65 / 91 / 130px
-// on screen) — Bao's anchor below is measured against these.
+// on screen); Bao's anchor below is measured against these.
 function Terrain() {
   const path =
     "M0 400 L0 270 C 260 215, 480 130, 720 130 C 960 130, 1180 215, 1440 270 L1440 400 Z";
@@ -67,8 +67,8 @@ export function FinalCta() {
           like 375px and leave an anti-aliased line down the left edge.)
           mt-110 is large on purpose:
           Bao renders 384–432px tall but his feet sit only ~60–125px below
-          the top of this box, so most of his height lives in this margin —
-          it has to absorb that, the 8px bob, and a clear gap (~115px+)
+          the top of this box, so most of his height lives in this margin,
+          which has to absorb that, the 8px bob, and a clear gap (~115px+)
           between the button and his crown. */}
       <div className="relative mt-110 h-33.75 w-full overflow-x-clip md:h-47.25 lg:h-67.5">
         <Terrain />
@@ -80,7 +80,7 @@ export function FinalCta() {
 
             Horizontal: his feet span 16–57% of the image width (the tail
             widens it to the right), so md:translate-x-[-36.5%] centers his
-            feet — not the image box — on the dome's peak. Below md it's
+            feet (not the image box) on the dome's peak. Below md it's
             -41% (feet ~14px left of the peak) so the tail tip still fits
             inside a 375px viewport instead of causing horizontal scroll.
 

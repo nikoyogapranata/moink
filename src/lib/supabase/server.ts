@@ -29,3 +29,12 @@ export async function createClient() {
     },
   );
 }
+
+/** The signed-in user's id, from the session's JWT verified locally
+ *  (getClaims; the project signs with asymmetric keys), or null. For
+ *  server actions: unlike getUser() it costs no round trip to Supabase
+ *  Auth. Row level security still checks every query. */
+export async function signedInUserId(supabase: Awaited<ReturnType<typeof createClient>>) {
+  const { data } = await supabase.auth.getClaims();
+  return data?.claims.sub ?? null;
+}

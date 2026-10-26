@@ -1,12 +1,13 @@
 "use client";
 
-import { Check, X } from "lucide-react";
+import { Check, Snail, Volume2, X } from "lucide-react";
 import { useEffect, useEffectEvent, useRef, useState, type Ref } from "react";
 
 import { AudioButton } from "@/components/dictionary/AudioButton";
+import { NORMAL_RATE, SLOW_RATE, speak, stopSpeaking, useChineseVoiceStatus, type VoiceStatus } from "@/lib/dictionary/speech";
 import { devError } from "@/lib/dev";
 import type { QueueWord } from "@/lib/training/queue";
-import { promptGloss, QUIZ_QUESTION_LABELS, type QuizShowing } from "@/lib/training/quiz";
+import { isListenFormat, promptGloss, QUESTION_LABELS, type ListenShowing, type QuizShowing, type Showing } from "@/lib/training/quiz";
 
 import { hanziSize, HINT, MISSING_GLOSS, PILL, REDUCED_TRANSITION_MS, SURFACE, TRANSITION_MS } from "./FlashCard";
 import { useReducedMotion } from "./hooks";
@@ -28,7 +29,49 @@ const OPTION_STATES = {
   dimmed: "border-line bg-surface-raised text-bark opacity-50",
 };
 
+const CONTROL = `inline-flex h-11 items-center gap-2 rounded-pill border-[1.5px] border-line bg-surface-raised px-4 font-body text-body font-medium text-bark transition-colors hover:bg-highlight/60 disabled:opacity-50 ${FOCUS_RING}`;
+
 export type QuizAnswer = { picked: number; right: boolean };
+
+/** A listening question's audio: whether it's speaking, whether it has
+ *  played yet (answers wait for that), and the two buttons. */
+export interface ListenControls {
+  status: VoiceStatus;
+  speaking: boolean;
+  heard: boolean;
+  onPlay: () => void;
+  onSlow: () => void;
+}
+
+/** The listening prompt: no text at all, only the big play button and
+ *  Slow. Before the first play of a session it asks for a tap (browsers
+ *  block speech until the user interacts). */
+function ListenPrompt({ listen, leaving }: { listen: ListenControls; leaving: boolean }) {
+  const ready = listen.status === "available";
+  return (
+    <div className={`flex flex-col items-center gap-3 py-3 ${leaving ? "quiz-leave" : "card-rise"}`}>
+      <button
+        type="button"
+        onClick={listen.onPlay}
+        disabled={!ready}
+        aria-label={listen.heard ? "Play the word again" : "Play the word"}
+        aria-keyshortcuts="Space R"
+        className={`flex h-24 w-24 items-center justify-center rounded-full bg-rust text-on-rust shadow-float transition-[background-color,scale] hover:bg-rust-dark active:scale-95 disabled:opacity-60 motion-reduce:transition-none motion-reduce:active:scale-100 ${FOCUS_RING} ${
+          listen.speaking ? "listen-pulse" : ""
+        }`}
+      >
+        <Volume2 size={44} strokeWidth={2.25} aria-hidden="true" />
+      </button>
+      <p className="min-h-6 font-body text-body font-medium text-bark-muted">
+        {!ready ? "Getting the voice ready" : listen.heard ? (listen.speaking ? "Listening…" : "\u00a0") : "Tap to listen"}
+      </p>
+      <button type="button" onClick={listen.onSlow} disabled={!ready} aria-keyshortcuts="S" className={CONTROL}>
+        <Snail size={18} aria-hidden="true" />
+        Slow
+      </button>
+    </div>
+  );
+}
 
 function wordLine(word: QueueWord) {
   return `${word.simplified}, ${word.pinyin}, ${word.gloss ?? MISSING_GLOSS}`;
@@ -49,9 +92,10 @@ export function QuizQuestion({
   continueRef,
   onPick,
   onContinue,
+  listen,
 }: {
   word: QueueWord;
-  quiz: QuizShowing;
+  quiz: Showing;
   /** Cards left in the run, this one included, for the stack. */
   remaining: number;
   answer: QuizAnswer | null;
@@ -60,12 +104,17 @@ export function QuizQuestion({
   continueRef: Ref<HTMLButtonElement>;
   onPick: (id: number) => void;
   onContinue: () => void;
+  /** Listening formats only. */
+  listen?: ListenControls;
 }) {
-  const label = QUIZ_QUESTION_LABELS[quiz.format];
+  const label = QUESTION_LABELS[quiz.format];
+  const listening = isListenFormat(quiz.format);
   const gloss = word.gloss ?? MISSING_GLOSS;
   const prompt =
     quiz.format === "meaning" ? word.simplified : quiz.format === "hanzi" ? promptGloss(gloss, word.simplified) : word.pinyin;
-  const hanziOptions = quiz.format !== "meaning";
+  const hanziOptions = quiz.format === "hanzi" || quiz.format === "pinyin" || quiz.format === "listen_hanzi";
+  // Listening answers wait until the word has played.
+  const locked = answer !== null || (listening && !listen?.heard);
   const longOptions = !hanziOptions && quiz.options.some((o) => o.text.length > LONG_OPTION);
   const shape = `absolute inset-x-0 top-0 origin-bottom ${CARD_HEIGHT} ${SURFACE}`;
   const motion = leaving ? "quiz-leave" : "quiz-in";
@@ -82,43 +131,47 @@ export function QuizQuestion({
         ref={promptRef}
         tabIndex={-1}
         role="group"
-        aria-label={`${label} ${prompt}`}
+        aria-label={listening ? label : `${label} ${prompt}`}
         className="mx-auto flex w-full max-w-md flex-col gap-2 outline-none"
       >
         <p aria-hidden="true" className={`text-center font-body text-body font-medium text-bark-muted ${motion}`}>
           {label}
         </p>
-        <div className="relative w-full pb-5">
-          {remaining > 2 && <div aria-hidden="true" className={`${shape} translate-y-5 scale-90`} />}
-          {remaining > 1 && <div aria-hidden="true" className={`${shape} translate-y-2.5 scale-95`} />}
-          <div className={`relative flex flex-col p-5 ${CARD_HEIGHT} ${SURFACE} ${leaving ? "quiz-leave" : "card-rise"}`}>
-            <div aria-hidden="true" className="flex justify-end">
-              <span className={`${PILL} bg-highlight text-bark`}>HSK {word.hsk_level}</span>
-            </div>
-            <div className="flex min-h-0 flex-1 items-center justify-center text-center">
-              {quiz.format === "meaning" ? (
-                <p
-                  aria-hidden="true"
-                  lang="zh-CN"
-                  className={`font-hanzi font-medium leading-[1.15] wrap-break-word text-bark ${hanziSize(word.simplified)}`}
-                >
-                  {word.simplified}
-                </p>
-              ) : quiz.format === "hanzi" ? (
-                <p aria-hidden="true" className="max-w-full font-body text-[24px] font-medium leading-8 wrap-break-word text-bark">
-                  {prompt}
-                </p>
-              ) : (
-                <div className="flex items-center gap-1">
-                  <p aria-hidden="true" className="font-body text-[34px] font-medium leading-11 text-rust-dark">
-                    {word.pinyin}
+        {listening && listen ? (
+          <ListenPrompt listen={listen} leaving={leaving} />
+        ) : (
+          <div className="relative w-full pb-5">
+            {remaining > 2 && <div aria-hidden="true" className={`${shape} translate-y-5 scale-90`} />}
+            {remaining > 1 && <div aria-hidden="true" className={`${shape} translate-y-2.5 scale-95`} />}
+            <div className={`relative flex flex-col p-5 ${CARD_HEIGHT} ${SURFACE} ${leaving ? "quiz-leave" : "card-rise"}`}>
+              <div aria-hidden="true" className="flex justify-end">
+                <span className={`${PILL} bg-highlight text-bark`}>HSK {word.hsk_level}</span>
+              </div>
+              <div className="flex min-h-0 flex-1 items-center justify-center text-center">
+                {quiz.format === "meaning" ? (
+                  <p
+                    aria-hidden="true"
+                    lang="zh-CN"
+                    className={`font-hanzi font-medium leading-[1.15] wrap-break-word text-bark ${hanziSize(word.simplified)}`}
+                  >
+                    {word.simplified}
                   </p>
-                  <AudioButton text={word.simplified} />
-                </div>
-              )}
+                ) : quiz.format === "hanzi" ? (
+                  <p aria-hidden="true" className="max-w-full font-body text-[24px] font-medium leading-8 wrap-break-word text-bark">
+                    {prompt}
+                  </p>
+                ) : (
+                  <div className="flex items-center gap-1">
+                    <p aria-hidden="true" className="font-body text-[34px] font-medium leading-11 text-rust-dark">
+                      {word.pinyin}
+                    </p>
+                    <AudioButton text={word.simplified} />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       <div
@@ -131,9 +184,9 @@ export function QuizQuestion({
             key={option.id}
             type="button"
             onClick={() => onPick(option.id)}
-            aria-disabled={answer !== null}
+            aria-disabled={locked}
             aria-keyshortcuts={String(i + 1)}
-            className={`${OPTION} ${optionState(option.id)}`}
+            className={`${OPTION} flex-col ${optionState(option.id)} ${!answer && locked ? "opacity-60" : ""}`}
           >
             <span
               aria-hidden="true"
@@ -148,6 +201,11 @@ export function QuizQuestion({
             ) : (
               <span className="font-body text-[16px] font-medium leading-6 wrap-break-word">{option.text}</span>
             )}
+            {/* After a listening answer every option shows its reading,
+                so the tones can be compared. */}
+            {answer && listening && option.pinyin && (
+              <span className="font-body text-[13px] font-medium leading-5 text-rust-dark">{option.pinyin}</span>
+            )}
             {answer && option.id === word.id && <span className="sr-only">, right answer</span>}
             {answer && !answer.right && option.id === answer.picked && <span className="sr-only">, your answer</span>}
           </button>
@@ -160,14 +218,16 @@ export function QuizQuestion({
         {answer ? (
           <ResultBar
             right={answer.right}
-            title={answer.right ? "Nice!" : "Not quite"}
+            title={listening ? (answer.right ? "Good ear!" : "Listen again") : answer.right ? "Nice!" : "Not quite"}
             word={word}
             continueRef={continueRef}
             onContinue={onContinue}
             className={motion}
           />
         ) : (
-          <p className={HINT}>1 to 4 to answer · Enter to continue</p>
+          <p className={HINT}>
+            {listening ? "Space or R to replay · S for slow · 1 to 4 to answer" : "1 to 4 to answer · Enter to continue"}
+          </p>
         )}
       </div>
     </>
@@ -230,31 +290,47 @@ export function ResultBar({
 
 type Phase = "rising" | "asking" | "answered" | "leaving";
 
+/** A session's listening audio: whether questions may play on their own
+ *  yet (after the first tap of the session), and the tap. */
+export interface SessionAudio {
+  autoPlay: boolean;
+  onPlayed: () => void;
+}
+
 /**
- * A quiz question on the card stack. Picking an option answers it: the
- * result shows right away while `onAnswer` saves it; Continue (or Enter or
- * Space) fades the question out, runs the commit (the parent moves on) and
- * the next question rises from the stack. A failed save (`onAnswer`
- * resolves to null) opens the same question again. Same contract as
- * CardStage, so a session can show either.
+ * A quiz or listening question. Picking an option answers it: the result
+ * shows right away while `onAnswer` saves it; Continue (or Enter) fades
+ * the question out, runs the commit (the parent moves on) and the next
+ * question rises. A failed save (`onAnswer` resolves to null) opens the
+ * same question again. Same contract as CardStage, so a session can show
+ * either. A listening question plays its word when it appears (once the
+ * session has had its first tap, see `audio`), and takes answers once it
+ * has played.
  */
-export function QuizStage({
+function QuestionStage({
   word,
   quiz,
   remaining,
   onAnswer,
+  audio,
 }: {
   word: QueueWord;
-  quiz: QuizShowing;
+  quiz: Showing;
   remaining: number;
   onAnswer: (gotIt: boolean, durationMs: number) => Promise<(() => void) | null>;
+  audio?: SessionAudio;
 }) {
   const reducedMotion = useReducedMotion();
   const riseMs = reducedMotion ? REDUCED_TRANSITION_MS : TRANSITION_MS;
+  const listening = isListenFormat(quiz.format);
+  const voice = useChineseVoiceStatus();
 
   const [answer, setAnswer] = useState<QuizAnswer | null>(null);
   const [leaving, setLeaving] = useState(false);
   const [questionKey, setQuestionKey] = useState(0);
+  const [speaking, setSpeaking] = useState(false);
+  const [heard, setHeard] = useState(false);
+  const heardRef = useRef(false);
 
   const phase = useRef<Phase>("rising");
   const mounted = useRef(false);
@@ -286,8 +362,37 @@ export function QuizStage({
     return () => window.clearTimeout(timer);
   }, [questionKey, riseMs]);
 
+  function play(rate: number) {
+    if (!listening || voice !== "available" || phase.current === "leaving") return;
+    speak(word.simplified, {
+      rate,
+      // Heard once speech really starts (a blocked play changes nothing),
+      // and answering time starts then.
+      onStart: () => {
+        setSpeaking(true);
+        if (!heardRef.current) {
+          heardRef.current = true;
+          setHeard(true);
+          shownAt.current = performance.now();
+        }
+        audio?.onPlayed();
+      },
+      onEnd: () => setSpeaking(false),
+    });
+  }
+
+  // A listening question plays on its own once the session has had its
+  // first tap (and the voice is ready). Speech stops when it goes.
+  const autoPlay = useEffectEvent(() => {
+    if (listening && audio?.autoPlay && !heardRef.current) play(NORMAL_RATE);
+  });
+  useEffect(() => {
+    autoPlay();
+  }, [questionKey, voice]);
+  useEffect(() => () => stopSpeaking(), [questionKey]);
+
   function pick(id: number) {
-    if (phase.current !== "asking") return;
+    if (phase.current !== "asking" || (listening && !heard)) return;
     phase.current = "answered";
     const right = id === word.id;
     setAnswer({ picked: id, right });
@@ -328,6 +433,9 @@ export function QuizStage({
     pending.current = null;
     commit();
     setAnswer(null);
+    heardRef.current = false;
+    setHeard(false);
+    setSpeaking(false);
     setQuestionKey((k) => k + 1);
   }
 
@@ -336,10 +444,14 @@ export function QuizStage({
     const target = e.target instanceof HTMLElement ? e.target : null;
     if (target?.closest("input, textarea, select, [role=dialog]")) return;
     const n = Number(e.key);
+    const key = e.key.toLowerCase();
     if (Number.isInteger(n) && n >= 1 && n <= quiz.options.length) {
       if (phase.current !== "asking") return;
       e.preventDefault();
       pick(quiz.options[n - 1].id);
+    } else if (listening && (key === "r" || key === "s" || (key === " " && !target?.closest("button, a")))) {
+      e.preventDefault();
+      play(key === "s" ? SLOW_RATE : NORMAL_RATE);
     } else if (e.key === "Enter" || e.key === " ") {
       // A focused button or link (Continue included) acts on its own.
       if (phase.current !== "answered" || target?.closest("button, a")) return;
@@ -355,8 +467,8 @@ export function QuizStage({
 
   const announcement = answer
     ? answer.right
-      ? `Right. ${wordLine(word)}.`
-      : `Not quite. The answer is ${wordLine(word)}.`
+      ? `${listening ? "Good ear!" : "Right."} ${wordLine(word)}.`
+      : `${listening ? "Listen again." : "Not quite."} The answer is ${wordLine(word)}.`
     : "";
 
   return (
@@ -372,6 +484,17 @@ export function QuizStage({
           continueRef={continueRef}
           onPick={pick}
           onContinue={() => void next()}
+          listen={
+            listening
+              ? {
+                  status: voice,
+                  speaking,
+                  heard,
+                  onPlay: () => play(NORMAL_RATE),
+                  onSlow: () => play(SLOW_RATE),
+                }
+              : undefined
+          }
         />
       </div>
       <p aria-live="polite" className="sr-only">
@@ -379,4 +502,25 @@ export function QuizStage({
       </p>
     </div>
   );
+}
+
+/** A quiz question on the card stack. */
+export function QuizStage(props: {
+  word: QueueWord;
+  quiz: QuizShowing;
+  remaining: number;
+  onAnswer: (gotIt: boolean, durationMs: number) => Promise<(() => void) | null>;
+}) {
+  return <QuestionStage {...props} />;
+}
+
+/** A listening question: the word is heard, never shown, until answered. */
+export function ListenStage(props: {
+  word: QueueWord;
+  quiz: ListenShowing;
+  remaining: number;
+  onAnswer: (gotIt: boolean, durationMs: number) => Promise<(() => void) | null>;
+  audio: SessionAudio;
+}) {
+  return <QuestionStage {...props} />;
 }

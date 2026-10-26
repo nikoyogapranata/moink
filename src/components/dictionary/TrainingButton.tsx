@@ -32,7 +32,7 @@ function writingLine(writing: Writing, now: number) {
   switch (writing.kind) {
     case "card": {
       const label = now === 0 ? null : dueLabel(writing.due, now);
-      return label ? `Writing · due ${label}` : "Writing · due now";
+      return label ? `Writing · ${label}` : "Writing · due now";
     }
     case "unlocked":
       return "Writing unlocked · comes up in Today's review";

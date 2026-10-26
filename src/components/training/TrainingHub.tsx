@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeftRight, Layers, ListChecks, PenLine, Play } from "lucide-react";
+import { ArrowLeftRight, Headphones, Layers, ListChecks, PenLine, Play, type LucideIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useId, useOptimistic, useRef, useState, useTransition, type ReactNode, type Ref } from "react";
@@ -8,6 +8,7 @@ import { useEffect, useId, useOptimistic, useRef, useState, useTransition, type 
 import { PageHeader } from "@/components/app/PageHeader";
 import { CARD } from "@/components/dictionary/SideCards";
 import { Button } from "@/components/ui/Button";
+import { NO_VOICE_HELP, useChineseVoiceStatus } from "@/lib/dictionary/speech";
 import { setDailyNewWords, setDailyNewWriting } from "@/lib/training/actions";
 import { DAILY_NEW_WORD_OPTIONS, DAILY_NEW_WRITING_OPTIONS } from "@/lib/training/daily";
 import { DIRECTION_LABELS, type DeckSet, type Direction } from "@/lib/training/deck";
@@ -142,6 +143,14 @@ function TodayCard({
 
 /* Practice by mode */
 
+/* Every mode card ends in the same action area, pinned to the bottom
+   (margin-top: auto): the extra height in a row goes between the subtitle
+   and the actions, so buttons line up across the row. The quick-start
+   line keeps its height even when there's no last deck yet. */
+const ACTIONS = "mt-auto flex flex-col gap-3";
+const LAST_SLOT = "flex min-h-6 items-center";
+const LAST_LINK = `inline-flex items-center gap-1.5 rounded-sm font-body text-body font-medium text-rust-dark underline-offset-4 hover:underline ${FOCUS_RING}`;
+
 /* The mini card pair: 160x104, the cards 74x90 and overlapping by about
    4px, the swap badge at the bottom where they meet (below all card text). */
 const MINI_CARD =
@@ -261,7 +270,7 @@ function FlashcardsCard({ defaultSet }: { defaultSet: DeckSet }) {
   }
 
   return (
-    <section aria-labelledby="flashcards-title" className={`${CARD} flex flex-col gap-3 xl:col-span-2`}>
+    <section aria-labelledby="flashcards-title" className={`${CARD} flex flex-col gap-3`}>
       <span className="flex h-11 w-11 items-center justify-center rounded-md bg-highlight text-rust-dark">
         <Layers size={22} aria-hidden="true" />
       </span>
@@ -271,111 +280,129 @@ function FlashcardsCard({ defaultSet }: { defaultSet: DeckSet }) {
         </h3>
         <p className="font-body text-body text-bark-muted">Practice any set, as often as you like</p>
       </div>
-      <div className="grid grid-cols-2 gap-3 max-[360px]:grid-cols-1">
-        {(["hanzi", "meaning"] as const).map((direction) => (
-          <DirectionTile
-            key={direction}
-            ref={direction === "hanzi" ? hanziRef : meaningRef}
-            direction={direction}
-            onClick={() => setOpen(direction)}
-          />
-        ))}
+      <div className={ACTIONS}>
+        <div className="grid grid-cols-2 gap-3 max-[360px]:grid-cols-1">
+          {(["hanzi", "meaning"] as const).map((direction) => (
+            <DirectionTile
+              key={direction}
+              ref={direction === "hanzi" ? hanziRef : meaningRef}
+              direction={direction}
+              onClick={() => setOpen(direction)}
+            />
+          ))}
+        </div>
+        <div className={LAST_SLOT}>
+          {lastDeck && lastDeck.ids.length > 0 && (
+            <Link
+              href={`/training/flashcards?dir=${lastDeck.direction}`}
+              onClick={() => practiceDeckHref(lastDeck)}
+              className={LAST_LINK}
+            >
+              <Play size={16} aria-hidden="true" />
+              Last deck · {lastDeck.ids.length} {lastDeck.ids.length === 1 ? "card" : "cards"}
+              <span className="sr-only">, {DIRECTION_LABELS[lastDeck.direction]}</span>
+            </Link>
+          )}
+        </div>
       </div>
-      {lastDeck && lastDeck.ids.length > 0 && (
-        <Link
-          href={`/training/flashcards?dir=${lastDeck.direction}`}
-          onClick={() => practiceDeckHref(lastDeck)}
-          className={`inline-flex items-center gap-1.5 self-start rounded-sm font-body text-body font-medium text-rust-dark underline-offset-4 hover:underline ${FOCUS_RING}`}
-        >
-          <Play size={16} aria-hidden="true" />
-          Last deck · {lastDeck.ids.length} {lastDeck.ids.length === 1 ? "card" : "cards"}
-          <span className="sr-only">, {DIRECTION_LABELS[lastDeck.direction]}</span>
-        </Link>
-      )}
       {open && <DeckBuilder mode="flashcards" initialDirection={open} defaultSet={defaultSet} onClose={closeBuilder} />}
     </section>
   );
 }
 
-/** Quiz: Build a quiz opens the builder in quiz mode, and a quick start
- *  runs the last quiz built. */
-function QuizCard({ defaultSet }: { defaultSet: DeckSet }) {
-  const [open, setOpen] = useState(false);
-  const lastQuiz = useLastQuiz();
-  const buildRef = useRef<HTMLButtonElement>(null);
+type ModeId = "quiz" | "listening" | "writing";
 
-  return (
-    <section aria-labelledby="quiz-title" className={`${CARD} flex flex-col gap-3`}>
-      <span className="flex h-11 w-11 items-center justify-center rounded-md bg-good-tint text-good-ink">
-        <ListChecks size={22} aria-hidden="true" />
-      </span>
-      <div>
-        <h3 id="quiz-title" className="font-heading text-h3 font-bold text-bark">
-          Quiz
-        </h3>
-        <p className="font-body text-body text-bark-muted">Pick the right answer</p>
-      </div>
-      <Button ref={buildRef} aria-haspopup="dialog" onClick={() => setOpen(true)} className="mt-auto self-start">
-        Build a quiz
-      </Button>
-      {lastQuiz && lastQuiz.ids.length > 0 && (
-        <Link
-          href="/training/quiz"
-          onClick={() => practiceQuizHref(lastQuiz)}
-          className={`inline-flex items-center gap-1.5 self-start rounded-sm font-body text-body font-medium text-rust-dark underline-offset-4 hover:underline ${FOCUS_RING}`}
-        >
-          <Play size={16} aria-hidden="true" />
-          Last quiz · {lastQuiz.ids.length} {lastQuiz.ids.length === 1 ? "word" : "words"}
-        </Link>
-      )}
-      {open && (
-        <DeckBuilder
-          mode="quiz"
-          defaultSet={defaultSet}
-          onClose={() => {
-            setOpen(false);
-            buildRef.current?.focus();
-          }}
-        />
-      )}
-    </section>
-  );
+const MODES: Record<
+  ModeId,
+  { title: string; subtitle: string; build: string; last: string; icon: LucideIcon; tile: string }
+> = {
+  quiz: {
+    title: "Quiz",
+    subtitle: "Pick the right answer",
+    build: "Build a quiz",
+    last: "Last quiz",
+    icon: ListChecks,
+    tile: "bg-good-tint text-good-ink",
+  },
+  listening: {
+    title: "Listening",
+    subtitle: "Hear it, find it",
+    build: "Build a listening set",
+    last: "Last set",
+    icon: Headphones,
+    tile: "bg-listen-tint text-listen-ink",
+  },
+  writing: {
+    title: "Writing",
+    subtitle: "Trace it, then write from memory",
+    build: "Build a writing set",
+    last: "Last set",
+    icon: PenLine,
+    tile: "bg-learning-tint text-learning-ink",
+  },
+};
+
+/** The last deck of a mode, for its quick start: how many words, and what
+ *  hands it to the practice page (returning the page's href). */
+function useLastOf(mode: ModeId): { count: number; start: () => string } | null {
+  const quiz = useLastQuiz("quiz");
+  const listening = useLastQuiz("listening");
+  const writing = useLastWriting();
+  if (mode === "writing") return writing?.ids.length ? { count: writing.ids.length, start: () => practiceWritingHref(writing) } : null;
+  const deck = mode === "quiz" ? quiz : listening;
+  return deck?.ids.length ? { count: deck.ids.length, start: () => practiceQuizHref(mode, deck) } : null;
 }
 
-/** Writing: Build a writing set opens the builder in writing mode, and a
- *  quick start runs the last set built. */
-function WritingCard({ defaultSet }: { defaultSet: DeckSet }) {
+/** A practice mode: its icon, title and line, a button that opens the
+ *  builder in that mode, and a quick start for the last deck built.
+ *  Listening says why it's off when the browser has no Chinese voice. */
+function ModeCard({ mode, defaultSet }: { mode: ModeId; defaultSet: DeckSet }) {
   const [open, setOpen] = useState(false);
-  const lastWriting = useLastWriting();
+  const last = useLastOf(mode);
+  const voice = useChineseVoiceStatus();
   const buildRef = useRef<HTMLButtonElement>(null);
+  const { title, subtitle, build, icon: Icon, tile } = MODES[mode];
+  const noVoice = mode === "listening" && voice === "none";
+  const titleId = `${mode}-title`;
 
   return (
-    <section aria-labelledby="writing-title" className={`${CARD} flex flex-col gap-3`}>
-      <span className="flex h-11 w-11 items-center justify-center rounded-md bg-learning-tint text-learning-ink">
-        <PenLine size={22} aria-hidden="true" />
+    <section aria-labelledby={titleId} className={`${CARD} flex flex-col gap-3`}>
+      <span className={`flex h-11 w-11 items-center justify-center rounded-md ${tile}`}>
+        <Icon size={22} aria-hidden="true" />
       </span>
       <div>
-        <h3 id="writing-title" className="font-heading text-h3 font-bold text-bark">
-          Writing
+        <h3 id={titleId} className="font-heading text-h3 font-bold text-bark">
+          {title}
         </h3>
-        <p className="font-body text-body text-bark-muted">Trace it, then write from memory</p>
+        <p className="font-body text-body text-bark-muted">{subtitle}</p>
       </div>
-      <Button ref={buildRef} aria-haspopup="dialog" onClick={() => setOpen(true)} className="mt-auto self-start">
-        Build a writing set
-      </Button>
-      {lastWriting && lastWriting.ids.length > 0 && (
-        <Link
-          href="/training/writing"
-          onClick={() => practiceWritingHref(lastWriting)}
-          className={`inline-flex items-center gap-1.5 self-start rounded-sm font-body text-body font-medium text-rust-dark underline-offset-4 hover:underline ${FOCUS_RING}`}
-        >
-          <Play size={16} aria-hidden="true" />
-          Last set · {lastWriting.ids.length} {lastWriting.ids.length === 1 ? "word" : "words"}
-        </Link>
+      {noVoice && (
+        <div className="rounded-md bg-highlight px-3 py-2">
+          <p className="font-body text-body font-medium text-bark">Your browser has no Chinese voice</p>
+          <p className="font-body text-body-sm text-bark">{NO_VOICE_HELP}</p>
+        </div>
       )}
+      <div className={ACTIONS}>
+        <Button ref={buildRef} aria-haspopup="dialog" disabled={noVoice} onClick={() => setOpen(true)} className="self-start">
+          {build}
+        </Button>
+        <div className={LAST_SLOT}>
+          {last && !noVoice && (
+            <Link
+              href={mode === "writing" ? "/training/writing" : `/training/${mode}`}
+              onClick={() => last.start()}
+              className={LAST_LINK}
+            >
+              <Play size={16} aria-hidden="true" />
+              {MODES[mode].last} · {last.count} {last.count === 1 ? "word" : "words"}
+              <span className="sr-only">, {title}</span>
+            </Link>
+          )}
+        </div>
+      </div>
       {open && (
         <DeckBuilder
-          mode="writing"
+          mode={mode}
           defaultSet={defaultSet}
           onClose={() => {
             setOpen(false);
@@ -576,12 +603,13 @@ export function TrainingHub({
         <h2 id="modes-title" className="font-heading text-h2 font-bold text-bark">
           Practice by mode
         </h2>
-        {/* Flashcards takes two columns at xl for its direction tiles;
-            Listening will start the next row. */}
-        <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {/* Two by two from sm up: each row's cards share a height, and
+            Flashcards has room for its two direction tiles. */}
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
           <FlashcardsCard defaultSet={defaultDeckSet} />
-          <QuizCard defaultSet={defaultDeckSet} />
-          <WritingCard defaultSet={defaultDeckSet} />
+          <ModeCard mode="quiz" defaultSet={defaultDeckSet} />
+          <ModeCard mode="writing" defaultSet={defaultDeckSet} />
+          <ModeCard mode="listening" defaultSet={defaultDeckSet} />
         </div>
       </section>
 

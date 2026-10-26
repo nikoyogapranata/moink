@@ -15,10 +15,11 @@ import {
 } from "react";
 
 import { devError } from "@/lib/dev";
-import { fetchDeckSet, fetchDueTodayIds } from "@/lib/training/actions";
+import type { Skill } from "@/lib/supabase/database.types";
+import { fetchDeckSet } from "@/lib/training/actions";
 import { DECK_SETS, type DeckSet, type Direction } from "@/lib/training/deck";
 import type { QueueWord } from "@/lib/training/queue";
-import { QUIZ_FORMAT_LABELS, QUIZ_FORMATS, type QuizFormat } from "@/lib/training/quiz";
+import { FORMAT_LABELS, LISTEN_FORMATS, QUIZ_FORMATS, type QuestionFormat } from "@/lib/training/quiz";
 import { isWritable, WRITING_STYLE_LABELS, type WritingStyle } from "@/lib/training/writing";
 
 import {
@@ -49,7 +50,25 @@ const SAMPLE_STEP_PX = 16;
 const EDGE_PX = 48;
 const MAX_SCROLL_PX = 18;
 
-type SetData = { words: QueueWord[]; inTraining: ReadonlySet<number> } | "error";
+type LoadedSet = { words: QueueWord[]; inTraining: ReadonlySet<number> };
+type SetData = LoadedSet | "error";
+
+/* Sets and due ids already loaded on this page, so opening the builder
+   again (or switching back to a set) doesn't wait on the server. Kept a
+   few minutes at most: a review in between changes them. */
+const CACHE_MS = 5 * 60_000;
+const setCache = new Map<DeckSet, { data: LoadedSet; at: number }>();
+const dueCache = new Map<Skill, { ids: ReadonlySet<number>; at: number }>();
+const fresh = (at: number) => Date.now() - at < CACHE_MS;
+
+function cachedSets(): Partial<Record<DeckSet, SetData>> {
+  return Object.fromEntries([...setCache].flatMap(([set, { data, at }]) => (fresh(at) ? [[set, data]] : [])));
+}
+
+function cachedDue(skill: Skill | null) {
+  const hit = skill ? dueCache.get(skill) : undefined;
+  return hit && fresh(hit.at) ? hit.ids : null;
+}
 
 type Drag = {
   pointerId: number;
@@ -124,15 +143,23 @@ const WordTile = memo(function WordTile({
   );
 });
 
-export type BuilderMode = "flashcards" | "quiz" | "writing";
+export type BuilderMode = "flashcards" | "quiz" | "listening" | "writing";
+
+const TITLES: Record<BuilderMode, string> = {
+  flashcards: "Build your deck",
+  quiz: "Build your quiz",
+  listening: "Build a listening set",
+  writing: "Build a writing set",
+};
 
 /**
- * Build your deck (flashcards: pick a direction), your quiz (pick the
- * question formats) or a writing set (pick the style), then words from any
+ * Build your deck (flashcards: pick a direction), your quiz or listening
+ * set (pick the question formats) or a writing set (pick the style), then
+ * words from any
  * of the sets. The selection carries across sets. A native modal dialog
  * (focus stays inside, the page behind is inert); a full-screen sheet on
  * phones. Restores the mode's last deck and saves it again on close and on
- * Start. The quiz and writing note selected words that are due today in
+ * Start. The quiz, listening and writing note selected words that are due today in
  * their schedule, since only Today's review counts them. Writing can't
  * pick words with a character that has no stroke data.
  */
@@ -154,20 +181,27 @@ export function DeckBuilder({
   const reducedMotion = useReducedMotion();
   const titleId = useId();
 
-  const quiz = mode === "quiz";
+  // The quiz and listening are question modes: format chips, and the
+  // recognition schedule for the due hint.
+  const questionKind = mode === "quiz" || mode === "listening" ? mode : null;
+  const quiz = questionKind !== null;
   const writing = mode === "writing";
+  const allFormats: readonly QuestionFormat[] = mode === "listening" ? LISTEN_FORMATS : QUIZ_FORMATS;
   // Only mounted after a click, so reading storage here can't mismatch.
-  const [lastQuiz] = useState(() => (quiz ? readLastQuiz() : null));
+  const [lastQuiz] = useState(() => (questionKind ? readLastQuiz(questionKind) : null));
   const [lastWriting] = useState(() => (writing ? readLastWriting() : null));
   const [lastDeck] = useState(() => (quiz ? lastQuiz : writing ? lastWriting : readLastDeck()));
   const [direction, setDirection] = useState(initialDirection);
-  const [formats, setFormats] = useState<readonly QuizFormat[]>(lastQuiz?.formats ?? QUIZ_FORMATS);
+  const [formats, setFormats] = useState<readonly QuestionFormat[]>(lastQuiz?.formats ?? allFormats);
   const [style, setStyle] = useState<WritingStyle>(lastWriting?.style ?? "trace");
-  const [dueToday, setDueToday] = useState<ReadonlySet<number>>(() => new Set());
+  // The schedule the due hint reads: recognition for the quiz and
+  // listening, writing for writing; none for flashcards.
+  const dueSkill: Skill | null = quiz ? "recognition" : writing ? "writing" : null;
+  const [dueToday, setDueToday] = useState<ReadonlySet<number> | null>(() => cachedDue(dueSkill));
   const [set, setSet] = useState<DeckSet>(lastDeck?.set ?? defaultSet);
   const [selected, setSelected] = useState<ReadonlySet<number>>(() => new Set(lastDeck?.ids));
   const [shuffleOn, setShuffleOn] = useState(lastDeck?.shuffle ?? true);
-  const [sets, setSets] = useState<Partial<Record<DeckSet, SetData>>>({});
+  const [sets, setSets] = useState<Partial<Record<DeckSet, SetData>>>(cachedSets);
   const [focusIndex, setFocusIndex] = useState(0);
   const [peek, setPeek] = useState<Peek | null>(null);
   const [shaking, setShaking] = useState(false);
@@ -190,7 +224,7 @@ export function DeckBuilder({
   const loaded = data !== undefined;
   const setLabel = DECK_SETS.find((s) => s.id === set)!.label;
   const selectedHere = words.reduce((n, w) => (selected.has(w.id) ? n + 1 : n), 0);
-  const selectedDue = quiz || writing ? [...selected].reduce((n, id) => (dueToday.has(id) ? n + 1 : n), 0) : 0;
+  const selectedDue = dueToday ? [...selected].reduce((n, id) => (dueToday.has(id) ? n + 1 : n), 0) : 0;
   /** Writing only takes words the pad can write. */
   const canPick = (word: QueueWord) => !writing || isWritable(word.simplified);
 
@@ -242,45 +276,38 @@ export function DeckBuilder({
     };
   }, []);
 
-  // Load each set the first time it's shown (a retry clears it).
+  // Load each set the first time it's shown (a retry clears it), with the
+  // due ids for the hint on the first load: one server action, so nothing
+  // waits in Next's queue of actions behind another.
+  const needDue = dueSkill !== null && dueToday === null;
   useEffect(() => {
-    if (loaded) return;
+    if (loaded && !needDue) return;
     let cancelled = false;
-    fetchDeckSet(set)
+    fetchDeckSet(set, needDue ? dueSkill : undefined)
       .catch((error) => {
         devError(`DeckBuilder: fetchDeckSet("${set}") threw.`, error);
         return { ok: false } as const;
       })
       .then((result) => {
         if (cancelled) return;
-        if (!result.ok) devError(`DeckBuilder: couldn't load the "${set}" set (fetchDeckSet returned ok: false; see the server log).`);
-        setSets((all) => ({
-          ...all,
-          [set]: result.ok ? { words: result.words, inTraining: new Set(result.inTraining) } : "error",
-        }));
+        if (!result.ok) {
+          devError(`DeckBuilder: couldn't load the "${set}" set (fetchDeckSet returned ok: false; see the server log).`);
+          if (!loaded) setSets((all) => ({ ...all, [set]: "error" }));
+          return;
+        }
+        const data = { words: result.words, inTraining: new Set(result.inTraining) };
+        setCache.set(set, { data, at: Date.now() });
+        setSets((all) => ({ ...all, [set]: data }));
+        if (result.dueToday && dueSkill) {
+          const ids = new Set(result.dueToday);
+          dueCache.set(dueSkill, { ids, at: Date.now() });
+          setDueToday(ids);
+        }
       });
     return () => {
       cancelled = true;
     };
-  }, [set, loaded]);
-
-  // The due hint: the user's cards due today in the mode's schedule
-  // (recognition for the quiz, writing for writing), loaded once.
-  useEffect(() => {
-    if (!quiz && !writing) return;
-    let cancelled = false;
-    fetchDueTodayIds(writing ? "writing" : "recognition")
-      .catch((error) => {
-        devError("DeckBuilder: fetchDueTodayIds threw, so the due hint stays hidden.", error);
-        return null;
-      })
-      .then((ids) => {
-        if (!cancelled && ids) setDueToday(new Set(ids));
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [quiz, writing]);
+  }, [set, loaded, needDue, dueSkill]);
 
   // Touch painting runs on touch events. After a long press Chrome sends
   // touchmove uncancelable and cancels the pointer once it starts a pan,
@@ -320,10 +347,10 @@ export function DeckBuilder({
    *  practice page (and gives the page's href). */
   function save() {
     const ids = [...selected];
-    if (quiz) {
+    if (questionKind) {
       const deck = { formats: [...formats], set, ids, shuffle: shuffleOn };
-      saveLastQuiz(deck);
-      return () => practiceQuizHref(deck);
+      saveLastQuiz(questionKind, deck);
+      return () => practiceQuizHref(questionKind, deck);
     }
     if (writing) {
       const deck = { style, set, ids, shuffle: shuffleOn };
@@ -349,7 +376,7 @@ export function DeckBuilder({
     router.push(save()());
   }
 
-  function toggleFormat(format: QuizFormat) {
+  function toggleFormat(format: QuestionFormat) {
     if (formats.includes(format)) {
       if (formats.length === 1) {
         setNotice("Keep at least one format on.");
@@ -357,7 +384,7 @@ export function DeckBuilder({
       }
       setFormats(formats.filter((f) => f !== format));
     } else {
-      setFormats(QUIZ_FORMATS.filter((f) => f === format || formats.includes(f)));
+      setFormats(allFormats.filter((f) => f === format || formats.includes(f)));
     }
     setNotice("");
   }
@@ -677,7 +704,7 @@ export function DeckBuilder({
         <header className="flex shrink-0 flex-col gap-3 px-4 pt-[calc(12px+env(safe-area-inset-top))] sm:px-6 md:pt-5">
           <div className="flex items-center justify-between gap-3">
             <h2 id={titleId} className="font-heading text-h1 font-bold text-bark">
-              {quiz ? "Build your quiz" : writing ? "Build a writing set" : "Build your deck"}
+              {TITLES[mode]}
             </h2>
             <button
               type="button"
@@ -690,8 +717,8 @@ export function DeckBuilder({
           </div>
           {quiz ? (
             <div role="group" aria-label="Question formats" className="flex flex-wrap gap-2">
-              {QUIZ_FORMATS.map((format) => {
-                const { from, to } = QUIZ_FORMAT_LABELS[format];
+              {allFormats.map((format) => {
+                const { from, to } = FORMAT_LABELS[format];
                 return (
                   <button
                     key={format}

@@ -9,5 +9,5 @@ export const metadata: Metadata = {
 // A quiz from the builder: the word ids and formats handed over in
 // sessionStorage. Reads only; nothing here writes to the database.
 export default function QuizPage() {
-  return <QuizDeck />;
+  return <QuizDeck kind="quiz" />;
 }

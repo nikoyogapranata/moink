@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { Rating } from "ts-fsrs";
 
 import { Button } from "@/components/ui/Button";
+import { useChineseVoiceStatus } from "@/lib/dictionary/speech";
 import { devError } from "@/lib/dev";
 import { fetchQueue, rateCard } from "@/lib/training/actions";
 import { reviewMode, type ReviewMode } from "@/lib/training/deck";
@@ -20,13 +21,13 @@ import {
   type QueueItem,
   type Run,
 } from "@/lib/training/queue";
-import { quizReviewMode, reviewShowing } from "@/lib/training/quiz";
+import { questionReviewMode, reviewShowing, withoutListening } from "@/lib/training/quiz";
 import type { ReviewBatch } from "@/lib/training/server";
 import { WRITING_MODE } from "@/lib/training/writing";
 
 import { CardStage } from "./FlashCard";
 import { useDirection } from "./hooks";
-import { QuizStage } from "./QuizStage";
+import { ListenStage, QuizStage } from "./QuizStage";
 import { DoneScreen, formatSpent, SessionFrame, SessionHeader } from "./SessionParts";
 import { WritingStage } from "./WritingStage";
 
@@ -49,9 +50,11 @@ function recallOnly(item: QueueItem): QueueItem {
 /**
  * Today's review: the scheduled recognition queue, then the writing queue,
  * every answer saved with rateCard (Still learning or a wrong pick = Again,
- * Got it or a right pick = Good). A recognition card past New is a quiz
- * question about half the time (picked on the server for the first
- * showing, again each time it comes back). A new writing card is traced
+ * Got it or a right pick = Good). A recognition card past New is a
+ * flashcard, a quiz question or a listening question (REVIEW_MIX; picked on
+ * the server for the first showing, again each time it comes back).
+ * Without a Chinese voice, listening questions become flashcards or quiz
+ * questions. A new writing card is traced
  * first (never saved) and then recalled; a due one is recalled only.
  * Reset, and Practice again on the done screen, replay both as a practice
  * round that saves nothing.
@@ -74,6 +77,9 @@ export function ReviewSession({ initialBatch }: { initialBatch: ReviewBatch }) {
   const [error, setError] = useState<string | null>(null);
   const [spentMs, setSpentMs] = useState(0);
   const [more, setMore] = useState<ReviewBatch | null>(null);
+  // Listening plays on its own after the session's first tap.
+  const [audioUnlocked, setAudioUnlocked] = useState(false);
+  const voice = useChineseVoiceStatus();
 
   const startedAt = useRef(0);
   const timing = useRef({ total: 0, count: 0 });
@@ -81,7 +87,10 @@ export function ReviewSession({ initialBatch }: { initialBatch: ReviewBatch }) {
 
   const writing = run.queue.length === 0;
   const active = writing ? writeRun : run;
-  const current = active.queue[0];
+  const front = active.queue[0];
+  // How the front card shows: the server may have picked listening for a
+  // browser with no Chinese voice.
+  const current = front && voice === "none" ? withoutListening(front, bank[front.word.id]) : front;
   const done = !current;
   const interlude = writing && !done && !writingStarted;
   const recognitionStats = runStats(run);
@@ -119,10 +128,10 @@ export function ReviewSession({ initialBatch }: { initialBatch: ReviewBatch }) {
     }
   }
 
-  /** A recognition card coming back, shown afresh: a quiz question or a
-   *  flashcard. */
+  /** A recognition card coming back, shown afresh: a flashcard, a quiz
+   *  question or (with a Chinese voice) a listening question. */
   function reshow(item: QueueItem): QueueItem {
-    return { ...item, quiz: reviewShowing(item.isNew, bank[item.word.id]) };
+    return { ...item, ...reviewShowing(item.isNew, bank[item.word.id], voice !== "none") };
   }
 
   async function answer(gotIt: boolean, durationMs: number) {
@@ -133,10 +142,11 @@ export function ReviewSession({ initialBatch }: { initialBatch: ReviewBatch }) {
     if (practiceRound) return () => advance(reshowCard(afterPractice(active, grade), id, comeBack));
 
     const duration = Math.min(durationMs, MAX_DURATION_MS);
+    const question = current.listen ?? current.quiz;
     const mode: ReviewMode = writing
       ? WRITING_MODE
-      : current.quiz
-        ? quizReviewMode(current.quiz.format)
+      : question
+        ? questionReviewMode(question.format)
         : reviewMode(direction);
     const result = await rateCard(id, grade, duration, mode).catch((error) => {
       devError("ReviewSession: rateCard threw.", error);
@@ -252,6 +262,15 @@ export function ReviewSession({ initialBatch }: { initialBatch: ReviewBatch }) {
             trace={current.writing?.trace ?? false}
             onAnswer={answer}
             onSkip={() => advance(skipFront(active))}
+          />
+        ) : current.listen ? (
+          <ListenStage
+            key={round}
+            word={current.word}
+            quiz={current.listen}
+            remaining={run.queue.length}
+            onAnswer={answer}
+            audio={{ autoPlay: audioUnlocked, onPlayed: () => setAudioUnlocked(true) }}
           />
         ) : current.quiz ? (
           <QuizStage

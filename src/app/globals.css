@@ -49,6 +49,11 @@
   --color-again-line: #c4473a;
   --color-miss: #b3261e;
   --color-miss-strong: #93201a;
+  /* Listening: the play button's icon on rust (white, 3.3:1, a graphic),
+     and the hub's blue tile (ink on tint 6.7:1). */
+  --color-on-rust: #ffffff;
+  --color-listen-tint: #dde9f7;
+  --color-listen-ink: #1f4f8a;
 
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -127,6 +132,11 @@
   --color-again-line: #e07a6c;
   --color-miss: #b3261e;
   --color-miss-strong: #93201a;
+  /* White on the brighter rust is only 2.8:1, so the icon goes dark
+     (6.3:1). Blue ink on tint 9.3:1. */
+  --color-on-rust: #18181a;
+  --color-listen-tint: #1e2c3d;
+  --color-listen-ink: #b9d4f5;
 }
 
 body {
@@ -515,6 +525,28 @@ body {
 
   .option-shake {
     animation: none;
+  }
+}
+
+/* Listening: the play button pulses while the word is spoken. Reduced
+   motion keeps a still ring instead. */
+@keyframes listen-pulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-rust) 45%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 18px color-mix(in srgb, var(--color-rust) 0%, transparent);
+  }
+}
+
+.listen-pulse {
+  animation: listen-pulse 1100ms ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .listen-pulse {
+    animation: none;
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-rust) 35%, transparent);
   }
 }
 

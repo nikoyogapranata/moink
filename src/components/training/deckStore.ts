@@ -4,15 +4,15 @@ import { useMemo, useSyncExternalStore } from "react";
 
 import { devErrorOnce } from "@/lib/dev";
 import { MAX_DECK_WORDS, parseDeckSet, parseDirection, type DeckSet, type Direction } from "@/lib/training/deck";
-import { parseQuizFormats, type QuizFormat } from "@/lib/training/quiz";
+import { LISTEN_FORMATS, parseFormats, QUIZ_FORMATS, type QuestionFormat } from "@/lib/training/quiz";
 import { parseWritingStyle, type WritingStyle } from "@/lib/training/writing";
 
-/* Two decks each for flashcards, the quiz and writing, all kept in memory too so
+/* Two decks each for flashcards, the quiz, listening and writing, all kept in memory too so
    they still work for the visit when storage throws:
    - the last deck built, in localStorage, which the builder restores and
      the hub's quick-start link uses;
    - the deck being practiced, in sessionStorage, which /training/flashcards
-     /training/quiz or /training/writing reads (ids only; the page loads the words). */
+     /training/quiz, /training/listening or /training/writing reads (ids only; the page loads the words). */
 
 export interface SavedDeck {
   direction: Direction;
@@ -26,8 +26,21 @@ export interface PracticeDeck {
   shuffle: boolean;
 }
 
+/** Question decks: the quiz and listening, stored apart but alike. */
+export type QuestionKind = "quiz" | "listening";
+
+const QUESTION_KINDS: Record<QuestionKind, { formats: readonly QuestionFormat[]; last: string; practice: string; href: string }> = {
+  quiz: { formats: QUIZ_FORMATS, last: "moink:last-quiz", practice: "moink:practice-quiz", href: "/training/quiz" },
+  listening: {
+    formats: LISTEN_FORMATS,
+    last: "moink:last-listening",
+    practice: "moink:practice-listening",
+    href: "/training/listening",
+  },
+};
+
 export interface SavedQuiz {
-  formats: QuizFormat[];
+  formats: QuestionFormat[];
   set: DeckSet;
   ids: number[];
   shuffle: boolean;
@@ -35,14 +48,12 @@ export interface SavedQuiz {
 
 export interface PracticeQuiz {
   ids: number[];
-  formats: QuizFormat[];
+  formats: QuestionFormat[];
   shuffle: boolean;
 }
 
 const LAST_DECK_KEY = "moink:last-deck";
 const PRACTICE_DECK_KEY = "moink:practice-deck";
-const LAST_QUIZ_KEY = "moink:last-quiz";
-const PRACTICE_QUIZ_KEY = "moink:practice-quiz";
 const LAST_WRITING_KEY = "moink:last-writing";
 const PRACTICE_WRITING_KEY = "moink:practice-writing";
 
@@ -158,56 +169,56 @@ export function usePracticeDeck() {
   return useMemo(() => (raw === undefined ? undefined : parsePracticeDeck(raw)), [raw]);
 }
 
-/* Quiz decks */
+/* Quiz and listening decks */
 
-function parseSavedQuiz(raw: string | null): SavedQuiz | null {
+function parseSavedQuiz(kind: QuestionKind, raw: string | null): SavedQuiz | null {
   const value = parseJson(raw);
-  const formats = parseQuizFormats(value?.formats);
+  const formats = parseFormats(value?.formats, QUESTION_KINDS[kind].formats);
   const set = parseDeckSet(value?.set);
   const ids = parseIds(value?.ids);
   if (!formats || !set || !ids) return null;
   return { formats, set, ids, shuffle: value?.shuffle !== false };
 }
 
-export function readLastQuiz() {
-  return parseSavedQuiz(read(local, LAST_QUIZ_KEY));
+export function readLastQuiz(kind: QuestionKind) {
+  return parseSavedQuiz(kind, read(local, QUESTION_KINDS[kind].last));
 }
 
-export function saveLastQuiz(quiz: SavedQuiz) {
-  write(local, LAST_QUIZ_KEY, JSON.stringify(quiz));
+export function saveLastQuiz(kind: QuestionKind, quiz: SavedQuiz) {
+  write(local, QUESTION_KINDS[kind].last, JSON.stringify(quiz));
 }
 
-/** Keeps a shuffle choice made mid-quiz for the builder's next open. */
-export function saveLastQuizShuffle(shuffle: boolean) {
-  const last = readLastQuiz();
-  if (last && last.shuffle !== shuffle) saveLastQuiz({ ...last, shuffle });
+/** Keeps a shuffle choice made mid-session for the builder's next open. */
+export function saveLastQuizShuffle(kind: QuestionKind, shuffle: boolean) {
+  const last = readLastQuiz(kind);
+  if (last && last.shuffle !== shuffle) saveLastQuiz(kind, { ...last, shuffle });
 }
 
-/** The last quiz built, or null (always null on the server). */
-export function useLastQuiz() {
-  const raw = useSyncExternalStore(subscribe, () => read(local, LAST_QUIZ_KEY), () => null);
-  return useMemo(() => parseSavedQuiz(raw), [raw]);
+/** The last deck of `kind` built, or null (always null on the server). */
+export function useLastQuiz(kind: QuestionKind) {
+  const raw = useSyncExternalStore(subscribe, () => read(local, QUESTION_KINDS[kind].last), () => null);
+  return useMemo(() => parseSavedQuiz(kind, raw), [kind, raw]);
 }
 
-/** Hands the quiz to the quiz page and returns where to go. */
-export function practiceQuizHref(quiz: SavedQuiz) {
+/** Hands the deck to its practice page and returns where to go. */
+export function practiceQuizHref(kind: QuestionKind, quiz: SavedQuiz) {
   const practice: PracticeQuiz = { ids: quiz.ids, formats: quiz.formats, shuffle: quiz.shuffle };
-  write(session, PRACTICE_QUIZ_KEY, JSON.stringify(practice));
-  return "/training/quiz";
+  write(session, QUESTION_KINDS[kind].practice, JSON.stringify(practice));
+  return QUESTION_KINDS[kind].href;
 }
 
-function parsePracticeQuiz(raw: string | null): PracticeQuiz | null {
+function parsePracticeQuiz(kind: QuestionKind, raw: string | null): PracticeQuiz | null {
   const value = parseJson(raw);
   const ids = parseIds(value?.ids);
-  const formats = parseQuizFormats(value?.formats);
+  const formats = parseFormats(value?.formats, QUESTION_KINDS[kind].formats);
   return ids && formats ? { ids, formats, shuffle: value?.shuffle !== false } : null;
 }
 
-/** The quiz to practice: undefined until the page is on the client, then
- *  the quiz or null when there's none. */
-export function usePracticeQuiz() {
-  const raw = useSyncExternalStore(subscribe, () => read(session, PRACTICE_QUIZ_KEY), () => undefined);
-  return useMemo(() => (raw === undefined ? undefined : parsePracticeQuiz(raw)), [raw]);
+/** The deck of `kind` to practice: undefined until the page is on the
+ *  client, then the deck or null when there's none. */
+export function usePracticeQuiz(kind: QuestionKind) {
+  const raw = useSyncExternalStore(subscribe, () => read(session, QUESTION_KINDS[kind].practice), () => undefined);
+  return useMemo(() => (raw === undefined ? undefined : parsePracticeQuiz(kind, raw)), [kind, raw]);
 }
 
 /* Writing sets */

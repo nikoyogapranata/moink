@@ -3,7 +3,7 @@ import { Rating, type Grade } from "ts-fsrs";
 import type { Database } from "@/lib/supabase/database.types";
 
 import type { CardFields } from "./fsrs";
-import type { QuizShowing } from "./quiz";
+import type { ListenShowing, QuizShowing } from "./quiz";
 import type { WritingShowing } from "./writing";
 
 type QueueRow = Database["public"]["Functions"]["get_review_queue"]["Returns"][number];
@@ -25,6 +25,8 @@ export interface QueueItem {
   /** Shown as this quiz question next time it's up; a flashcard when
    *  null or missing. */
   quiz?: QuizShowing | null;
+  /** Shown as this listening question next time it's up. */
+  listen?: ListenShowing | null;
   /** Shown on the writing pad (a writing card or writing practice). */
   writing?: WritingShowing | null;
 }

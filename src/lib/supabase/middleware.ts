@@ -27,13 +27,16 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  // Refresh the auth session. Do not run code between createServerClient and
-  // getUser(); it can make the session hard to debug.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Refresh the auth session (getClaims refreshes an expired token first)
+  // and read the user from the verified JWT. The project signs with
+  // asymmetric keys, so the check is local: no round trip to Supabase Auth
+  // on every request, which getUser() cost (about 280 ms each). Do not run
+  // code between createServerClient and getClaims(); it can make the
+  // session hard to debug.
+  const { data } = await supabase.auth.getClaims();
+  const userId = data?.claims.sub ?? null;
 
-  return { supabase, user, response: supabaseResponse };
+  return { supabase, userId, response: supabaseResponse };
 }
 
 /** Redirect while keeping any auth cookies the session refresh just set. */

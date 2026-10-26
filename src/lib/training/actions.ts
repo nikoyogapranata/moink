@@ -2,17 +2,17 @@
 
 import { refresh } from "next/cache";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient, signedInUserId } from "@/lib/supabase/server";
 
 import { isDailyNewWordOption, isDailyNewWritingOption } from "./daily";
 import { byGridOrder, isReviewMode, MAX_DECK_WORDS, parseDeckSet, skillOf, type ReviewMode } from "./deck";
 import { isGrade, scheduler, toCard, toFields, type CardFields } from "./fsrs";
 import type { QueueWord } from "./queue";
-import { parseQuizFormats, type QuizBank } from "./quiz";
+import { parseFormats, QUESTION_FORMATS, type QuizBank } from "./quiz";
 import {
   buildQuestions,
   loadDeck,
-  loadDueIds,
+  loadDueTodayIds,
   loadReviewBatch,
   loadTrainingProfile,
   loadTrainingWordIds,
@@ -55,15 +55,13 @@ export async function rateCard(
   const skill = skillOf(mode);
 
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { ok: false };
+  const userId = await signedInUserId(supabase);
+  if (!userId) return { ok: false };
 
   const { data: row, error: loadError } = await supabase
     .from("user_words")
     .select("due, stability, difficulty, elapsed_days, scheduled_days, learning_steps, reps, lapses, state, last_review")
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .eq("word_id", wordId)
     .eq("skill", skill)
     .maybeSingle();
@@ -98,13 +96,11 @@ const EMPTY_BATCH: ReviewBatch = { items: [], bank: {}, writing: [] };
  *  screen. */
 export async function fetchQueue(): Promise<ReviewBatch> {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return EMPTY_BATCH;
+  const userId = await signedInUserId(supabase);
+  if (!userId) return EMPTY_BATCH;
 
   const now = new Date();
-  const { days } = await loadTrainingProfile(supabase, user.id, now);
+  const { days } = await loadTrainingProfile(supabase, userId, now);
   try {
     return await loadReviewBatch(supabase, days.today, now);
   } catch (error) {
@@ -113,30 +109,40 @@ export async function fetchQueue(): Promise<ReviewBatch> {
   }
 }
 
-export type DeckSetResult = { ok: true; words: QueueWord[]; inTraining: number[] } | { ok: false };
+export type DeckSetResult =
+  | { ok: true; words: QueueWord[]; inTraining: number[]; dueToday: number[] | null }
+  | { ok: false };
 
-/** A deck builder set in grid order, and which of its words are in the
- *  user's training. Reads only. */
-export async function fetchDeckSet(set: string): Promise<DeckSetResult> {
+/**
+ * A deck builder set in grid order, which of its words are in the user's
+ * training and, when `dueSkill` is given, the ids of the user's cards of
+ * that skill due today (the builder's due hint). One action, and every
+ * query in it runs in parallel: the builder waits on a single round trip.
+ * Reads only.
+ */
+export async function fetchDeckSet(set: string, dueSkill?: string): Promise<DeckSetResult> {
   const deckSet = parseDeckSet(set);
   if (!deckSet) return { ok: false };
+  const skill = dueSkill === "recognition" || dueSkill === "writing" ? dueSkill : null;
 
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { ok: false };
+  const userId = await signedInUserId(supabase);
+  if (!userId) return { ok: false };
 
+  const now = new Date();
   try {
-    const [words, trainingIds] = await Promise.all([
-      loadDeck(supabase, user.id, deckSet, new Date()),
-      loadTrainingWordIds(supabase, user.id),
+    const [words, trainingIds, dueToday] = await Promise.all([
+      loadDeck(supabase, userId, deckSet, now),
+      // Every word in "My words" is in training already.
+      deckSet === "mine" ? null : loadTrainingWordIds(supabase, userId),
+      skill ? loadDueTodayIds(supabase, userId, skill, now) : null,
     ]);
-    const training = new Set(trainingIds);
+    const training = trainingIds ? new Set(trainingIds) : null;
     return {
       ok: true,
       words: words.sort(byGridOrder),
-      inTraining: words.filter((w) => training.has(w.id)).map((w) => w.id),
+      inTraining: training ? words.filter((w) => training.has(w.id)).map((w) => w.id) : words.map((w) => w.id),
+      dueToday,
     };
   } catch (error) {
     console.error("fetchDeckSet failed", error);
@@ -150,10 +156,8 @@ export async function fetchDeckWords(ids: number[]): Promise<QueueWord[] | null>
   if (!isIdList(ids)) return null;
 
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
+  const userId = await signedInUserId(supabase);
+  if (!userId) return null;
 
   try {
     return await loadWordsByIds(supabase, [...new Set(ids)]);
@@ -169,14 +173,12 @@ export async function fetchQuizDeck(
   ids: number[],
   formats: string[],
 ): Promise<{ words: QueueWord[]; bank: QuizBank } | null> {
-  const quizFormats = parseQuizFormats(formats);
+  const quizFormats = parseFormats(formats, QUESTION_FORMATS);
   if (!isIdList(ids) || !quizFormats) return null;
 
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
+  const userId = await signedInUserId(supabase);
+  if (!userId) return null;
 
   const unique = [...new Set(ids)];
   try {
@@ -191,40 +193,19 @@ export async function fetchQuizDeck(
   }
 }
 
-/** Ids of the user's cards of `skill` due today (by the end of today in
- *  their zone, overdue included), for the builder's due hint. */
-export async function fetchDueTodayIds(skill: string): Promise<number[] | null> {
-  if (skill !== "recognition" && skill !== "writing") return null;
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
-
-  try {
-    const { days } = await loadTrainingProfile(supabase, user.id, new Date());
-    return await loadDueIds(supabase, user.id, skill, days.tomorrow);
-  } catch (error) {
-    console.error("fetchDueTodayIds failed", error);
-    return null;
-  }
-}
-
 export async function setDailyNewWords(value: number): Promise<{ ok: boolean }> {
   if (!isDailyNewWordOption(value)) return { ok: false };
 
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { ok: false };
+  const userId = await signedInUserId(supabase);
+  if (!userId) return { ok: false };
 
   // .select() so an update that RLS filtered down to zero rows reads as a
   // failure instead of a silent success.
   const { data, error } = await supabase
     .from("profiles")
     .update({ daily_new_words: value })
-    .eq("id", user.id)
+    .eq("id", userId)
     .select("id");
   if (error || !data?.length) {
     console.error("setDailyNewWords failed", error);
@@ -239,17 +220,15 @@ export async function setDailyNewWriting(value: number): Promise<{ ok: boolean }
   if (!isDailyNewWritingOption(value)) return { ok: false };
 
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { ok: false };
+  const userId = await signedInUserId(supabase);
+  if (!userId) return { ok: false };
 
   // .select() so an update that RLS filtered down to zero rows reads as a
   // failure instead of a silent success.
   const { data, error } = await supabase
     .from("profiles")
     .update({ daily_new_writing: value })
-    .eq("id", user.id)
+    .eq("id", userId)
     .select("id");
   if (error || !data?.length) {
     console.error("setDailyNewWriting failed", error);

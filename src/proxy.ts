@@ -4,8 +4,8 @@ import { getHomePath } from "@/lib/supabase/profile";
 
 // Signed-in screens that need a finished profile: everything in the
 // src/app/(app) and src/app/(focus) route groups (/training covers the
-// focus-mode /training/review, /training/flashcards, /training/quiz and
-// /training/writing). Add new app routes here.
+// focus-mode /training/review, /training/flashcards, /training/quiz,
+// /training/listening and /training/writing). Add new app routes here.
 const APP_ROUTES = [
   "/dashboard",
   "/training",
@@ -21,16 +21,21 @@ function isAppRoute(pathname: string) {
 }
 
 export async function proxy(request: NextRequest) {
-  const { supabase, user, response } = await updateSession(request);
+  const { supabase, userId, response } = await updateSession(request);
   const { pathname } = request.nextUrl;
 
   const isOnboarding = pathname === "/onboarding";
   if (!isOnboarding && !isAppRoute(pathname)) return response;
 
-  if (!user) return redirectWithSession(request, response, "/login");
+  if (!userId) return redirectWithSession(request, response, "/login");
+
+  // Server actions (POSTs with a Next-Action header) check the user
+  // themselves; the onboarding redirect is for page loads, so they skip
+  // the profile lookup.
+  if (request.headers.has("next-action")) return response;
 
   // Only these routes pay for the profile lookup.
-  const home = await getHomePath(supabase, user.id);
+  const home = await getHomePath(supabase, userId);
   if (isOnboarding && home === "/dashboard") {
     return redirectWithSession(request, response, "/dashboard");
   }

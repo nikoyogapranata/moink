@@ -1,8 +1,13 @@
-// Builds quiz questions for every HSK 1 to 4 word in all three formats, the
-// same way the app does (buildWordQuestions over levelPool), and fails if
-// any question can't be built or has two options sharing a simplified
-// form, gloss, plain pinyin or option text: that question would have two
-// right answers, or two identical buttons.
+// Builds quiz and listening questions for every HSK 1 to 4 word in all
+// five formats, the same way the app does (buildWordQuestions over
+// levelPool and soundPool), and fails if any question can't be built or
+// could have two right answers:
+//
+//   - quiz (meaning, hanzi, pinyin): two options share a simplified form,
+//     gloss, plain pinyin or option text;
+//   - listening (listen_hanzi, listen_meaning): an option has the target's
+//     toned pinyin (a true homophone can't be told apart by ear), or two
+//     options share a simplified form, gloss, toned pinyin or option text.
 //
 //   pnpm tsx scripts/check-quiz.ts [rounds]
 //
@@ -12,12 +17,14 @@
 import { config } from "dotenv";
 import { createClient } from "@supabase/supabase-js";
 
-import { toPinyinPlain } from "../src/lib/pinyin";
+import { toPinyinPlain, tonedPinyin } from "../src/lib/pinyin";
 import {
   buildWordQuestions,
+  isListenFormat,
   levelPool,
   optionGloss,
-  QUIZ_FORMATS,
+  QUESTION_FORMATS,
+  soundPool,
   type QuizWord,
 } from "../src/lib/training/quiz";
 
@@ -38,7 +45,8 @@ async function main() {
   const rounds = Number(process.argv[2] ?? 5);
   const supabase = createClient(SUPABASE_URL!, SUPABASE_SECRET_KEY!);
 
-  // Every level, since a small one borrows from its neighbors.
+  // Every level: a small one borrows from its neighbors, and listening
+  // reaches one level up.
   const byLevel = new Map<number, QuizWord[]>();
   for (let level = 1; level <= 6; level++) {
     const words: QuizWord[] = [];
@@ -58,37 +66,48 @@ async function main() {
   const byId = new Map([...byLevel.values()].flat().map((w) => [w.id, w]));
 
   const plain = (w: QuizWord) => w.pinyin_plain || toPinyinPlain(w.pinyin) || w.pinyin;
+  const toned = (w: QuizWord) => tonedPinyin(w.pinyin);
   const gloss = (w: QuizWord) => (w.gloss ?? "").trim().toLowerCase();
 
-  let questions = 0;
+  const counts = { quiz: 0, listening: 0 };
+  let tonePairs = 0;
   const problems: string[] = [];
   for (const level of CHECKED_LEVELS) {
-    const pool = levelPool(byLevel, level);
+    const pools = { level: levelPool(byLevel, level), sounds: soundPool(byLevel, level) };
     for (const target of byLevel.get(level)!) {
       for (let round = 0; round < rounds; round++) {
-        const built = buildWordQuestions(target, pool, QUIZ_FORMATS);
-        for (const format of QUIZ_FORMATS) {
+        const built = buildWordQuestions(target, pools, QUESTION_FORMATS);
+        for (const format of QUESTION_FORMATS) {
+          const listening = isListenFormat(format);
+          const where = `${target.simplified} ${target.pinyin} (${target.id}) ${format}`;
           const options = built[format];
           if (!options) {
-            problems.push(`${target.simplified} (${target.id}) ${format}: no question built`);
+            problems.push(`${where}: no question built`);
             continue;
           }
-          questions++;
+          counts[listening ? "listening" : "quiz"]++;
           const words = options.map((o) => byId.get(o.id)!);
-          const where = `${target.simplified} (${target.id}) ${format}`;
           if (options.length !== 4) problems.push(`${where}: ${options.length} options`);
           if (words.filter((w) => w.id === target.id).length !== 1) problems.push(`${where}: right answer missing`);
-          for (const [name, key] of [
-            ["simplified", (w: QuizWord) => w.simplified],
+          const uniqueKeys: [string, (w: QuizWord) => string][] = [
+            ["simplified", (w) => w.simplified],
             ["gloss", gloss],
-            ["pinyin_plain", plain],
-          ] as const) {
+            listening ? ["toned pinyin", toned] : ["pinyin_plain", plain],
+          ];
+          for (const [name, key] of uniqueKeys) {
             const values = words.map(key);
             if (new Set(values).size !== values.length) problems.push(`${where}: duplicate ${name} (${values.join(" | ")})`);
           }
+          if (listening) {
+            const homophones = words.filter((w) => w.id !== target.id && toned(w) === toned(target));
+            if (homophones.length) problems.push(`${where}: homophone option ${homophones.map((w) => w.simplified).join(" ")}`);
+            if (words.some((w) => w.id !== target.id && plain(w) === plain(target))) tonePairs++;
+            if (options.some((o) => o.pinyin !== byId.get(o.id)!.pinyin)) problems.push(`${where}: option pinyin missing`);
+          }
           const texts = options.map((o) => o.text.trim().toLowerCase());
           if (new Set(texts).size !== texts.length) problems.push(`${where}: duplicate option text (${texts.join(" | ")})`);
-          if (format === "meaning" && options.some((o) => o.text !== optionGloss(byId.get(o.id)!.gloss!))) {
+          const glossText = format === "meaning" || format === "listen_meaning";
+          if (glossText && options.some((o) => o.text !== optionGloss(byId.get(o.id)!.gloss!))) {
             problems.push(`${where}: option text isn't the option gloss`);
           }
         }
@@ -97,7 +116,8 @@ async function main() {
   }
 
   const words = CHECKED_LEVELS.reduce((n, l) => n + byLevel.get(l)!.length, 0);
-  console.log(`Checked ${questions} questions: ${words} words in HSK 1 to 4, 3 formats, ${rounds} rounds each.`);
+  console.log(`Checked ${counts.quiz} quiz and ${counts.listening} listening questions: ${words} words in HSK 1 to 4, ${rounds} rounds each.`);
+  console.log(`Listening questions with a tone pair (same syllables, other tones): ${tonePairs} (${((100 * tonePairs) / Math.max(1, counts.listening)).toFixed(1)}%).`);
   if (problems.length > 0) {
     console.error(`FAIL: ${problems.length} problems`);
     for (const p of problems.slice(0, 50)) console.error(`  ${p}`);

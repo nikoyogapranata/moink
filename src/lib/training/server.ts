@@ -8,10 +8,11 @@ import { toQueueItems, type QueueItem, type QueueWord } from "./queue";
 import {
   buildWordQuestions,
   levelPool,
-  QUIZ_FORMATS,
+  QUESTION_FORMATS,
   reviewShowing,
+  soundPool,
   type QuizBank,
-  type QuizFormat,
+  type QuestionFormat,
   type QuizWord,
 } from "./quiz";
 
@@ -117,22 +118,33 @@ export async function loadDeck(supabase: Client, userId: string, set: DeckSet, n
   );
 }
 
-/** Ids of the user's cards of `skill` (past New, not suspended) due
- *  before `before`. */
-export async function loadDueIds(supabase: Client, userId: string, skill: Skill, before: Date): Promise<number[]> {
-  const rows = await allRows((from, to) =>
-    supabase
-      .from("user_words")
-      .select("word_id")
-      .eq("user_id", userId)
-      .eq("skill", skill)
-      .eq("suspended", false)
-      .neq("state", 0)
-      .lt("due", before.toISOString())
-      .order("word_id")
-      .range(from, to),
-  );
-  return rows.map((row) => row.word_id);
+/** Cards past this are never due today, whatever the user's zone. */
+const TWO_DAYS_MS = 2 * 24 * 60 * 60_000;
+
+/**
+ * Ids of the user's cards of `skill` (past New, not suspended) due today
+ * in their zone, overdue included. The day's end needs the profile's time
+ * zone, so cards due within two days load alongside the profile and are
+ * cut at the end of today after: one round trip, not two.
+ */
+export async function loadDueTodayIds(supabase: Client, userId: string, skill: Skill, now: Date): Promise<number[]> {
+  const [{ days }, rows] = await Promise.all([
+    loadTrainingProfile(supabase, userId, now),
+    allRows((from, to) =>
+      supabase
+        .from("user_words")
+        .select("word_id, due")
+        .eq("user_id", userId)
+        .eq("skill", skill)
+        .eq("suspended", false)
+        .neq("state", 0)
+        .lt("due", new Date(now.getTime() + TWO_DAYS_MS).toISOString())
+        .order("word_id")
+        .range(from, to),
+    ),
+  ]);
+  const end = days.tomorrow.getTime();
+  return rows.filter((row) => Date.parse(row.due) < end).map((row) => row.word_id);
 }
 
 /* Quiz questions */
@@ -156,12 +168,13 @@ async function levelWords(supabase: Client, level: number): Promise<QuizWord[]> 
 /**
  * buildQuestions: each word's options in each of `formats` (see
  * buildWordQuestions), distractors from the word's own old-HSK level, or
- * its neighbors too when the level is small. Unknown ids are skipped.
+ * its neighbors too when the level is small; listening's sound-alikes from
+ * every level up to one above it (soundPool). Unknown ids are skipped.
  */
 export async function buildQuestions(
   supabase: Client,
   wordIds: number[],
-  formats: readonly QuizFormat[],
+  formats: readonly QuestionFormat[],
 ): Promise<QuizBank> {
   const ids = new Set(wordIds);
   // Targets are in their level's pool, so every level is loaded (cached
@@ -174,8 +187,8 @@ export async function buildQuestions(
   for (const level of levels) {
     const targets = byLevel.get(level)!.filter((w) => ids.has(w.id));
     if (targets.length === 0) continue;
-    const pool = levelPool(byLevel, level);
-    for (const target of targets) bank[target.id] = buildWordQuestions(target, pool, formats);
+    const pools = { level: levelPool(byLevel, level), sounds: soundPool(byLevel, level) };
+    for (const target of targets) bank[target.id] = buildWordQuestions(target, pools, formats);
   }
   return bank;
 }
@@ -199,8 +212,10 @@ export interface ReviewBatch {
   writing: QueueItem[];
 }
 
-/** The session queue (loadQueue), each card past New shown as a quiz
- *  question about half the time, and the writing queue. Without questions
+/** The session queue (loadQueue), each card past New shown as a
+ *  flashcard, quiz or listening question (REVIEW_MIX; the client swaps
+ *  listening out when it has no Chinese voice), and the writing queue.
+ *  Without questions
  *  (their load failed) every card is a flashcard; without the writing
  *  queue (its load failed) the session is recognition only. */
 export async function loadReviewBatch(supabase: Client, todayStart: Date, now: Date): Promise<ReviewBatch> {
@@ -214,13 +229,13 @@ export async function loadReviewBatch(supabase: Client, todayStart: Date, now: D
   const bank = await buildQuestions(
     supabase,
     queue.map((item) => item.word.id),
-    QUIZ_FORMATS,
+    QUESTION_FORMATS,
   ).catch((error) => {
     console.error("loadReviewBatch: couldn't build quiz questions; flashcards only.", error);
     return {} as QuizBank;
   });
   return {
-    items: queue.map((item) => ({ ...item, quiz: reviewShowing(item.isNew, bank[item.word.id]) })),
+    items: queue.map((item) => ({ ...item, ...reviewShowing(item.isNew, bank[item.word.id]) })),
     bank,
     writing,
   };

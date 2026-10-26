@@ -18,13 +18,16 @@ export function parseDirection(value: unknown): Direction | null {
 }
 
 /** reviews.mode for a scheduled answer: a flashcard in either direction,
- *  a quiz question in one of its formats, or a writing recall. */
+ *  a quiz or listening question in one of its formats, or a writing
+ *  recall. */
 export type ReviewMode =
   | "flashcard"
   | "flashcard_reverse"
   | "quiz_meaning"
   | "quiz_hanzi"
   | "quiz_pinyin"
+  | "listen_hanzi"
+  | "listen_meaning"
   | "writing_recall";
 
 const REVIEW_MODES: readonly ReviewMode[] = [
@@ -33,6 +36,8 @@ const REVIEW_MODES: readonly ReviewMode[] = [
   "quiz_meaning",
   "quiz_hanzi",
   "quiz_pinyin",
+  "listen_hanzi",
+  "listen_meaning",
   "writing_recall",
 ];
 

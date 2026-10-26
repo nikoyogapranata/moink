@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, type ReactNode } from "react";
 
+import { AudioButton } from "@/components/dictionary/AudioButton";
 import { DIRECTION_LABELS, type Direction } from "@/lib/training/deck";
 import type { QueueItem } from "@/lib/training/queue";
 
@@ -234,7 +235,7 @@ export function DoneScreen({
 }
 
 /** The done screen's list of words missed at least once. */
-export function MissedWords({ items }: { items: QueueItem[] }) {
+export function MissedWords({ items, audio = false }: { items: QueueItem[]; audio?: boolean }) {
   return (
     <section aria-labelledby="missed-title" className="w-full text-left">
       <h2 id="missed-title" className="font-heading text-h3 font-bold text-bark">
@@ -242,14 +243,18 @@ export function MissedWords({ items }: { items: QueueItem[] }) {
       </h2>
       <ul className="mt-2 divide-y-[1.5px] divide-line rounded-lg border-[1.5px] border-line bg-surface-raised">
         {items.map(({ word }) => (
-          <li key={word.id} className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 px-3 py-2">
-            <span lang="zh-CN" className="shrink-0 font-hanzi text-[20px] font-medium leading-7 text-bark">
-              {word.simplified}
+          <li key={word.id} className="flex items-center gap-2 px-3 py-2">
+            <span className="flex min-w-0 flex-1 flex-wrap items-baseline gap-x-3 gap-y-0.5">
+              <span lang="zh-CN" className="shrink-0 font-hanzi text-[20px] font-medium leading-7 text-bark">
+                {word.simplified}
+              </span>
+              <span className="shrink-0 font-body text-body font-medium text-rust-dark">{word.pinyin}</span>
+              <span className="min-w-40 flex-1 font-body text-body wrap-break-word text-bark">
+                {word.gloss ?? MISSING_GLOSS}
+              </span>
             </span>
-            <span className="shrink-0 font-body text-body font-medium text-rust-dark">{word.pinyin}</span>
-            <span className="min-w-40 flex-1 font-body text-body wrap-break-word text-bark">
-              {word.gloss ?? MISSING_GLOSS}
-            </span>
+            {/* Listening: hear each missed word again. */}
+            {audio && <AudioButton text={word.simplified} size="sm" />}
           </li>
         ))}
       </ul>
