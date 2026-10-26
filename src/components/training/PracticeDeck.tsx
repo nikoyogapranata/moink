@@ -2,7 +2,7 @@
 
 import { LoaderCircle } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/Button";
 import { devError } from "@/lib/dev";
@@ -46,36 +46,44 @@ export function PracticeDeck({ initialDirection }: { initialDirection: Direction
 
   const current = loaded?.deck === deck ? loaded : null;
 
-  if (deck === undefined || (deck && !current)) {
-    return (
-      <main className="flex min-h-dvh items-center justify-center gap-2 font-body text-body text-bark-muted">
-        <LoaderCircle size={20} aria-hidden="true" className="spin" />
-        Loading your deck
-      </main>
-    );
-  }
-
-  if (current && "error" in current) {
-    return (
-      <DoneScreen title="Couldn't load your deck" stats={[]} pose="ready">
-        <Button onClick={() => window.location.reload()}>Try again</Button>
-        <Button variant="secondary" asChild>
-          <Link href="/training">Back to Training</Link>
-        </Button>
-      </DoneScreen>
-    );
-  }
-
+  if (deck === undefined || (deck && !current)) return <DeckLoading>Loading your deck</DeckLoading>;
+  if (current && "error" in current) return <DeckLoadError title="Couldn't load your deck" />;
   if (!current || current.items.length === 0) {
-    return (
-      <DoneScreen title="No deck to practice" stats={[]} pose="ready">
-        <p className="w-full font-body text-body text-bark-muted">Build a deck from Flashcards in Training.</p>
-        <Button asChild>
-          <Link href="/training">Back to Training</Link>
-        </Button>
-      </DoneScreen>
-    );
+    return <NoDeck title="No deck to practice">Build a deck from Flashcards in Training.</NoDeck>;
   }
 
   return <PracticeSession items={current.items} shuffled={current.deck.shuffle} initialDirection={initialDirection} />;
+}
+
+/* The loader's screens, shared with QuizDeck. */
+
+export function DeckLoading({ children }: { children: ReactNode }) {
+  return (
+    <main className="flex min-h-dvh items-center justify-center gap-2 font-body text-body text-bark-muted">
+      <LoaderCircle size={20} aria-hidden="true" className="spin" />
+      {children}
+    </main>
+  );
+}
+
+export function DeckLoadError({ title }: { title: string }) {
+  return (
+    <DoneScreen title={title} stats={[]} pose="ready">
+      <Button onClick={() => window.location.reload()}>Try again</Button>
+      <Button variant="secondary" asChild>
+        <Link href="/training">Back to Training</Link>
+      </Button>
+    </DoneScreen>
+  );
+}
+
+export function NoDeck({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <DoneScreen title={title} stats={[]} pose="ready">
+      <p className="w-full font-body text-body text-bark-muted">{children}</p>
+      <Button asChild>
+        <Link href="/training">Back to Training</Link>
+      </Button>
+    </DoneScreen>
+  );
 }

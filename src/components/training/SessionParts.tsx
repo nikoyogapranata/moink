@@ -71,7 +71,7 @@ function ShuffleToggle({ on, onToggle }: { on: boolean; onToggle: () => void }) 
 }
 
 /** Close, progress, counter, Shuffle (practice only) and Reset; then the
- *  direction toggle and the first-answer pills. */
+ *  direction toggle (flashcards only) and the first-answer pills. */
 export function SessionHeader({
   finished,
   total,
@@ -87,8 +87,8 @@ export function SessionHeader({
   total: number;
   gotIt: number;
   stillLearning: number;
-  direction: Direction;
-  onDirection: (next: Direction) => void;
+  direction?: Direction;
+  onDirection?: (next: Direction) => void;
   onReset: () => void;
   shuffle?: { on: boolean; onToggle: () => void };
   practiceRound?: boolean;
@@ -123,7 +123,7 @@ export function SessionHeader({
         </div>
       </div>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <DirectionToggle value={direction} onChange={onDirection} />
+        {direction && onDirection ? <DirectionToggle value={direction} onChange={onDirection} /> : <span />}
         <p className="flex flex-wrap items-center gap-2">
           {practiceRound && <span className={`${PILL} bg-highlight text-bark`}>Practice round · not saved</span>}
           <span className={`${PILL} bg-good-tint text-good-ink`}>{gotIt} got it</span>
@@ -140,16 +140,36 @@ export function formatSpent(ms: number) {
   return `${Math.round(seconds / 60)} min`;
 }
 
-/** Bao, the heading (focused on arrival), the stats and the buttons. */
+/** The Shuffled / In order toast over the top of the stage. The live
+ *  region is always there, so each new message is announced. */
+export function Toast({ toast }: { toast: { text: string; n: number } | null }) {
+  return (
+    <p aria-live="polite" className="pointer-events-none absolute inset-x-0 top-0 z-10 flex justify-center">
+      {toast && (
+        <span
+          key={toast.n}
+          className="toast-pop rounded-pill bg-bark px-3.5 py-1.5 font-body text-body font-medium text-background shadow-float"
+        >
+          {toast.text}
+        </span>
+      )}
+    </p>
+  );
+}
+
+/** Bao, the heading (focused on arrival), the stats, any details and the
+ *  buttons. */
 export function DoneScreen({
   title,
   stats,
   pose = "cheering",
+  details,
   children,
 }: {
   title: string;
   stats: { label: string; value: string }[];
   pose?: "cheering" | "ready";
+  details?: ReactNode;
   children: ReactNode;
 }) {
   const reducedMotion = useReducedMotion();
@@ -184,6 +204,7 @@ export function DoneScreen({
           ))}
         </dl>
       )}
+      {details}
       <div className="flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">{children}</div>
     </main>
   );

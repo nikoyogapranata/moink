@@ -7,19 +7,35 @@ import { createClient } from "@/lib/supabase/server";
 import { isDailyNewWordOption } from "./daily";
 import { byGridOrder, isReviewMode, MAX_DECK_WORDS, parseDeckSet, type ReviewMode } from "./deck";
 import { isGrade, scheduler, toCard, toFields, type CardFields } from "./fsrs";
-import type { QueueItem, QueueWord } from "./queue";
-import { loadDeck, loadQueue, loadTrainingProfile, loadTrainingWordIds, loadWordsByIds } from "./server";
+import type { QueueWord } from "./queue";
+import { parseQuizFormats, type QuizBank } from "./quiz";
+import {
+  buildQuestions,
+  loadDeck,
+  loadDueIds,
+  loadReviewBatch,
+  loadTrainingProfile,
+  loadTrainingWordIds,
+  loadWordsByIds,
+  type ReviewBatch,
+} from "./server";
 
 const MAX_DURATION_MS = 60_000;
 
 export type RateResult = { ok: true; card: CardFields } | { ok: false };
 
+function isIdList(ids: unknown): ids is number[] {
+  return (
+    Array.isArray(ids) && ids.length <= MAX_DECK_WORDS && ids.every((id) => Number.isSafeInteger(id) && id > 0)
+  );
+}
+
 /**
  * Rate one recognition card. The server is the source of truth: it loads
  * the stored card (or an empty one for a word with no row yet), schedules
  * it at the server's now, and saves the card and the review together with
- * record_review. `mode` is the direction the card was shown in; both
- * update the same recognition card. Returns the new card so the session
+ * record_review. `mode` is how the card was shown (a flashcard direction
+ * or a quiz format); all update the same recognition card. Returns the new card so the session
  * can decide whether it comes back.
  */
 export async function rateCard(
@@ -73,21 +89,24 @@ export async function rateCard(
   return { ok: true, card: fields };
 }
 
-/** A fresh session queue, for "Keep going" on the done screen. */
-export async function fetchQueue(): Promise<QueueItem[]> {
+const EMPTY_BATCH: ReviewBatch = { items: [], bank: {} };
+
+/** A fresh session queue and its questions, for "Keep going" on the done
+ *  screen. */
+export async function fetchQueue(): Promise<ReviewBatch> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return [];
+  if (!user) return EMPTY_BATCH;
 
   const now = new Date();
   const { days } = await loadTrainingProfile(supabase, user.id, now);
   try {
-    return await loadQueue(supabase, days.today, now);
+    return await loadReviewBatch(supabase, days.today, now);
   } catch (error) {
     console.error("fetchQueue failed", error);
-    return [];
+    return EMPTY_BATCH;
   }
 }
 
@@ -125,13 +144,7 @@ export async function fetchDeckSet(set: string): Promise<DeckSetResult> {
 /** The words of a built deck, for the practice page. Reads only; null on
  *  a bad id list or a failed load. */
 export async function fetchDeckWords(ids: number[]): Promise<QueueWord[] | null> {
-  if (
-    !Array.isArray(ids) ||
-    ids.length > MAX_DECK_WORDS ||
-    !ids.every((id) => Number.isSafeInteger(id) && id > 0)
-  ) {
-    return null;
-  }
+  if (!isIdList(ids)) return null;
 
   const supabase = await createClient();
   const {
@@ -143,6 +156,52 @@ export async function fetchDeckWords(ids: number[]): Promise<QueueWord[] | null>
     return await loadWordsByIds(supabase, [...new Set(ids)]);
   } catch (error) {
     console.error("fetchDeckWords failed", error);
+    return null;
+  }
+}
+
+/** A built quiz deck's words and their questions in `formats`, for the
+ *  quiz page. Reads only; null on bad input or a failed load. */
+export async function fetchQuizDeck(
+  ids: number[],
+  formats: string[],
+): Promise<{ words: QueueWord[]; bank: QuizBank } | null> {
+  const quizFormats = parseQuizFormats(formats);
+  if (!isIdList(ids) || !quizFormats) return null;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const unique = [...new Set(ids)];
+  try {
+    const [words, bank] = await Promise.all([
+      loadWordsByIds(supabase, unique),
+      buildQuestions(supabase, unique, quizFormats),
+    ]);
+    return { words, bank };
+  } catch (error) {
+    console.error("fetchQuizDeck failed", error);
+    return null;
+  }
+}
+
+/** Ids of the user's recognition cards due today (by the end of today in
+ *  their zone, overdue included), for the quiz builder's hint. */
+export async function fetchDueTodayIds(): Promise<number[] | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  try {
+    const { days } = await loadTrainingProfile(supabase, user.id, new Date());
+    return await loadDueIds(supabase, user.id, days.tomorrow);
+  } catch (error) {
+    console.error("fetchDueTodayIds failed", error);
     return null;
   }
 }

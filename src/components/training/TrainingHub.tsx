@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeftRight, Layers, Play } from "lucide-react";
+import { ArrowLeftRight, Layers, ListChecks, Play } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useId, useOptimistic, useRef, useState, useTransition, type ReactNode, type Ref } from "react";
@@ -14,7 +14,7 @@ import { DIRECTION_LABELS, type DeckSet, type Direction } from "@/lib/training/d
 
 import { baoImage, type BaoPose } from "./bao";
 import { DeckBuilder } from "./DeckBuilder";
-import { practiceDeckHref, useLastDeck } from "./deckStore";
+import { practiceDeckHref, practiceQuizHref, useLastDeck, useLastQuiz } from "./deckStore";
 
 const REVIEW_HREF = "/training/review";
 
@@ -278,7 +278,52 @@ function FlashcardsCard({ defaultSet }: { defaultSet: DeckSet }) {
           <span className="sr-only">, {DIRECTION_LABELS[lastDeck.direction]}</span>
         </Link>
       )}
-      {open && <DeckBuilder initialDirection={open} defaultSet={defaultSet} onClose={closeBuilder} />}
+      {open && <DeckBuilder mode="flashcards" initialDirection={open} defaultSet={defaultSet} onClose={closeBuilder} />}
+    </section>
+  );
+}
+
+/** Quiz: Build a quiz opens the builder in quiz mode, and a quick start
+ *  runs the last quiz built. */
+function QuizCard({ defaultSet }: { defaultSet: DeckSet }) {
+  const [open, setOpen] = useState(false);
+  const lastQuiz = useLastQuiz();
+  const buildRef = useRef<HTMLButtonElement>(null);
+
+  return (
+    <section aria-labelledby="quiz-title" className={`${CARD} flex flex-col gap-3`}>
+      <span className="flex h-11 w-11 items-center justify-center rounded-md bg-good-tint text-good-ink">
+        <ListChecks size={22} aria-hidden="true" />
+      </span>
+      <div>
+        <h3 id="quiz-title" className="font-heading text-h3 font-bold text-bark">
+          Quiz
+        </h3>
+        <p className="font-body text-body text-bark-muted">Pick the right answer</p>
+      </div>
+      <Button ref={buildRef} aria-haspopup="dialog" onClick={() => setOpen(true)} className="mt-auto self-start">
+        Build a quiz
+      </Button>
+      {lastQuiz && lastQuiz.ids.length > 0 && (
+        <Link
+          href="/training/quiz"
+          onClick={() => practiceQuizHref(lastQuiz)}
+          className={`inline-flex items-center gap-1.5 self-start rounded-sm font-body text-body font-medium text-rust-dark underline-offset-4 hover:underline ${FOCUS_RING}`}
+        >
+          <Play size={16} aria-hidden="true" />
+          Last quiz · {lastQuiz.ids.length} {lastQuiz.ids.length === 1 ? "word" : "words"}
+        </Link>
+      )}
+      {open && (
+        <DeckBuilder
+          mode="quiz"
+          defaultSet={defaultSet}
+          onClose={() => {
+            setOpen(false);
+            buildRef.current?.focus();
+          }}
+        />
+      )}
     </section>
   );
 }
@@ -443,10 +488,11 @@ export function TrainingHub({
         <h2 id="modes-title" className="font-heading text-h2 font-bold text-bark">
           Practice by mode
         </h2>
-        {/* Room for Quiz, Writing and Listening next to Flashcards, which
-            takes two columns at xl for its direction tiles. */}
+        {/* Flashcards takes two columns at xl for its direction tiles; the
+            last column is kept for Writing and Listening. */}
         <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <FlashcardsCard defaultSet={defaultDeckSet} />
+          <QuizCard defaultSet={defaultDeckSet} />
         </div>
       </section>
 

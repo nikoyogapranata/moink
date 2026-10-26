@@ -1,24 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Rating } from "ts-fsrs";
 
 import { Button } from "@/components/ui/Button";
-import { byGridOrder, shuffle, type Direction } from "@/lib/training/deck";
+import { inGridOrder, shuffle, type Direction } from "@/lib/training/deck";
 import { afterPractice, reorderUnanswered, runStats, startPractice, type QueueItem } from "@/lib/training/queue";
 
 import { saveLastDeckShuffle } from "./deckStore";
 import { CardStage } from "./FlashCard";
-import { useDirection } from "./hooks";
-import { DoneScreen, SessionFrame, SessionHeader } from "./SessionParts";
-
-/** How long the Shuffled / In order toast stays up. */
-const TOAST_MS = 1600;
-
-function inGridOrder(items: QueueItem[]) {
-  return [...items].sort((a, b) => byGridOrder(a.word, b.word));
-}
+import { useDirection, useToast } from "./hooks";
+import { DoneScreen, SessionFrame, SessionHeader, Toast } from "./SessionParts";
 
 /**
  * A built deck. Nothing here is saved: Still learning cards go to the end
@@ -42,10 +35,7 @@ export function PracticeSession({
   const [run, setRun] = useState(() => startPractice(items));
   const [round, setRound] = useState(0);
   const [shuffleOn, setShuffleOn] = useState(shuffled);
-  const [toast, setToast] = useState<{ text: string; n: number } | null>(null);
-  const toastTimer = useRef<number | undefined>(undefined);
-
-  useEffect(() => () => window.clearTimeout(toastTimer.current), []);
+  const [toast, showToast] = useToast();
 
   const current = run.queue[0];
   const stats = runStats(run);
@@ -60,9 +50,7 @@ export function PracticeSession({
     setShuffleOn(next);
     setRun((r) => reorderUnanswered(r, next ? shuffle : inGridOrder));
     saveLastDeckShuffle(next);
-    window.clearTimeout(toastTimer.current);
-    setToast((t) => ({ text: next ? "Shuffled" : "In order", n: (t?.n ?? 0) + 1 }));
-    toastTimer.current = window.setTimeout(() => setToast(null), TOAST_MS);
+    showToast(next ? "Shuffled" : "In order");
   }
 
   // Applied to the latest run, so a toggle during the throw isn't lost.
@@ -105,16 +93,7 @@ export function PracticeSession({
         shuffle={{ on: shuffleOn, onToggle: toggleShuffle }}
       />
       <main className="relative flex flex-1 flex-col pb-[calc(16px+env(safe-area-inset-bottom))]">
-        <p aria-live="polite" className="pointer-events-none absolute inset-x-0 top-0 z-10 flex justify-center">
-          {toast && (
-            <span
-              key={toast.n}
-              className="toast-pop rounded-pill bg-bark px-3.5 py-1.5 font-body text-body font-medium text-background shadow-float"
-            >
-              {toast.text}
-            </span>
-          )}
-        </p>
+        <Toast toast={toast} />
         <CardStage
           key={round}
           item={current}

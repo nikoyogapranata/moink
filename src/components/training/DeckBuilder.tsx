@@ -1,6 +1,7 @@
 "use client";
 
-import { LoaderCircle, X } from "lucide-react";
+import { ArrowRight, LoaderCircle, X } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   memo,
@@ -14,11 +15,12 @@ import {
 } from "react";
 
 import { devError } from "@/lib/dev";
-import { fetchDeckSet } from "@/lib/training/actions";
+import { fetchDeckSet, fetchDueTodayIds } from "@/lib/training/actions";
 import { DECK_SETS, type DeckSet, type Direction } from "@/lib/training/deck";
 import type { QueueWord } from "@/lib/training/queue";
+import { QUIZ_FORMAT_LABELS, QUIZ_FORMATS, type QuizFormat } from "@/lib/training/quiz";
 
-import { practiceDeckHref, readLastDeck, saveLastDeck } from "./deckStore";
+import { practiceDeckHref, practiceQuizHref, readLastDeck, readLastQuiz, saveLastDeck, saveLastQuiz } from "./deckStore";
 import { useReducedMotion } from "./hooks";
 import { DirectionToggle } from "./SessionParts";
 
@@ -102,18 +104,25 @@ const WordTile = memo(function WordTile({
   );
 });
 
+export type BuilderMode = "flashcards" | "quiz";
+
 /**
- * Build your deck: pick a direction, then words from any of the sets. The
- * selection carries across sets. A native modal dialog (focus stays inside,
- * the page behind is inert); a full-screen sheet on phones. Restores the
- * last deck and saves it again on close and on Start.
+ * Build your deck (flashcards: pick a direction) or your quiz (pick the
+ * question formats), then words from any of the sets. The selection
+ * carries across sets. A native modal dialog (focus stays inside, the page
+ * behind is inert); a full-screen sheet on phones. Restores the mode's last
+ * deck and saves it again on close and on Start. The quiz notes selected
+ * words that are due today, since only Today's review counts them.
  */
 export function DeckBuilder({
-  initialDirection,
+  mode,
+  initialDirection = "hanzi",
   defaultSet,
   onClose,
 }: {
-  initialDirection: Direction;
+  mode: BuilderMode;
+  /** Flashcards only. */
+  initialDirection?: Direction;
   /** When there's no last deck: the user's HSK level. */
   defaultSet: DeckSet;
   /** Called after the dialog has closed; the opener takes focus back. */
@@ -123,9 +132,13 @@ export function DeckBuilder({
   const reducedMotion = useReducedMotion();
   const titleId = useId();
 
+  const quiz = mode === "quiz";
   // Only mounted after a click, so reading storage here can't mismatch.
-  const [lastDeck] = useState(readLastDeck);
+  const [lastQuiz] = useState(() => (quiz ? readLastQuiz() : null));
+  const [lastDeck] = useState(() => (quiz ? lastQuiz : readLastDeck()));
   const [direction, setDirection] = useState(initialDirection);
+  const [formats, setFormats] = useState<readonly QuizFormat[]>(lastQuiz?.formats ?? QUIZ_FORMATS);
+  const [dueToday, setDueToday] = useState<ReadonlySet<number>>(() => new Set());
   const [set, setSet] = useState<DeckSet>(lastDeck?.set ?? defaultSet);
   const [selected, setSelected] = useState<ReadonlySet<number>>(() => new Set(lastDeck?.ids));
   const [shuffleOn, setShuffleOn] = useState(lastDeck?.shuffle ?? true);
@@ -152,6 +165,7 @@ export function DeckBuilder({
   const loaded = data !== undefined;
   const setLabel = DECK_SETS.find((s) => s.id === set)!.label;
   const selectedHere = words.reduce((n, w) => (selected.has(w.id) ? n + 1 : n), 0);
+  const selectedDue = quiz ? [...selected].reduce((n, id) => (dueToday.has(id) ? n + 1 : n), 0) : 0;
 
   const onCloseRef = useRef(onClose);
   useEffect(() => {
@@ -223,6 +237,23 @@ export function DeckBuilder({
     };
   }, [set, loaded]);
 
+  // The quiz's due hint: the user's cards due today, loaded once.
+  useEffect(() => {
+    if (!quiz) return;
+    let cancelled = false;
+    fetchDueTodayIds()
+      .catch((error) => {
+        devError("DeckBuilder: fetchDueTodayIds threw, so the due hint stays hidden.", error);
+        return null;
+      })
+      .then((ids) => {
+        if (!cancelled && ids) setDueToday(new Set(ids));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [quiz]);
+
   // Touch painting runs on touch events. After a long press Chrome sends
   // touchmove uncancelable and cancels the pointer once it starts a pan,
   // so the scroller is frozen when painting arms (see onPointerDown) and
@@ -257,8 +288,22 @@ export function DeckBuilder({
     };
   }, []);
 
+  /** Saves the deck as the mode's last one; returns what hands it to the
+   *  practice page (and gives the page's href). */
+  function save() {
+    const ids = [...selected];
+    if (quiz) {
+      const deck = { formats: [...formats], set, ids, shuffle: shuffleOn };
+      saveLastQuiz(deck);
+      return () => practiceQuizHref(deck);
+    }
+    const deck = { direction, set, ids, shuffle: shuffleOn };
+    saveLastDeck(deck);
+    return () => practiceDeckHref(deck);
+  }
+
   function close() {
-    saveLastDeck({ direction, set, ids: [...selected], shuffle: shuffleOn });
+    save();
     dialogRef.current?.close();
   }
 
@@ -268,9 +313,20 @@ export function DeckBuilder({
       if (!reducedMotion) setShaking(true);
       return;
     }
-    const deck = { direction, set, ids: [...selected], shuffle: shuffleOn };
-    saveLastDeck(deck);
-    router.push(practiceDeckHref(deck));
+    router.push(save()());
+  }
+
+  function toggleFormat(format: QuizFormat) {
+    if (formats.includes(format)) {
+      if (formats.length === 1) {
+        setNotice("Keep at least one format on.");
+        return;
+      }
+      setFormats(formats.filter((f) => f !== format));
+    } else {
+      setFormats(QUIZ_FORMATS.filter((f) => f === format || formats.includes(f)));
+    }
+    setNotice("");
   }
 
   function chooseSet(next: DeckSet) {
@@ -585,7 +641,7 @@ export function DeckBuilder({
         <header className="flex shrink-0 flex-col gap-3 px-4 pt-[calc(12px+env(safe-area-inset-top))] sm:px-6 md:pt-5">
           <div className="flex items-center justify-between gap-3">
             <h2 id={titleId} className="font-heading text-h1 font-bold text-bark">
-              Build your deck
+              {quiz ? "Build your quiz" : "Build your deck"}
             </h2>
             <button
               type="button"
@@ -596,9 +652,31 @@ export function DeckBuilder({
               <X size={24} aria-hidden="true" />
             </button>
           </div>
-          <div>
-            <DirectionToggle value={direction} onChange={setDirection} />
-          </div>
+          {quiz ? (
+            <div role="group" aria-label="Question formats" className="flex flex-wrap gap-2">
+              {QUIZ_FORMATS.map((format) => {
+                const { from, to } = QUIZ_FORMAT_LABELS[format];
+                return (
+                  <button
+                    key={format}
+                    type="button"
+                    aria-pressed={formats.includes(format)}
+                    aria-label={`${from} to ${to}`}
+                    onClick={() => toggleFormat(format)}
+                    className={`inline-flex items-center gap-1.5 ${chip(formats.includes(format))}`}
+                  >
+                    {from}
+                    <ArrowRight size={16} aria-hidden="true" />
+                    {to}
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <div>
+              <DirectionToggle value={direction} onChange={setDirection} />
+            </div>
+          )}
           <div
             role="group"
             aria-label="Set"
@@ -700,6 +778,19 @@ export function DeckBuilder({
           </div>
         </div>
 
+        {selectedDue > 0 && (
+          <p className="shrink-0 px-4 pt-3 font-body text-body-sm text-bark-muted sm:px-6">
+            {selectedDue} of these {selectedDue === 1 ? "is" : "are"} due today.{" "}
+            <Link
+              href="/training/review"
+              onClick={() => save()}
+              className={`rounded-sm font-medium text-rust-dark underline underline-offset-4 ${FOCUS_RING}`}
+            >
+              Do Today&apos;s review
+            </Link>{" "}
+            to count them.
+          </p>
+        )}
         <footer className="flex shrink-0 items-center justify-between gap-3 px-4 pb-[calc(12px+env(safe-area-inset-bottom))] pt-3 sm:px-6 md:pb-4">
           <label className="flex cursor-pointer items-center gap-2 font-body text-body font-medium text-bark">
             <input
@@ -720,7 +811,9 @@ export function DeckBuilder({
                 : "bg-rust text-background hover:bg-rust-dark"
             }`}
           >
-            {selected.size === 0 ? "Pick some words" : `Start ${selected.size} ${selected.size === 1 ? "card" : "cards"}`}
+            {selected.size === 0
+              ? "Pick some words"
+              : `Start ${selected.size} ${quiz ? (selected.size === 1 ? "word" : "words") : selected.size === 1 ? "card" : "cards"}`}
           </button>
         </footer>
         <p aria-live="polite" className="sr-only">

@@ -3,6 +3,7 @@ import { Rating, type Grade } from "ts-fsrs";
 import type { Database } from "@/lib/supabase/database.types";
 
 import type { CardFields } from "./fsrs";
+import type { QuizShowing } from "./quiz";
 
 type QueueRow = Database["public"]["Functions"]["get_review_queue"]["Returns"][number];
 
@@ -20,6 +21,9 @@ export interface QueueItem {
   /** null for a new word with no user_words row yet. */
   card: CardFields | null;
   isNew: boolean;
+  /** Shown as this quiz question next time it's up; a flashcard when
+   *  null or missing. */
+  quiz?: QuizShowing | null;
 }
 
 /** A card due again within this window (learning and relearning steps)
@@ -158,6 +162,33 @@ export function reorderUnanswered(run: Run, order: (items: QueueItem[]) => Queue
   slots.forEach((slot, n) => {
     queue[slot] = reordered[n];
   });
+  return { ...run, queue };
+}
+
+/** A quiz practice round after the front question was answered: a miss
+ *  comes back as `again` (a new question) MIN_GAP questions later, or last
+ *  when fewer are left; a right answer finishes the word. */
+export function afterQuizPractice(run: Run, grade: Grade, again: QueueItem): Run {
+  const [current, ...rest] = run.queue;
+  const id = current.word.id;
+  if (grade !== Rating.Again) {
+    return { ...run, queue: rest, finished: new Set(run.finished).add(id), firstAnswers: withFirstAnswer(run, id, grade) };
+  }
+  const at = returnIndex(rest.length, 0, 1);
+  return {
+    ...run,
+    queue: [...rest.slice(0, at), again, ...rest.slice(at)],
+    firstAnswers: withFirstAnswer(run, id, grade),
+  };
+}
+
+/** The run with the card for word `id`, if it's still queued, replaced by
+ *  `reshow(card)`: how a card that comes back is shown again. */
+export function reshowCard(run: Run, id: number, reshow: (item: QueueItem) => QueueItem): Run {
+  const at = run.queue.findIndex((item) => item.word.id === id);
+  if (at === -1) return run;
+  const queue = [...run.queue];
+  queue[at] = reshow(queue[at]);
   return { ...run, queue };
 }
 

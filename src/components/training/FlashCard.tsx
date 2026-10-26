@@ -10,20 +10,20 @@ import type { QueueItem, QueueWord } from "@/lib/training/queue";
 
 import { useReducedMotion } from "./hooks";
 
-const PILL = "inline-flex items-center rounded-pill px-2.5 py-0.5 font-body text-[13px] font-medium leading-5";
-const HINT = "hidden text-center font-body text-[13px] leading-5 text-bark-muted lg:block";
-const SURFACE = "rounded-[22px] border-[1.5px] border-line bg-surface-raised";
+export const PILL = "inline-flex items-center rounded-pill px-2.5 py-0.5 font-body text-[13px] font-medium leading-5";
+export const HINT = "hidden text-center font-body text-[13px] leading-5 text-bark-muted lg:block";
+export const SURFACE = "rounded-[22px] border-[1.5px] border-line bg-surface-raised";
 const CARD_HEIGHT = "h-[clamp(300px,50dvh,440px)]";
 
 /** Throw and rise, and the input lock around them. Matches globals.css. */
-const TRANSITION_MS = 380;
-const REDUCED_TRANSITION_MS = 150;
+export const TRANSITION_MS = 380;
+export const REDUCED_TRANSITION_MS = 150;
 
-const MISSING_GLOSS = "No meaning saved yet";
+export const MISSING_GLOSS = "No meaning saved yet";
 
 /* Front hanzi: 124px for one character, 104px for two, 84px for three or
    more, each scaled down with the viewport on narrow phones. */
-function hanziSize(text: string) {
+export function hanziSize(text: string) {
   const length = [...text].length;
   if (length <= 1) return "text-[length:clamp(84px,30vw,124px)]";
   if (length === 2) return "text-[length:clamp(64px,24vw,104px)]";

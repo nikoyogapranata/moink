@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import { devErrorOnce } from "@/lib/dev";
 import { parseDirection, type Direction } from "@/lib/training/deck";
@@ -65,4 +65,20 @@ export function useDirection(mode: SessionMode, initial: Direction | null) {
     storeDirection(mode, next);
   }
   return [direction, setDirection] as const;
+}
+
+/** How long a toast stays up. */
+const TOAST_MS = 1600;
+
+/** A short message for <Toast>: show(text) puts it up for TOAST_MS. */
+export function useToast() {
+  const [toast, setToast] = useState<{ text: string; n: number } | null>(null);
+  const timer = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(timer.current), []);
+  function show(text: string) {
+    window.clearTimeout(timer.current);
+    setToast((t) => ({ text, n: (t?.n ?? 0) + 1 }));
+    timer.current = window.setTimeout(() => setToast(null), TOAST_MS);
+  }
+  return [toast, show] as const;
 }

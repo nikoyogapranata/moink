@@ -42,6 +42,13 @@
   /* Got it button: white text on it is 5.1:1, 6.9:1 on hover. */
   --color-got-it: #4a7a2c;
   --color-got-it-strong: #3b6420;
+  /* Quiz: a wrong pick (again ink on the tint 6.1:1, the line 4.0:1
+     against the tint) and the red Continue (white text 6.5:1, 8.5:1 on
+     hover). */
+  --color-again-tint: #fde4e0;
+  --color-again-line: #c4473a;
+  --color-miss: #b3261e;
+  --color-miss-strong: #93201a;
 
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -115,6 +122,11 @@
   /* deep-grass is too light here for white text; 5.2:1 and 6.5:1. */
   --color-got-it: #3f7a24;
   --color-got-it-strong: #356a1d;
+  /* Ink on tint 8.7:1, the line 4.6:1; white on miss as in light. */
+  --color-again-tint: #4a2420;
+  --color-again-line: #e07a6c;
+  --color-miss: #b3261e;
+  --color-miss-strong: #93201a;
 }
 
 body {
@@ -466,6 +478,44 @@ body {
 .card-rise {
   transform-origin: 50% 100%;
   animation: card-rise 380ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* Quiz: each question's parts fade in as its card rises, and fade out
+   (no throw) on Continue. A wrong pick gives a short shake. */
+.quiz-in {
+  animation: fade-in 220ms ease-out both;
+}
+
+.quiz-leave {
+  animation: fade-out 200ms ease forwards;
+}
+
+@keyframes option-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25%,
+  75% {
+    transform: translateX(-5px);
+  }
+  50% {
+    transform: translateX(5px);
+  }
+}
+
+.option-shake {
+  animation: option-shake 300ms ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quiz-leave {
+    animation: fade-out 150ms ease forwards;
+  }
+
+  .option-shake {
+    animation: none;
+  }
 }
 
 /* The practice session's Shuffled / In order toast. Opacity only, so it

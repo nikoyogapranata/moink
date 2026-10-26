@@ -9,25 +9,9 @@
 // ü is written "v" in both (lǚ -> "lv", lü3 -> "lv3"), the usual way to
 // type it, so "lvyou" and "lv3you2" find 旅游.
 
-// Tone-marked vowels (and ü) to their plain letter, lowercase only: input
-// is lowercased first.
-const TONED = "āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜüńňǹḿ";
-const PLAIN = "aaaaeeeeiiiioooouuuuvvvvvnnnm";
+import { toPinyinPlain, untone } from "../../src/lib/pinyin";
 
-function untone(s: string) {
-  let out = "";
-  for (const c of s) {
-    const i = TONED.indexOf(c);
-    out += i === -1 ? c : PLAIN[i];
-  }
-  return out;
-}
-
-export function toPinyinPlain(pinyin: string | null | undefined) {
-  if (!pinyin) return null;
-  const s = untone(pinyin.normalize("NFC").toLowerCase().replace(/u:/g, "v"));
-  return s.replace(/[^a-z]/g, "") || null;
-}
+export { toPinyinPlain };
 
 export function toPinyinNum(numeric: string | null | undefined) {
   if (!numeric) return null;
