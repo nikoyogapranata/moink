@@ -210,6 +210,7 @@ export function DictionaryView({
           .from("user_words")
           .select("word_id")
           .eq("user_id", user.id)
+          .eq("skill", "recognition")
           .range(from, from + 999);
         if (error || !data) break;
         for (const row of data) ids.add(row.word_id);

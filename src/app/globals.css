@@ -28,6 +28,20 @@
   /* Active nav item / hover tint background. Blush in light mode; a deep
      warm brown in dark mode so text-bark (light there) stays readable. */
   --color-highlight: #fbe3c2;
+  /* Training: a light tint with the dark ink of the same ramp, ink on
+     tint at least 5.8:1. Again ink is for error text; good tints the
+     "New" and "got it" pills; learning the "still learning" pill and the
+     Still learning button (ink 7.5:1 on white, outline 3.5:1 against the
+     page). */
+  --color-again-ink: #a3271c;
+  --color-learning-tint: #fdebc8;
+  --color-learning-ink: #7a4a00;
+  --color-learning-line: #b87a12;
+  --color-good-tint: #e2f0d3;
+  --color-good-ink: #3b6420;
+  /* Got it button: white text on it is 5.1:1, 6.9:1 on hover. */
+  --color-got-it: #4a7a2c;
+  --color-got-it-strong: #3b6420;
 
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -91,6 +105,16 @@
   --color-surface-raised: #232325;
   --color-line: #38383b;
   --color-highlight: #3d2c22;
+  /* Training ramps flipped: deep tint, light ink, at least 7.1:1. */
+  --color-again-ink: #ffc2b8;
+  --color-learning-tint: #46341a;
+  --color-learning-ink: #ffd88f;
+  --color-learning-line: #d9a03c;
+  --color-good-tint: #2c3d22;
+  --color-good-ink: #c3e8a0;
+  /* deep-grass is too light here for white text; 5.2:1 and 6.5:1. */
+  --color-got-it: #3f7a24;
+  --color-got-it-strong: #356a1d;
 }
 
 body {
@@ -254,6 +278,24 @@ body {
   animation: step-in 250ms ease-out both;
 }
 
+/* Training done screens: Bao's quick cheer. Only applied when motion is
+   allowed. */
+@keyframes bao-react {
+  0% {
+    transform: scale(0.85);
+  }
+  60% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.bao-react {
+  animation: bao-react 300ms ease-out both;
+}
+
 /* Speech bubble text: the new line fades in as the old one is replaced. */
 .bubble-text-in {
   animation: fade-in 250ms ease-out both;
@@ -348,5 +390,184 @@ body {
 
   .flip-card-inner.is-flipped .flip-card-face--back {
     opacity: 1;
+  }
+}
+
+/* Training flashcards. .fc-scene gives the depth, .fc-inner turns, and
+   the two faces sit back to back like .flip-card-*. The easing overshoots
+   a little at the end. */
+.fc-scene {
+  perspective: 1200px;
+}
+
+.fc-inner {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  transform-style: preserve-3d;
+  transition: transform 550ms cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+
+.fc-inner.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.fc-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.fc-back {
+  transform: rotateY(180deg);
+}
+
+/* An answered card is thrown off to the side (right for Got it, left for
+   Still learning); the next rises from the first stack shape, which sits
+   10px lower and 5% smaller, anchored at the bottom. */
+@keyframes card-throw-right {
+  to {
+    transform: translateX(120%) rotate(12deg);
+    opacity: 0;
+  }
+}
+
+@keyframes card-throw-left {
+  to {
+    transform: translateX(-120%) rotate(-12deg);
+    opacity: 0;
+  }
+}
+
+@keyframes card-rise {
+  from {
+    transform: translateY(10px) scale(0.95);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+.card-throw-right {
+  animation: card-throw-right 380ms cubic-bezier(0.5, 0, 0.75, 0.4) forwards;
+}
+
+.card-throw-left {
+  animation: card-throw-left 380ms cubic-bezier(0.5, 0, 0.75, 0.4) forwards;
+}
+
+.card-rise {
+  transform-origin: 50% 100%;
+  animation: card-rise 380ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* The practice session's Shuffled / In order toast. Opacity only, so it
+   stays under reduced motion. */
+.toast-pop {
+  animation: fade-in 150ms ease-out both;
+}
+
+/* Reduced motion: the faces crossfade instead of turning, and a card
+   fades out and the next fades in instead of the throw and rise. The
+   session times its input lock to match (150ms). */
+@media (prefers-reduced-motion: reduce) {
+  .fc-inner {
+    transition: none;
+    transform: none !important;
+    transform-style: flat;
+  }
+
+  .fc-face {
+    backface-visibility: visible;
+    -webkit-backface-visibility: visible;
+    transition: opacity 150ms ease;
+  }
+
+  .fc-back {
+    transform: none;
+    opacity: 0;
+  }
+
+  .fc-inner.is-flipped .fc-front {
+    opacity: 0;
+  }
+
+  .fc-inner.is-flipped .fc-back {
+    opacity: 1;
+  }
+
+  .card-throw-right,
+  .card-throw-left {
+    animation: fade-out 150ms ease forwards;
+  }
+
+  .card-rise {
+    animation: fade-in 150ms ease both;
+  }
+}
+
+/* Deck builder: a full-screen sheet that slides up on phones, a dialog
+   that rises a little from 768px. The backdrop fades in. */
+@keyframes deck-sheet-in {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes deck-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+}
+
+.deck-dialog[open] {
+  animation: deck-sheet-in 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.deck-dialog[open]::backdrop {
+  animation: fade-in 220ms ease-out;
+}
+
+@media (min-width: 768px) {
+  .deck-dialog[open] {
+    animation: deck-dialog-in 220ms ease-out;
+  }
+}
+
+/* "Pick some words" with nothing picked: the grid gives a small shake. */
+@keyframes grid-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-6px);
+  }
+  40%,
+  80% {
+    transform: translateX(6px);
+  }
+}
+
+.grid-shake {
+  animation: grid-shake 360ms ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .deck-dialog[open] {
+    animation: fade-in 150ms ease-out;
+  }
+
+  .grid-shake {
+    animation: none;
   }
 }

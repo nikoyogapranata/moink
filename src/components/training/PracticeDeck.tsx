@@ -1,0 +1,81 @@
+"use client";
+
+import { LoaderCircle } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+
+import { Button } from "@/components/ui/Button";
+import { devError } from "@/lib/dev";
+import { fetchDeckWords } from "@/lib/training/actions";
+import { byGridOrder, shuffle, type Direction } from "@/lib/training/deck";
+import type { QueueItem } from "@/lib/training/queue";
+
+import { usePracticeDeck, type PracticeDeck as Deck } from "./deckStore";
+import { PracticeSession } from "./PracticeSession";
+import { DoneScreen } from "./SessionParts";
+
+type Loaded = { deck: Deck; items: QueueItem[] } | { deck: Deck; error: true };
+
+/** Loads the deck the builder handed over (sessionStorage) and runs it. */
+export function PracticeDeck({ initialDirection }: { initialDirection: Direction | null }) {
+  const deck = usePracticeDeck();
+  const [loaded, setLoaded] = useState<Loaded | null>(null);
+
+  useEffect(() => {
+    if (!deck) return;
+    let cancelled = false;
+    fetchDeckWords(deck.ids)
+      .catch((error) => {
+        devError("PracticeDeck: fetchDeckWords threw.", error);
+        return null;
+      })
+      .then((words) => {
+        if (cancelled) return;
+        if (!words) {
+          devError(`PracticeDeck: couldn't load the deck's ${deck.ids.length} words (fetchDeckWords returned null; see the server log).`);
+          setLoaded({ deck, error: true });
+          return;
+        }
+        const ordered = deck.shuffle ? shuffle(words) : [...words].sort(byGridOrder);
+        setLoaded({ deck, items: ordered.map((word) => ({ word, card: null, isNew: false })) });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [deck]);
+
+  const current = loaded?.deck === deck ? loaded : null;
+
+  if (deck === undefined || (deck && !current)) {
+    return (
+      <main className="flex min-h-dvh items-center justify-center gap-2 font-body text-body text-bark-muted">
+        <LoaderCircle size={20} aria-hidden="true" className="spin" />
+        Loading your deck
+      </main>
+    );
+  }
+
+  if (current && "error" in current) {
+    return (
+      <DoneScreen title="Couldn't load your deck" stats={[]} pose="ready">
+        <Button onClick={() => window.location.reload()}>Try again</Button>
+        <Button variant="secondary" asChild>
+          <Link href="/training">Back to Training</Link>
+        </Button>
+      </DoneScreen>
+    );
+  }
+
+  if (!current || current.items.length === 0) {
+    return (
+      <DoneScreen title="No deck to practice" stats={[]} pose="ready">
+        <p className="w-full font-body text-body text-bark-muted">Build a deck from Flashcards in Training.</p>
+        <Button asChild>
+          <Link href="/training">Back to Training</Link>
+        </Button>
+      </DoneScreen>
+    );
+  }
+
+  return <PracticeSession items={current.items} shuffled={current.deck.shuffle} initialDirection={initialDirection} />;
+}

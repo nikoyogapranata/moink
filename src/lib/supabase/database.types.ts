@@ -1,7 +1,8 @@
 // Database types for the Supabase clients, in the shape `supabase gen types
 // typescript` produces. Written by hand from the live schema plus
-// supabase/migrations/20261025120000_learning_core.sql and
-// 20261101120000_dictionary_search.sql; regenerate with the
+// supabase/migrations/20261025120000_learning_core.sql,
+// 20261101120000_dictionary_search.sql and 20261102120000_training.sql;
+// regenerate with the
 // CLI once it's set up, and keep this file's name so imports don't change.
 
 export type Json =
@@ -11,6 +12,9 @@ export type Json =
   | null
   | { [key: string]: Json | undefined }
   | Json[];
+
+/** Which card of a word: one user_words row per user, word and skill. */
+export type Skill = "recognition" | "writing";
 
 export type Database = {
   public: {
@@ -137,6 +141,7 @@ export type Database = {
         Row: {
           user_id: string;
           word_id: number;
+          skill: Skill;
           due: string;
           stability: number;
           difficulty: number;
@@ -154,6 +159,7 @@ export type Database = {
         Insert: {
           user_id: string;
           word_id: number;
+          skill?: Skill;
           due?: string;
           stability?: number;
           difficulty?: number;
@@ -170,6 +176,7 @@ export type Database = {
         Update: {
           user_id?: string;
           word_id?: number;
+          skill?: Skill;
           due?: string;
           stability?: number;
           difficulty?: number;
@@ -205,6 +212,7 @@ export type Database = {
           id: number;
           user_id: string;
           word_id: number;
+          skill: Skill;
           /** ts-fsrs Rating: 1 Again, 2 Hard, 3 Good, 4 Easy. */
           rating: number;
           state: number;
@@ -223,6 +231,7 @@ export type Database = {
           id?: never;
           user_id: string;
           word_id: number;
+          skill?: Skill;
           rating: number;
           state: number;
           due: string;
@@ -241,6 +250,7 @@ export type Database = {
           id?: never;
           user_id?: string;
           word_id?: number;
+          skill?: Skill;
           rating?: number;
           state?: number;
           due?: string;
@@ -320,8 +330,38 @@ export type Database = {
           p_log: Json;
           p_duration_ms?: number;
           p_mode?: string;
+          p_skill?: Skill;
         };
         Returns: number;
+      };
+      new_words_remaining_today: {
+        Args: { p_today_start: string };
+        Returns: number;
+      };
+      get_review_queue: {
+        Args: { p_now: string; p_today_start: string };
+        Returns: {
+          id: number;
+          simplified: string;
+          pinyin: string;
+          gloss: string | null;
+          hsk_level: number;
+          classifiers: string[] | null;
+          /** Card fields: null when has_card is false. */
+          due: string | null;
+          stability: number | null;
+          difficulty: number | null;
+          elapsed_days: number | null;
+          scheduled_days: number | null;
+          learning_steps: number | null;
+          reps: number | null;
+          lapses: number | null;
+          state: number | null;
+          last_review: string | null;
+          is_new: boolean;
+          /** False for words from next_new_words (no user_words row yet). */
+          has_card: boolean;
+        }[];
       };
     };
     Enums: {

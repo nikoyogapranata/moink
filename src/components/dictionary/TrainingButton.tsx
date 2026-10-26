@@ -22,9 +22,10 @@ function subscribeMinute(onChange: () => void) {
 const minuteNow = () => Math.floor(Date.now() / 60_000) * 60_000;
 
 /**
- * Add to training / Added / Learning, for one word. Give it key={wordId}
- * so switching words starts fresh. Adding inserts a user_words row with
- * only user_id and word_id (the column defaults are an empty FSRS card).
+ * Add to training / Added / Learning, for one word's recognition card.
+ * Give it key={wordId} so switching words starts fresh. Adding inserts a
+ * user_words row with only user_id, word_id and skill (the column defaults
+ * are an empty FSRS card).
  * Both add and remove are optimistic and roll back with a message if the
  * request fails.
  */
@@ -43,6 +44,7 @@ export function TrainingButton({ wordId }: { wordId: number }) {
       .select("reps, due")
       .eq("user_id", user.id)
       .eq("word_id", wordId)
+      .eq("skill", "recognition")
       .maybeSingle()
       .then(({ data, error: loadError }) => {
         if (cancelled) return;
@@ -68,7 +70,7 @@ export function TrainingButton({ wordId }: { wordId: number }) {
 
     const { data, error: addError } = await createClient()
       .from("user_words")
-      .insert({ user_id: user.id, word_id: wordId })
+      .insert({ user_id: user.id, word_id: wordId, skill: "recognition" })
       .select("reps, due")
       .single();
     setBusy(false);
@@ -93,7 +95,8 @@ export function TrainingButton({ wordId }: { wordId: number }) {
       .from("user_words")
       .delete()
       .eq("user_id", user.id)
-      .eq("word_id", wordId);
+      .eq("word_id", wordId)
+      .eq("skill", "recognition");
     setBusy(false);
     if (removeError) {
       setState(previous);
