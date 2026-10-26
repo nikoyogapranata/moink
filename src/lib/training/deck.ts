@@ -1,6 +1,8 @@
 // Flashcard directions and the deck builder's sets, shared by the hub,
 // the deck page and both sessions. Safe on server and client.
 
+import type { Skill } from "@/lib/supabase/database.types";
+
 import type { QueueItem, QueueWord } from "./queue";
 
 /** Hanzi first (recognition) or meaning first (the reverse). */
@@ -16,11 +18,29 @@ export function parseDirection(value: unknown): Direction | null {
 }
 
 /** reviews.mode for a scheduled answer: a flashcard in either direction,
- *  or a quiz question in one of its formats. All update the same
- *  recognition card. */
-export type ReviewMode = "flashcard" | "flashcard_reverse" | "quiz_meaning" | "quiz_hanzi" | "quiz_pinyin";
+ *  a quiz question in one of its formats, or a writing recall. */
+export type ReviewMode =
+  | "flashcard"
+  | "flashcard_reverse"
+  | "quiz_meaning"
+  | "quiz_hanzi"
+  | "quiz_pinyin"
+  | "writing_recall";
 
-const REVIEW_MODES: readonly ReviewMode[] = ["flashcard", "flashcard_reverse", "quiz_meaning", "quiz_hanzi", "quiz_pinyin"];
+const REVIEW_MODES: readonly ReviewMode[] = [
+  "flashcard",
+  "flashcard_reverse",
+  "quiz_meaning",
+  "quiz_hanzi",
+  "quiz_pinyin",
+  "writing_recall",
+];
+
+/** The card a mode's answer updates: a recall updates the writing card,
+ *  everything else the recognition card. */
+export function skillOf(mode: ReviewMode): Skill {
+  return mode === "writing_recall" ? "writing" : "recognition";
+}
 
 export function reviewMode(direction: Direction): ReviewMode {
   return direction === "hanzi" ? "flashcard" : "flashcard_reverse";

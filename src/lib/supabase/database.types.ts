@@ -1,7 +1,8 @@
 // Database types for the Supabase clients, in the shape `supabase gen types
 // typescript` produces. Written by hand from the live schema plus
 // supabase/migrations/20261025120000_learning_core.sql,
-// 20261101120000_dictionary_search.sql and 20261102120000_training.sql;
+// 20261101120000_dictionary_search.sql, 20261102120000_training.sql and
+// 20261109120000_writing.sql;
 // regenerate with the
 // CLI once it's set up, and keep this file's name so imports don't change.
 
@@ -32,6 +33,8 @@ export type Database = {
           longest_streak: number;
           last_study_date: string | null;
           daily_new_words: number;
+          /** New writing cards a day, 0 to 20. */
+          daily_new_writing: number;
           timezone: string;
           created_at: string;
           updated_at: string;
@@ -48,6 +51,7 @@ export type Database = {
           longest_streak?: number;
           last_study_date?: string | null;
           daily_new_words?: number;
+          daily_new_writing?: number;
           timezone?: string;
           created_at?: string;
           updated_at?: string;
@@ -64,6 +68,7 @@ export type Database = {
           longest_streak?: number;
           last_study_date?: string | null;
           daily_new_words?: number;
+          daily_new_writing?: number;
           timezone?: string;
           created_at?: string;
           updated_at?: string;
@@ -135,6 +140,14 @@ export type Database = {
           gloss_status?: "auto" | "reviewed";
           created_at?: string;
         };
+        Relationships: [];
+      };
+      writing_excluded: {
+        /** Characters hanzi-writer has no stroke data for
+         *  (scripts/check-stroke-data.ts). */
+        Row: { char: string };
+        Insert: { char: string };
+        Update: { char?: string };
         Relationships: [];
       };
       user_words: {
@@ -360,6 +373,35 @@ export type Database = {
           last_review: string | null;
           is_new: boolean;
           /** False for words from next_new_words (no user_words row yet). */
+          has_card: boolean;
+        }[];
+      };
+      new_writing_remaining_today: {
+        Args: { p_today_start: string };
+        Returns: number;
+      };
+      get_writing_queue: {
+        Args: { p_now: string; p_today_start: string };
+        Returns: {
+          id: number;
+          simplified: string;
+          pinyin: string;
+          gloss: string | null;
+          hsk_level: number;
+          classifiers: string[] | null;
+          /** Card fields: null when has_card is false. */
+          due: string | null;
+          stability: number | null;
+          difficulty: number | null;
+          elapsed_days: number | null;
+          scheduled_days: number | null;
+          learning_steps: number | null;
+          reps: number | null;
+          lapses: number | null;
+          state: number | null;
+          last_review: string | null;
+          is_new: boolean;
+          /** False for newly eligible words (no writing row yet). */
           has_card: boolean;
         }[];
       };

@@ -4,8 +4,8 @@ import { refresh } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
 
-import { isDailyNewWordOption } from "./daily";
-import { byGridOrder, isReviewMode, MAX_DECK_WORDS, parseDeckSet, type ReviewMode } from "./deck";
+import { isDailyNewWordOption, isDailyNewWritingOption } from "./daily";
+import { byGridOrder, isReviewMode, MAX_DECK_WORDS, parseDeckSet, skillOf, type ReviewMode } from "./deck";
 import { isGrade, scheduler, toCard, toFields, type CardFields } from "./fsrs";
 import type { QueueWord } from "./queue";
 import { parseQuizFormats, type QuizBank } from "./quiz";
@@ -31,11 +31,12 @@ function isIdList(ids: unknown): ids is number[] {
 }
 
 /**
- * Rate one recognition card. The server is the source of truth: it loads
+ * Rate one card. The server is the source of truth: it loads
  * the stored card (or an empty one for a word with no row yet), schedules
  * it at the server's now, and saves the card and the review together with
- * record_review. `mode` is how the card was shown (a flashcard direction
- * or a quiz format); all update the same recognition card. Returns the new card so the session
+ * record_review. `mode` is how the card was shown (a flashcard direction,
+ * a quiz format or a writing recall) and decides the card: writing_recall
+ * updates the writing card, everything else the recognition card. Returns the new card so the session
  * can decide whether it comes back.
  */
 export async function rateCard(
@@ -51,6 +52,8 @@ export async function rateCard(
     ? Math.min(Math.max(Math.round(durationMs), 0), MAX_DURATION_MS)
     : null;
 
+  const skill = skillOf(mode);
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -62,7 +65,7 @@ export async function rateCard(
     .select("due, stability, difficulty, elapsed_days, scheduled_days, learning_steps, reps, lapses, state, last_review")
     .eq("user_id", user.id)
     .eq("word_id", wordId)
-    .eq("skill", "recognition")
+    .eq("skill", skill)
     .maybeSingle();
   if (loadError) {
     console.error("rateCard: couldn't load card", loadError);
@@ -79,7 +82,7 @@ export async function rateCard(
     p_log: { ...log, due: log.due.toISOString(), review: log.review.toISOString() },
     p_duration_ms: duration ?? undefined,
     p_mode: mode,
-    p_skill: "recognition",
+    p_skill: skill,
   });
   if (saveError) {
     console.error("rateCard: couldn't save review", saveError);
@@ -89,7 +92,7 @@ export async function rateCard(
   return { ok: true, card: fields };
 }
 
-const EMPTY_BATCH: ReviewBatch = { items: [], bank: {} };
+const EMPTY_BATCH: ReviewBatch = { items: [], bank: {}, writing: [] };
 
 /** A fresh session queue and its questions, for "Keep going" on the done
  *  screen. */
@@ -188,9 +191,10 @@ export async function fetchQuizDeck(
   }
 }
 
-/** Ids of the user's recognition cards due today (by the end of today in
- *  their zone, overdue included), for the quiz builder's hint. */
-export async function fetchDueTodayIds(): Promise<number[] | null> {
+/** Ids of the user's cards of `skill` due today (by the end of today in
+ *  their zone, overdue included), for the builder's due hint. */
+export async function fetchDueTodayIds(skill: string): Promise<number[] | null> {
+  if (skill !== "recognition" && skill !== "writing") return null;
   const supabase = await createClient();
   const {
     data: { user },
@@ -199,7 +203,7 @@ export async function fetchDueTodayIds(): Promise<number[] | null> {
 
   try {
     const { days } = await loadTrainingProfile(supabase, user.id, new Date());
-    return await loadDueIds(supabase, user.id, days.tomorrow);
+    return await loadDueIds(supabase, user.id, skill, days.tomorrow);
   } catch (error) {
     console.error("fetchDueTodayIds failed", error);
     return null;
@@ -224,6 +228,31 @@ export async function setDailyNewWords(value: number): Promise<{ ok: boolean }> 
     .select("id");
   if (error || !data?.length) {
     console.error("setDailyNewWords failed", error);
+    return { ok: false };
+  }
+
+  refresh();
+  return { ok: true };
+}
+
+export async function setDailyNewWriting(value: number): Promise<{ ok: boolean }> {
+  if (!isDailyNewWritingOption(value)) return { ok: false };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false };
+
+  // .select() so an update that RLS filtered down to zero rows reads as a
+  // failure instead of a silent success.
+  const { data, error } = await supabase
+    .from("profiles")
+    .update({ daily_new_writing: value })
+    .eq("id", user.id)
+    .select("id");
+  if (error || !data?.length) {
+    console.error("setDailyNewWriting failed", error);
     return { ok: false };
   }
 

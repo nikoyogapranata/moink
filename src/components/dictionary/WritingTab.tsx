@@ -27,7 +27,7 @@ type Loaded =
   | { status: "ready"; strokes: CharacterStrokes; HanziWriter: HanziWriterClass };
 
 /** Practice grid: border, center cross, diagonals, in the line token. */
-function GuideLines({ size }: { size: number }) {
+export function GuideLines({ size }: { size: number }) {
   const m = size / 2;
   return (
     <g stroke="var(--color-line)" strokeWidth={1}>

@@ -5,13 +5,14 @@ import { useMemo, useSyncExternalStore } from "react";
 import { devErrorOnce } from "@/lib/dev";
 import { MAX_DECK_WORDS, parseDeckSet, parseDirection, type DeckSet, type Direction } from "@/lib/training/deck";
 import { parseQuizFormats, type QuizFormat } from "@/lib/training/quiz";
+import { parseWritingStyle, type WritingStyle } from "@/lib/training/writing";
 
-/* Two decks for flashcards and two for the quiz, all kept in memory too so
+/* Two decks each for flashcards, the quiz and writing, all kept in memory too so
    they still work for the visit when storage throws:
    - the last deck built, in localStorage, which the builder restores and
      the hub's quick-start link uses;
    - the deck being practiced, in sessionStorage, which /training/flashcards
-     or /training/quiz reads (ids only; the page loads the words). */
+     /training/quiz or /training/writing reads (ids only; the page loads the words). */
 
 export interface SavedDeck {
   direction: Direction;
@@ -42,6 +43,21 @@ const LAST_DECK_KEY = "moink:last-deck";
 const PRACTICE_DECK_KEY = "moink:practice-deck";
 const LAST_QUIZ_KEY = "moink:last-quiz";
 const PRACTICE_QUIZ_KEY = "moink:practice-quiz";
+const LAST_WRITING_KEY = "moink:last-writing";
+const PRACTICE_WRITING_KEY = "moink:practice-writing";
+
+export interface SavedWriting {
+  style: WritingStyle;
+  set: DeckSet;
+  ids: number[];
+  shuffle: boolean;
+}
+
+export interface PracticeWriting {
+  ids: number[];
+  style: WritingStyle;
+  shuffle: boolean;
+}
 
 const memory = new Map<string, string>();
 const listeners = new Set<() => void>();
@@ -192,4 +208,57 @@ function parsePracticeQuiz(raw: string | null): PracticeQuiz | null {
 export function usePracticeQuiz() {
   const raw = useSyncExternalStore(subscribe, () => read(session, PRACTICE_QUIZ_KEY), () => undefined);
   return useMemo(() => (raw === undefined ? undefined : parsePracticeQuiz(raw)), [raw]);
+}
+
+/* Writing sets */
+
+function parseSavedWriting(raw: string | null): SavedWriting | null {
+  const value = parseJson(raw);
+  const style = parseWritingStyle(value?.style);
+  const set = parseDeckSet(value?.set);
+  const ids = parseIds(value?.ids);
+  if (!style || !set || !ids) return null;
+  return { style, set, ids, shuffle: value?.shuffle !== false };
+}
+
+export function readLastWriting() {
+  return parseSavedWriting(read(local, LAST_WRITING_KEY));
+}
+
+export function saveLastWriting(writing: SavedWriting) {
+  write(local, LAST_WRITING_KEY, JSON.stringify(writing));
+}
+
+/** Keeps a style or shuffle choice made mid-session for the builder's
+ *  next open. */
+export function updateLastWriting(patch: Partial<Pick<SavedWriting, "style" | "shuffle">>) {
+  const last = readLastWriting();
+  if (last) saveLastWriting({ ...last, ...patch });
+}
+
+/** The last writing set built, or null (always null on the server). */
+export function useLastWriting() {
+  const raw = useSyncExternalStore(subscribe, () => read(local, LAST_WRITING_KEY), () => null);
+  return useMemo(() => parseSavedWriting(raw), [raw]);
+}
+
+/** Hands the set to the writing page and returns where to go. */
+export function practiceWritingHref(writing: SavedWriting) {
+  const practice: PracticeWriting = { ids: writing.ids, style: writing.style, shuffle: writing.shuffle };
+  write(session, PRACTICE_WRITING_KEY, JSON.stringify(practice));
+  return "/training/writing";
+}
+
+function parsePracticeWriting(raw: string | null): PracticeWriting | null {
+  const value = parseJson(raw);
+  const ids = parseIds(value?.ids);
+  const style = parseWritingStyle(value?.style);
+  return ids && style ? { ids, style, shuffle: value?.shuffle !== false } : null;
+}
+
+/** The set to write: undefined until the page is on the client, then the
+ *  set or null when there's none. */
+export function usePracticeWriting() {
+  const raw = useSyncExternalStore(subscribe, () => read(session, PRACTICE_WRITING_KEY), () => undefined);
+  return useMemo(() => (raw === undefined ? undefined : parsePracticeWriting(raw)), [raw]);
 }

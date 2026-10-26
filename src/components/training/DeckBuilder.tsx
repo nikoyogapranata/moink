@@ -19,10 +19,21 @@ import { fetchDeckSet, fetchDueTodayIds } from "@/lib/training/actions";
 import { DECK_SETS, type DeckSet, type Direction } from "@/lib/training/deck";
 import type { QueueWord } from "@/lib/training/queue";
 import { QUIZ_FORMAT_LABELS, QUIZ_FORMATS, type QuizFormat } from "@/lib/training/quiz";
+import { isWritable, WRITING_STYLE_LABELS, type WritingStyle } from "@/lib/training/writing";
 
-import { practiceDeckHref, practiceQuizHref, readLastDeck, readLastQuiz, saveLastDeck, saveLastQuiz } from "./deckStore";
+import {
+  practiceDeckHref,
+  practiceQuizHref,
+  practiceWritingHref,
+  readLastDeck,
+  readLastQuiz,
+  readLastWriting,
+  saveLastDeck,
+  saveLastQuiz,
+  saveLastWriting,
+} from "./deckStore";
 import { useReducedMotion } from "./hooks";
-import { DirectionToggle } from "./SessionParts";
+import { DirectionToggle, SegmentedControl } from "./SessionParts";
 
 const FOCUS_RING = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rust";
 
@@ -73,22 +84,31 @@ const WordTile = memo(function WordTile({
   selected,
   known,
   focusable,
+  disabled,
 }: {
   word: QueueWord;
   index: number;
   selected: boolean;
   known: boolean;
   focusable: boolean;
+  /** Writing: the word has a character with no stroke data. */
+  disabled: boolean;
 }) {
   return (
     <div
       role="checkbox"
       aria-checked={selected}
-      aria-label={`${word.simplified}, ${word.pinyin}${word.gloss ? `, ${word.gloss}` : ""}${known ? ", in your training" : ""}`}
+      aria-disabled={disabled || undefined}
+      aria-label={`${word.simplified}, ${word.pinyin}${word.gloss ? `, ${word.gloss}` : ""}${known ? ", in your training" : ""}${disabled ? ", no stroke data" : ""}`}
+      title={disabled ? "No stroke data" : undefined}
       tabIndex={focusable ? 0 : -1}
       data-index={index}
-      className={`@container relative flex h-13 min-w-0 cursor-pointer items-center justify-center rounded-[12px] border-[1.5px] px-1.5 text-center transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rust-dark ${
-        selected ? "border-rust bg-rust/12" : "border-line bg-surface-raised hover:bg-highlight/50"
+      className={`@container relative flex h-13 min-w-0 items-center justify-center rounded-[12px] border-[1.5px] px-1.5 text-center transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rust-dark ${
+        disabled
+          ? "cursor-not-allowed border-dashed border-line bg-surface-raised opacity-50"
+          : selected
+            ? "cursor-pointer border-rust bg-rust/12"
+            : "cursor-pointer border-line bg-surface-raised hover:bg-highlight/50"
       }`}
     >
       {known && <span aria-hidden="true" className="absolute left-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-deep-grass" />}
@@ -104,15 +124,17 @@ const WordTile = memo(function WordTile({
   );
 });
 
-export type BuilderMode = "flashcards" | "quiz";
+export type BuilderMode = "flashcards" | "quiz" | "writing";
 
 /**
- * Build your deck (flashcards: pick a direction) or your quiz (pick the
- * question formats), then words from any of the sets. The selection
- * carries across sets. A native modal dialog (focus stays inside, the page
- * behind is inert); a full-screen sheet on phones. Restores the mode's last
- * deck and saves it again on close and on Start. The quiz notes selected
- * words that are due today, since only Today's review counts them.
+ * Build your deck (flashcards: pick a direction), your quiz (pick the
+ * question formats) or a writing set (pick the style), then words from any
+ * of the sets. The selection carries across sets. A native modal dialog
+ * (focus stays inside, the page behind is inert); a full-screen sheet on
+ * phones. Restores the mode's last deck and saves it again on close and on
+ * Start. The quiz and writing note selected words that are due today in
+ * their schedule, since only Today's review counts them. Writing can't
+ * pick words with a character that has no stroke data.
  */
 export function DeckBuilder({
   mode,
@@ -133,11 +155,14 @@ export function DeckBuilder({
   const titleId = useId();
 
   const quiz = mode === "quiz";
+  const writing = mode === "writing";
   // Only mounted after a click, so reading storage here can't mismatch.
   const [lastQuiz] = useState(() => (quiz ? readLastQuiz() : null));
-  const [lastDeck] = useState(() => (quiz ? lastQuiz : readLastDeck()));
+  const [lastWriting] = useState(() => (writing ? readLastWriting() : null));
+  const [lastDeck] = useState(() => (quiz ? lastQuiz : writing ? lastWriting : readLastDeck()));
   const [direction, setDirection] = useState(initialDirection);
   const [formats, setFormats] = useState<readonly QuizFormat[]>(lastQuiz?.formats ?? QUIZ_FORMATS);
+  const [style, setStyle] = useState<WritingStyle>(lastWriting?.style ?? "trace");
   const [dueToday, setDueToday] = useState<ReadonlySet<number>>(() => new Set());
   const [set, setSet] = useState<DeckSet>(lastDeck?.set ?? defaultSet);
   const [selected, setSelected] = useState<ReadonlySet<number>>(() => new Set(lastDeck?.ids));
@@ -165,7 +190,9 @@ export function DeckBuilder({
   const loaded = data !== undefined;
   const setLabel = DECK_SETS.find((s) => s.id === set)!.label;
   const selectedHere = words.reduce((n, w) => (selected.has(w.id) ? n + 1 : n), 0);
-  const selectedDue = quiz ? [...selected].reduce((n, id) => (dueToday.has(id) ? n + 1 : n), 0) : 0;
+  const selectedDue = quiz || writing ? [...selected].reduce((n, id) => (dueToday.has(id) ? n + 1 : n), 0) : 0;
+  /** Writing only takes words the pad can write. */
+  const canPick = (word: QueueWord) => !writing || isWritable(word.simplified);
 
   const onCloseRef = useRef(onClose);
   useEffect(() => {
@@ -237,11 +264,12 @@ export function DeckBuilder({
     };
   }, [set, loaded]);
 
-  // The quiz's due hint: the user's cards due today, loaded once.
+  // The due hint: the user's cards due today in the mode's schedule
+  // (recognition for the quiz, writing for writing), loaded once.
   useEffect(() => {
-    if (!quiz) return;
+    if (!quiz && !writing) return;
     let cancelled = false;
-    fetchDueTodayIds()
+    fetchDueTodayIds(writing ? "writing" : "recognition")
       .catch((error) => {
         devError("DeckBuilder: fetchDueTodayIds threw, so the due hint stays hidden.", error);
         return null;
@@ -252,7 +280,7 @@ export function DeckBuilder({
     return () => {
       cancelled = true;
     };
-  }, [quiz]);
+  }, [quiz, writing]);
 
   // Touch painting runs on touch events. After a long press Chrome sends
   // touchmove uncancelable and cancels the pointer once it starts a pan,
@@ -296,6 +324,11 @@ export function DeckBuilder({
       const deck = { formats: [...formats], set, ids, shuffle: shuffleOn };
       saveLastQuiz(deck);
       return () => practiceQuizHref(deck);
+    }
+    if (writing) {
+      const deck = { style, set, ids, shuffle: shuffleOn };
+      saveLastWriting(deck);
+      return () => practiceWritingHref(deck);
     }
     const deck = { direction, set, ids, shuffle: shuffleOn };
     saveLastDeck(deck);
@@ -341,8 +374,11 @@ export function DeckBuilder({
   /* Selection */
 
   function apply(indices: number[], value: boolean) {
-    const ids = indices.flatMap((i) => (words[i] ? [words[i].id] : []));
-    if (ids.length === 0) return;
+    const ids = indices.flatMap((i) => (words[i] && canPick(words[i]) ? [words[i].id] : []));
+    if (ids.length === 0) {
+      if (indices.length === 1 && words[indices[0]]) setNotice(`${words[indices[0]].simplified} has no stroke data, so it can't be written.`);
+      return;
+    }
     setSelected((prev) => {
       if (ids.every((id) => prev.has(id) === value)) return prev;
       const next = new Set(prev);
@@ -641,7 +677,7 @@ export function DeckBuilder({
         <header className="flex shrink-0 flex-col gap-3 px-4 pt-[calc(12px+env(safe-area-inset-top))] sm:px-6 md:pt-5">
           <div className="flex items-center justify-between gap-3">
             <h2 id={titleId} className="font-heading text-h1 font-bold text-bark">
-              {quiz ? "Build your quiz" : "Build your deck"}
+              {quiz ? "Build your quiz" : writing ? "Build a writing set" : "Build your deck"}
             </h2>
             <button
               type="button"
@@ -671,6 +707,15 @@ export function DeckBuilder({
                   </button>
                 );
               })}
+            </div>
+          ) : writing ? (
+            <div>
+              <SegmentedControl
+                label="Writing style"
+                options={(["trace", "recall"] as const).map((id) => ({ id, label: WRITING_STYLE_LABELS[id] }))}
+                value={style}
+                onChange={setStyle}
+              />
             </div>
           ) : (
             <div>
@@ -771,6 +816,7 @@ export function DeckBuilder({
                     selected={selected.has(word.id)}
                     known={data.inTraining.has(word.id)}
                     focusable={i === Math.min(focusIndex, words.length - 1)}
+                    disabled={!canPick(word)}
                   />
                 ))}
               </div>
@@ -813,7 +859,7 @@ export function DeckBuilder({
           >
             {selected.size === 0
               ? "Pick some words"
-              : `Start ${selected.size} ${quiz ? (selected.size === 1 ? "word" : "words") : selected.size === 1 ? "card" : "cards"}`}
+              : `Start ${selected.size} ${quiz || writing ? (selected.size === 1 ? "word" : "words") : selected.size === 1 ? "card" : "cards"}`}
           </button>
         </footer>
         <p aria-live="polite" className="sr-only">
@@ -830,6 +876,7 @@ export function DeckBuilder({
           >
             <p className="font-body text-body font-medium text-rust-dark">{peekWord.pinyin}</p>
             {peekWord.gloss && <p className="font-body text-body-sm text-bark">{peekWord.gloss}</p>}
+            {!canPick(peekWord) && <p className="font-body text-body-sm font-medium text-again-ink">No stroke data</p>}
           </div>
         )}
       </div>

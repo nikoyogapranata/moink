@@ -63,7 +63,7 @@ function MeaningTab({ word }: { word: WordDetail }) {
         <p className="mt-1 font-body text-body text-bark-muted">{word.meanings.join(" · ")}</p>
       </div>
 
-      <TrainingButton key={word.id} wordId={word.id} />
+      <TrainingButton key={word.id} wordId={word.id} simplified={word.simplified} />
     </div>
   );
 }

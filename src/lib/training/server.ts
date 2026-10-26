@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-import type { Database } from "@/lib/supabase/database.types";
+import type { Database, Skill } from "@/lib/supabase/database.types";
 import { dayStarts, FALLBACK_TIME_ZONE } from "@/lib/time";
 
 import { DUE_SOON_MS, type DeckSet } from "./deck";
@@ -17,16 +17,17 @@ import {
 
 type Client = SupabaseClient<Database>;
 
-/** The user's daily new-word limit, target HSK level and day boundaries
- *  in their zone. */
+/** The user's daily new-word and new-writing limits, target HSK level
+ *  and day boundaries in their zone. */
 export async function loadTrainingProfile(supabase: Client, userId: string, now = new Date()) {
   const { data: profile } = await supabase
     .from("profiles")
-    .select("daily_new_words, hsk_level_target, timezone")
+    .select("daily_new_words, daily_new_writing, hsk_level_target, timezone")
     .eq("id", userId)
     .maybeSingle();
   return {
     dailyNewWords: profile?.daily_new_words ?? 0,
+    dailyNewWriting: profile?.daily_new_writing ?? 0,
     hskLevel: profile?.hsk_level_target ?? null,
     days: dayStarts(profile?.timezone || FALLBACK_TIME_ZONE, now),
   };
@@ -116,15 +117,15 @@ export async function loadDeck(supabase: Client, userId: string, set: DeckSet, n
   );
 }
 
-/** Ids of the user's recognition cards (past New, not suspended) due
+/** Ids of the user's cards of `skill` (past New, not suspended) due
  *  before `before`. */
-export async function loadDueIds(supabase: Client, userId: string, before: Date): Promise<number[]> {
+export async function loadDueIds(supabase: Client, userId: string, skill: Skill, before: Date): Promise<number[]> {
   const rows = await allRows((from, to) =>
     supabase
       .from("user_words")
       .select("word_id")
       .eq("user_id", userId)
-      .eq("skill", "recognition")
+      .eq("skill", skill)
       .eq("suspended", false)
       .neq("state", 0)
       .lt("due", before.toISOString())
@@ -179,17 +180,37 @@ export async function buildQuestions(
   return bank;
 }
 
-/** A review queue with its quiz questions. */
+/** The writing session queue from get_writing_queue, as of `now`: due
+ *  writing cards (Recall only), then newly eligible words (Trace first). */
+export async function loadWritingQueue(supabase: Client, todayStart: Date, now: Date): Promise<QueueItem[]> {
+  const { data, error } = await supabase.rpc("get_writing_queue", {
+    p_now: now.toISOString(),
+    p_today_start: todayStart.toISOString(),
+  });
+  if (error) throw error;
+  return toQueueItems(data ?? []).map((item) => ({ ...item, writing: { trace: item.isNew } }));
+}
+
+/** Today's review: the recognition queue with its quiz questions, then
+ *  the writing queue. */
 export interface ReviewBatch {
   items: QueueItem[];
   bank: QuizBank;
+  writing: QueueItem[];
 }
 
 /** The session queue (loadQueue), each card past New shown as a quiz
- *  question about half the time. Without questions (their load failed)
- *  every card is a flashcard. */
+ *  question about half the time, and the writing queue. Without questions
+ *  (their load failed) every card is a flashcard; without the writing
+ *  queue (its load failed) the session is recognition only. */
 export async function loadReviewBatch(supabase: Client, todayStart: Date, now: Date): Promise<ReviewBatch> {
-  const queue = await loadQueue(supabase, todayStart, now);
+  const [queue, writing] = await Promise.all([
+    loadQueue(supabase, todayStart, now),
+    loadWritingQueue(supabase, todayStart, now).catch((error) => {
+      console.error("loadReviewBatch: couldn't load the writing queue; recognition only.", error);
+      return [] as QueueItem[];
+    }),
+  ]);
   const bank = await buildQuestions(
     supabase,
     queue.map((item) => item.word.id),
@@ -201,5 +222,6 @@ export async function loadReviewBatch(supabase: Client, todayStart: Date, now: D
   return {
     items: queue.map((item) => ({ ...item, quiz: reviewShowing(item.isNew, bank[item.word.id]) })),
     bank,
+    writing,
   };
 }

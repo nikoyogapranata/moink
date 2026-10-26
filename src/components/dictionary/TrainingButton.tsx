@@ -1,18 +1,47 @@
 "use client";
 
-import { Check, Plus } from "lucide-react";
+import { Check, PenLine, Plus } from "lucide-react";
 import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { useAppUser } from "@/components/app/AppShell";
 import { Button } from "@/components/ui/Button";
 import { dueLabel, useTrainingIds } from "@/lib/dictionary/training";
 import { createClient } from "@/lib/supabase/client";
+import { isWritable } from "@/lib/training/writing";
 
 type Card = { reps: number; due: string };
 type State =
   | { kind: "loading" }
   | { kind: "none" }
   | { kind: "card"; card: Card };
+
+/** The word's writing card, or why there isn't one yet. Same rule as
+ *  get_writing_queue: recognition in Review with 2 Good or Easy reviews,
+ *  and stroke data for every character. */
+type Writing =
+  | { kind: "card"; due: string }
+  | { kind: "unlocked" }
+  | { kind: "locked" }
+  | { kind: "unavailable" };
+
+/** Good and Easy recognition reviews a word needs for writing. */
+const UNLOCK_REVIEWS = 2;
+const REVIEW_STATE = 2;
+
+function writingLine(writing: Writing, now: number) {
+  switch (writing.kind) {
+    case "card": {
+      const label = now === 0 ? null : dueLabel(writing.due, now);
+      return label ? `Writing · due ${label}` : "Writing · due now";
+    }
+    case "unlocked":
+      return "Writing unlocked · comes up in Today's review";
+    case "unavailable":
+      return "Writing isn't available for this word";
+    case "locked":
+      return "Writing unlocks after a few correct reviews";
+  }
+}
 
 // Re-render once a minute so "due in 5 minutes" stays roughly right.
 function subscribeMinute(onChange: () => void) {
@@ -29,36 +58,54 @@ const minuteNow = () => Math.floor(Date.now() / 60_000) * 60_000;
  * Both add and remove are optimistic and roll back with a message if the
  * request fails.
  */
-export function TrainingButton({ wordId }: { wordId: number }) {
+export function TrainingButton({ wordId, simplified }: { wordId: number; simplified: string }) {
   const user = useAppUser();
   const training = useTrainingIds();
   const [state, setState] = useState<State>({ kind: "loading" });
+  const [writing, setWriting] = useState<Writing>({ kind: "locked" });
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const now = useSyncExternalStore(subscribeMinute, minuteNow, () => 0);
 
   useEffect(() => {
     let cancelled = false;
-    createClient()
-      .from("user_words")
-      .select("reps, due")
-      .eq("user_id", user.id)
-      .eq("word_id", wordId)
-      .eq("skill", "recognition")
-      .maybeSingle()
-      .then(({ data, error: loadError }) => {
-        if (cancelled) return;
-        if (loadError) {
-          setState({ kind: "none" });
-          setError("Couldn't check your training. Reload to try again.");
-        } else {
-          setState(data ? { kind: "card", card: data } : { kind: "none" });
-        }
-      });
+    const supabase = createClient();
+    const card = (skill: "recognition" | "writing") =>
+      supabase
+        .from("user_words")
+        .select("reps, due, state")
+        .eq("user_id", user.id)
+        .eq("word_id", wordId)
+        .eq("skill", skill)
+        .maybeSingle();
+    Promise.all([
+      card("recognition"),
+      card("writing"),
+      supabase
+        .from("reviews")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("word_id", wordId)
+        .eq("skill", "recognition")
+        .in("rating", [3, 4]),
+    ]).then(([recognition, writingCard, good]) => {
+      if (cancelled) return;
+      if (recognition.error) {
+        setState({ kind: "none" });
+        setError("Couldn't check your training. Reload to try again.");
+        return;
+      }
+      const data = recognition.data;
+      setState(data ? { kind: "card", card: { reps: data.reps, due: data.due } } : { kind: "none" });
+      if (writingCard.data) setWriting({ kind: "card", due: writingCard.data.due });
+      else if (!isWritable(simplified)) setWriting({ kind: "unavailable" });
+      else if (data?.state === REVIEW_STATE && (good.count ?? 0) >= UNLOCK_REVIEWS) setWriting({ kind: "unlocked" });
+      else setWriting({ kind: "locked" });
+    });
     return () => {
       cancelled = true;
     };
-  }, [user.id, wordId]);
+  }, [user.id, wordId, simplified]);
 
   async function add() {
     if (busy) return;
@@ -144,6 +191,13 @@ export function TrainingButton({ wordId }: { wordId: number }) {
                 const label = dueLabel(state.card.due, now);
                 return label ? `Learning · ${label}` : "Due now";
               })()}
+        </p>
+      )}
+
+      {state.kind === "card" && (
+        <p className="inline-flex items-center gap-1.5 font-body text-body text-bark-muted">
+          <PenLine size={16} aria-hidden="true" className={writing.kind === "card" ? "text-bamboo-gold-dark" : ""} />
+          {writingLine(writing, now)}
         </p>
       )}
 

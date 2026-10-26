@@ -59,7 +59,7 @@ export function WordOfTheDayCard({
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
-        <TrainingButton key={word.id} wordId={word.id} />
+        <TrainingButton key={word.id} wordId={word.id} simplified={word.simplified} />
         <button
           type="button"
           onClick={onDetails}

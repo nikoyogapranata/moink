@@ -4,6 +4,7 @@ import type { Database } from "@/lib/supabase/database.types";
 
 import type { CardFields } from "./fsrs";
 import type { QuizShowing } from "./quiz";
+import type { WritingShowing } from "./writing";
 
 type QueueRow = Database["public"]["Functions"]["get_review_queue"]["Returns"][number];
 
@@ -24,6 +25,8 @@ export interface QueueItem {
   /** Shown as this quiz question next time it's up; a flashcard when
    *  null or missing. */
   quiz?: QuizShowing | null;
+  /** Shown on the writing pad (a writing card or writing practice). */
+  writing?: WritingShowing | null;
 }
 
 /** A card due again within this window (learning and relearning steps)
@@ -165,10 +168,11 @@ export function reorderUnanswered(run: Run, order: (items: QueueItem[]) => Queue
   return { ...run, queue };
 }
 
-/** A quiz practice round after the front question was answered: a miss
- *  comes back as `again` (a new question) MIN_GAP questions later, or last
- *  when fewer are left; a right answer finishes the word. */
-export function afterQuizPractice(run: Run, grade: Grade, again: QueueItem): Run {
+/** A quiz or writing practice round after the front word was answered: a
+ *  miss comes back as `again` (a new question, or Recall only) MIN_GAP
+ *  words later, or last when fewer are left; a right answer finishes the
+ *  word. */
+export function afterRetryPractice(run: Run, grade: Grade, again: QueueItem): Run {
   const [current, ...rest] = run.queue;
   const id = current.word.id;
   if (grade !== Rating.Again) {
@@ -180,6 +184,13 @@ export function afterQuizPractice(run: Run, grade: Grade, again: QueueItem): Run
     queue: [...rest.slice(0, at), again, ...rest.slice(at)],
     firstAnswers: withFirstAnswer(run, id, grade),
   };
+}
+
+/** The run without its front card, which counts as finished: a word the
+ *  writing pad can't write (its stroke data didn't load). */
+export function skipFront(run: Run): Run {
+  const [current, ...rest] = run.queue;
+  return { ...run, queue: rest, finished: new Set(run.finished).add(current.word.id) };
 }
 
 /** The run with the card for word `id`, if it's still queued, replaced by

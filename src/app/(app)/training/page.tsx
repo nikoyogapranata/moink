@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { TrainingHub } from "@/components/training/TrainingHub";
 import { createClient } from "@/lib/supabase/server";
 import { hskSet } from "@/lib/training/deck";
-import { loadQueue, loadTrainingProfile } from "@/lib/training/server";
+import { loadQueue, loadTrainingProfile, loadWritingQueue } from "@/lib/training/server";
 
 export const metadata: Metadata = {
   title: "Training - moink",
@@ -16,7 +16,7 @@ export default async function TrainingPage() {
   } = await supabase.auth.getUser();
 
   const now = new Date();
-  const { dailyNewWords, hskLevel, days } = await loadTrainingProfile(supabase, user!.id, now);
+  const { dailyNewWords, dailyNewWriting, hskLevel, days } = await loadTrainingProfile(supabase, user!.id, now);
 
   // Recognition cards only; head: true returns just the count.
   const cards = () =>
@@ -26,8 +26,12 @@ export default async function TrainingPage() {
       .eq("user_id", user!.id)
       .eq("skill", "recognition");
 
-  const [queue, dueNow, learning, dueTomorrow] = await Promise.all([
+  const [queue, writing, dueNow, learning, dueTomorrow] = await Promise.all([
     loadQueue(supabase, days.today, now),
+    loadWritingQueue(supabase, days.today, now).catch((error) => {
+      console.error("TrainingPage: couldn't load the writing queue.", error);
+      return [];
+    }),
     cards().eq("suspended", false).neq("state", 0).lte("due", now.toISOString()),
     cards().neq("state", 0),
     cards()
@@ -44,9 +48,11 @@ export default async function TrainingPage() {
       due={dueNow.count ?? 0}
       newCount={fresh.length}
       newFromDictionary={fresh.filter((item) => item.card !== null).length}
+      toWrite={writing.length}
       learning={learning.count ?? 0}
       dueTomorrow={dueTomorrow.count ?? 0}
       dailyNewWords={dailyNewWords}
+      dailyNewWriting={dailyNewWriting}
       defaultDeckSet={hskSet(hskLevel)}
     />
   );

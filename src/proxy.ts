@@ -4,8 +4,8 @@ import { getHomePath } from "@/lib/supabase/profile";
 
 // Signed-in screens that need a finished profile: everything in the
 // src/app/(app) and src/app/(focus) route groups (/training covers the
-// focus-mode /training/review, /training/flashcards and /training/quiz).
-// Add new app routes here.
+// focus-mode /training/review, /training/flashcards, /training/quiz and
+// /training/writing). Add new app routes here.
 const APP_ROUTES = [
   "/dashboard",
   "/training",

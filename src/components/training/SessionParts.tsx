@@ -6,8 +6,10 @@ import Link from "next/link";
 import { useEffect, useRef, type ReactNode } from "react";
 
 import { DIRECTION_LABELS, type Direction } from "@/lib/training/deck";
+import type { QueueItem } from "@/lib/training/queue";
 
 import { baoImage } from "./bao";
+import { MISSING_GLOSS } from "./FlashCard";
 import { useReducedMotion } from "./hooks";
 
 const FOCUS_RING = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rust";
@@ -24,10 +26,21 @@ export function SessionFrame({ children }: { children: ReactNode }) {
   );
 }
 
-export function DirectionToggle({ value, onChange }: { value: Direction; onChange: (next: Direction) => void }) {
+/** Two or more pressed-or-not buttons in a pill. */
+export function SegmentedControl<T extends string>({
+  label,
+  options,
+  value,
+  onChange,
+}: {
+  label: string;
+  options: readonly { id: T; label: string }[];
+  value: T;
+  onChange: (next: T) => void;
+}) {
   return (
-    <div role="group" aria-label="Card direction" className="inline-flex rounded-pill bg-highlight p-1">
-      {(["hanzi", "meaning"] as const).map((id) => (
+    <div role="group" aria-label={label} className="inline-flex rounded-pill bg-highlight p-1">
+      {options.map(({ id, label: text }) => (
         <button
           key={id}
           type="button"
@@ -37,11 +50,17 @@ export function DirectionToggle({ value, onChange }: { value: Direction; onChang
             value === id ? "bg-surface-raised text-bark shadow-float" : "text-bark-muted hover:text-bark"
           }`}
         >
-          {DIRECTION_LABELS[id]}
+          {text}
         </button>
       ))}
     </div>
   );
+}
+
+const DIRECTIONS = (["hanzi", "meaning"] as const).map((id) => ({ id, label: DIRECTION_LABELS[id] }));
+
+export function DirectionToggle({ value, onChange }: { value: Direction; onChange: (next: Direction) => void }) {
+  return <SegmentedControl label="Card direction" options={DIRECTIONS} value={value} onChange={onChange} />;
 }
 
 /** Shuffle on or off, with its tooltip. The tooltip is for sighted mouse
@@ -71,7 +90,8 @@ function ShuffleToggle({ on, onToggle }: { on: boolean; onToggle: () => void }) 
 }
 
 /** Close, progress, counter, Shuffle (practice only) and Reset; then the
- *  direction toggle (flashcards only) and the first-answer pills. */
+ *  direction toggle (flashcards), or another `control`, and the
+ *  first-answer pills. */
 export function SessionHeader({
   finished,
   total,
@@ -81,6 +101,7 @@ export function SessionHeader({
   onDirection,
   onReset,
   shuffle,
+  control,
   practiceRound = false,
 }: {
   finished: number;
@@ -91,6 +112,8 @@ export function SessionHeader({
   onDirection?: (next: Direction) => void;
   onReset: () => void;
   shuffle?: { on: boolean; onToggle: () => void };
+  /** In place of the direction toggle. */
+  control?: ReactNode;
   practiceRound?: boolean;
 }) {
   return (
@@ -123,7 +146,7 @@ export function SessionHeader({
         </div>
       </div>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        {direction && onDirection ? <DirectionToggle value={direction} onChange={onDirection} /> : <span />}
+        {control ?? (direction && onDirection ? <DirectionToggle value={direction} onChange={onDirection} /> : <span />)}
         <p className="flex flex-wrap items-center gap-2">
           {practiceRound && <span className={`${PILL} bg-highlight text-bark`}>Practice round · not saved</span>}
           <span className={`${PILL} bg-good-tint text-good-ink`}>{gotIt} got it</span>
@@ -207,5 +230,29 @@ export function DoneScreen({
       {details}
       <div className="flex w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">{children}</div>
     </main>
+  );
+}
+
+/** The done screen's list of words missed at least once. */
+export function MissedWords({ items }: { items: QueueItem[] }) {
+  return (
+    <section aria-labelledby="missed-title" className="w-full text-left">
+      <h2 id="missed-title" className="font-heading text-h3 font-bold text-bark">
+        Missed at least once
+      </h2>
+      <ul className="mt-2 divide-y-[1.5px] divide-line rounded-lg border-[1.5px] border-line bg-surface-raised">
+        {items.map(({ word }) => (
+          <li key={word.id} className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 px-3 py-2">
+            <span lang="zh-CN" className="shrink-0 font-hanzi text-[20px] font-medium leading-7 text-bark">
+              {word.simplified}
+            </span>
+            <span className="shrink-0 font-body text-body font-medium text-rust-dark">{word.pinyin}</span>
+            <span className="min-w-40 flex-1 font-body text-body wrap-break-word text-bark">
+              {word.gloss ?? MISSING_GLOSS}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }

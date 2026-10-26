@@ -20,7 +20,7 @@ export default async function ReviewPage() {
   // Which cards are quiz questions is picked here, so the first render
   // matches on the server and the client.
   const batch = await loadReviewBatch(supabase, days.today, now);
-  if (batch.items.length === 0) redirect("/training");
+  if (batch.items.length === 0 && batch.writing.length === 0) redirect("/training");
 
   return <ReviewSession initialBatch={batch} />;
 }

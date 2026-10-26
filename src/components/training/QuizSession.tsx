@@ -7,7 +7,7 @@ import { Rating } from "ts-fsrs";
 import { Button } from "@/components/ui/Button";
 import { inGridOrder, shuffle } from "@/lib/training/deck";
 import {
-  afterQuizPractice,
+  afterRetryPractice,
   reorderUnanswered,
   runStats,
   startPractice,
@@ -16,10 +16,9 @@ import {
 import { pickShowing, type QuizBank, type QuizFormat } from "@/lib/training/quiz";
 
 import { saveLastQuizShuffle } from "./deckStore";
-import { MISSING_GLOSS } from "./FlashCard";
 import { useToast } from "./hooks";
 import { QuizStage } from "./QuizStage";
-import { DoneScreen, SessionFrame, SessionHeader, Toast } from "./SessionParts";
+import { DoneScreen, MissedWords, SessionFrame, SessionHeader, Toast } from "./SessionParts";
 
 /**
  * A built quiz: one question per word, each in a random format among
@@ -71,7 +70,7 @@ export function QuizSession({
   // lost.
   async function answer(gotIt: boolean) {
     return () =>
-      setRun((r) => afterQuizPractice(r, gotIt ? Rating.Good : Rating.Again, reshow(r.queue[0])));
+      setRun((r) => afterRetryPractice(r, gotIt ? Rating.Good : Rating.Again, reshow(r.queue[0])));
   }
 
   if (!current?.quiz) {
@@ -118,28 +117,5 @@ export function QuizSession({
         />
       </main>
     </SessionFrame>
-  );
-}
-
-function MissedWords({ items }: { items: QueueItem[] }) {
-  return (
-    <section aria-labelledby="missed-title" className="w-full text-left">
-      <h2 id="missed-title" className="font-heading text-h3 font-bold text-bark">
-        Missed at least once
-      </h2>
-      <ul className="mt-2 divide-y-[1.5px] divide-line rounded-lg border-[1.5px] border-line bg-surface-raised">
-        {items.map(({ word }) => (
-          <li key={word.id} className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 px-3 py-2">
-            <span lang="zh-CN" className="shrink-0 font-hanzi text-[20px] font-medium leading-7 text-bark">
-              {word.simplified}
-            </span>
-            <span className="shrink-0 font-body text-body font-medium text-rust-dark">{word.pinyin}</span>
-            <span className="min-w-40 flex-1 font-body text-body wrap-break-word text-bark">
-              {word.gloss ?? MISSING_GLOSS}
-            </span>
-          </li>
-        ))}
-      </ul>
-    </section>
   );
 }

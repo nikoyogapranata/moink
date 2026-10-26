@@ -158,44 +158,73 @@ export function QuizQuestion({
           it shows. */}
       <div className="mx-auto min-h-44 w-full max-w-md">
         {answer ? (
-          <div className={`rounded-[18px] p-4 ${answer.right ? "bg-good-tint" : "bg-again-tint"} ${motion}`}>
-            <div className="flex items-start gap-2">
-              <div className="min-w-0 flex-1">
-                <p
-                  className={`flex items-center gap-1.5 font-heading text-h2 font-bold ${
-                    answer.right ? "text-good-ink" : "text-again-ink"
-                  }`}
-                >
-                  {answer.right ? <Check size={20} strokeWidth={3} aria-hidden="true" /> : <X size={20} strokeWidth={3} aria-hidden="true" />}
-                  {answer.right ? "Nice!" : "Not quite"}
-                </p>
-                <p className="mt-0.5 font-body text-body wrap-break-word text-bark">
-                  <span lang="zh-CN" className="font-hanzi font-medium">
-                    {word.simplified}
-                  </span>{" "}
-                  {word.pinyin} · {gloss}
-                </p>
-              </div>
-              <AudioButton text={word.simplified} />
-            </div>
-            <button
-              ref={continueRef}
-              type="button"
-              onClick={onContinue}
-              className={`mt-3 flex h-12 w-full items-center justify-center rounded-pill font-heading text-h3 font-bold text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rust focus-visible:ring-offset-2 ${
-                answer.right
-                  ? "bg-got-it hover:bg-got-it-strong focus-visible:ring-offset-good-tint"
-                  : "bg-miss hover:bg-miss-strong focus-visible:ring-offset-again-tint"
-              }`}
-            >
-              Continue
-            </button>
-          </div>
+          <ResultBar
+            right={answer.right}
+            title={answer.right ? "Nice!" : "Not quite"}
+            word={word}
+            continueRef={continueRef}
+            onContinue={onContinue}
+            className={motion}
+          />
         ) : (
           <p className={HINT}>1 to 4 to answer · Enter to continue</p>
         )}
       </div>
     </>
+  );
+}
+
+/** The result under a quiz question or the writing pad: green or red,
+ *  a title (and a detail line), the full word with audio, and Continue
+ *  (white text on got-it 5.1:1, on miss 6.5:1). */
+export function ResultBar({
+  right,
+  title,
+  detail,
+  word,
+  continueRef,
+  onContinue,
+  className = "",
+}: {
+  right: boolean;
+  title: string;
+  detail?: string;
+  word: QueueWord;
+  continueRef: Ref<HTMLButtonElement>;
+  onContinue: () => void;
+  className?: string;
+}) {
+  return (
+    <div className={`rounded-[18px] p-4 ${right ? "bg-good-tint" : "bg-again-tint"} ${className}`}>
+      <div className="flex items-start gap-2">
+        <div className="min-w-0 flex-1">
+          <p className={`flex items-center gap-1.5 font-heading text-h2 font-bold ${right ? "text-good-ink" : "text-again-ink"}`}>
+            {right ? <Check size={20} strokeWidth={3} aria-hidden="true" /> : <X size={20} strokeWidth={3} aria-hidden="true" />}
+            {title}
+          </p>
+          {detail && <p className={`font-body text-body font-medium ${right ? "text-good-ink" : "text-again-ink"}`}>{detail}</p>}
+          <p className="mt-0.5 font-body text-body wrap-break-word text-bark">
+            <span lang="zh-CN" className="font-hanzi font-medium">
+              {word.simplified}
+            </span>{" "}
+            {word.pinyin} · {word.gloss ?? MISSING_GLOSS}
+          </p>
+        </div>
+        <AudioButton text={word.simplified} />
+      </div>
+      <button
+        ref={continueRef}
+        type="button"
+        onClick={onContinue}
+        className={`mt-3 flex h-12 w-full items-center justify-center rounded-pill font-heading text-h3 font-bold text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rust focus-visible:ring-offset-2 ${
+          right
+            ? "bg-got-it hover:bg-got-it-strong focus-visible:ring-offset-good-tint"
+            : "bg-miss hover:bg-miss-strong focus-visible:ring-offset-again-tint"
+        }`}
+      >
+        Continue
+      </button>
+    </div>
   );
 }
 

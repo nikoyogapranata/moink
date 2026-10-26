@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeftRight, Layers, ListChecks, Play } from "lucide-react";
+import { ArrowLeftRight, Layers, ListChecks, PenLine, Play } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useId, useOptimistic, useRef, useState, useTransition, type ReactNode, type Ref } from "react";
@@ -8,19 +8,20 @@ import { useEffect, useId, useOptimistic, useRef, useState, useTransition, type 
 import { PageHeader } from "@/components/app/PageHeader";
 import { CARD } from "@/components/dictionary/SideCards";
 import { Button } from "@/components/ui/Button";
-import { setDailyNewWords } from "@/lib/training/actions";
-import { DAILY_NEW_WORD_OPTIONS } from "@/lib/training/daily";
+import { setDailyNewWords, setDailyNewWriting } from "@/lib/training/actions";
+import { DAILY_NEW_WORD_OPTIONS, DAILY_NEW_WRITING_OPTIONS } from "@/lib/training/daily";
 import { DIRECTION_LABELS, type DeckSet, type Direction } from "@/lib/training/deck";
 
 import { baoImage, type BaoPose } from "./bao";
 import { DeckBuilder } from "./DeckBuilder";
-import { practiceDeckHref, practiceQuizHref, useLastDeck, useLastQuiz } from "./deckStore";
+import { practiceDeckHref, practiceQuizHref, practiceWritingHref, useLastDeck, useLastQuiz, useLastWriting } from "./deckStore";
 
 const REVIEW_HREF = "/training/review";
 
 // Rough time per card for the estimate on the review card.
 const SECONDS_PER_DUE = 25;
 const SECONDS_PER_NEW = 40;
+const SECONDS_PER_WRITE = 60;
 
 const FOCUS_RING = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rust";
 
@@ -44,6 +45,7 @@ function Bao({ pose, className }: { pose: BaoPose; className: string }) {
 function TodayCard({
   due,
   newCount,
+  toWrite,
   newFromDictionary,
   dueTomorrow,
   dailyNewWords,
@@ -52,13 +54,15 @@ function TodayCard({
 }: {
   due: number;
   newCount: number;
+  /** Writing cards in Today's review: due and new. */
+  toWrite: number;
   newFromDictionary: number;
   dueTomorrow: number;
   dailyNewWords: number;
   nothingStarted: boolean;
   onChangeLimit: () => void;
 }) {
-  if (due === 0 && newCount === 0) {
+  if (due === 0 && newCount === 0 && toWrite === 0) {
     const limitZero = nothingStarted && dailyNewWords === 0;
     return (
       <section aria-labelledby="today-title" className={`${CARD} flex items-center justify-between gap-4`}>
@@ -88,7 +92,10 @@ function TodayCard({
     );
   }
 
-  const minutes = Math.max(1, Math.round((due * SECONDS_PER_DUE + newCount * SECONDS_PER_NEW) / 60));
+  const minutes = Math.max(
+    1,
+    Math.round((due * SECONDS_PER_DUE + newCount * SECONDS_PER_NEW + toWrite * SECONDS_PER_WRITE) / 60),
+  );
 
   return (
     <section aria-labelledby="today-title" className={`${CARD} flex items-end justify-between gap-4`}>
@@ -96,7 +103,7 @@ function TodayCard({
         <h2 id="today-title" className="font-heading text-h2 font-bold text-bark">
           Today&apos;s review
         </h2>
-        <dl className="mt-3 flex gap-8">
+        <dl className="mt-3 flex gap-6 sm:gap-8">
           <div>
             <dt className="sr-only">Due</dt>
             <dd className="font-heading text-[40px] font-bold leading-[44px] text-rust-dark">{due}</dd>
@@ -109,6 +116,13 @@ function TodayCard({
             <dd className="font-heading text-[40px] font-bold leading-[44px] text-deep-grass">{newCount}</dd>
             <dd aria-hidden="true" className="font-body text-body text-bark-muted">
               new
+            </dd>
+          </div>
+          <div>
+            <dt className="sr-only">To write</dt>
+            <dd className="font-heading text-[40px] font-bold leading-[44px] text-bamboo-gold-dark">{toWrite}</dd>
+            <dd aria-hidden="true" className="font-body text-body text-bark-muted">
+              to write
             </dd>
           </div>
         </dl>
@@ -328,18 +342,72 @@ function QuizCard({ defaultSet }: { defaultSet: DeckSet }) {
   );
 }
 
-/* Daily new-words limit */
+/** Writing: Build a writing set opens the builder in writing mode, and a
+ *  quick start runs the last set built. */
+function WritingCard({ defaultSet }: { defaultSet: DeckSet }) {
+  const [open, setOpen] = useState(false);
+  const lastWriting = useLastWriting();
+  const buildRef = useRef<HTMLButtonElement>(null);
+
+  return (
+    <section aria-labelledby="writing-title" className={`${CARD} flex flex-col gap-3`}>
+      <span className="flex h-11 w-11 items-center justify-center rounded-md bg-learning-tint text-learning-ink">
+        <PenLine size={22} aria-hidden="true" />
+      </span>
+      <div>
+        <h3 id="writing-title" className="font-heading text-h3 font-bold text-bark">
+          Writing
+        </h3>
+        <p className="font-body text-body text-bark-muted">Trace it, then write from memory</p>
+      </div>
+      <Button ref={buildRef} aria-haspopup="dialog" onClick={() => setOpen(true)} className="mt-auto self-start">
+        Build a writing set
+      </Button>
+      {lastWriting && lastWriting.ids.length > 0 && (
+        <Link
+          href="/training/writing"
+          onClick={() => practiceWritingHref(lastWriting)}
+          className={`inline-flex items-center gap-1.5 self-start rounded-sm font-body text-body font-medium text-rust-dark underline-offset-4 hover:underline ${FOCUS_RING}`}
+        >
+          <Play size={16} aria-hidden="true" />
+          Last set · {lastWriting.ids.length} {lastWriting.ids.length === 1 ? "word" : "words"}
+        </Link>
+      )}
+      {open && (
+        <DeckBuilder
+          mode="writing"
+          defaultSet={defaultSet}
+          onClose={() => {
+            setOpen(false);
+            buildRef.current?.focus();
+          }}
+        />
+      )}
+    </section>
+  );
+}
+
+/* Daily limits */
+
+type LimitKind = "words" | "writing";
+
+const LIMITS: Record<LimitKind, { label: string; options: readonly number[]; save: (n: number) => Promise<{ ok: boolean }> }> = {
+  words: { label: "New words per day", options: DAILY_NEW_WORD_OPTIONS, save: setDailyNewWords },
+  writing: { label: "New writing per day", options: DAILY_NEW_WRITING_OPTIONS, save: setDailyNewWriting },
+};
 
 function DailyLimitPicker({
-  value,
+  words,
+  writing,
   open,
   onOpenChange,
 }: {
-  value: number;
+  words: number;
+  writing: number;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const [optimistic, setOptimistic] = useOptimistic(value);
+  const [optimistic, setOptimistic] = useOptimistic({ words, writing });
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const panelId = useId();
@@ -369,14 +437,13 @@ function DailyLimitPicker({
     };
   }, [open, onOpenChange]);
 
-  function choose(next: number) {
+  /** Saves one limit; the panel stays open so the other can change too. */
+  function choose(kind: LimitKind, next: number) {
     setError(null);
-    onOpenChange(false);
-    triggerRef.current?.focus();
-    if (next === value) return;
+    if (next === (kind === "words" ? words : writing)) return;
     startTransition(async () => {
-      setOptimistic(next);
-      const result = await setDailyNewWords(next).catch(() => ({ ok: false }));
+      setOptimistic((current) => ({ ...current, [kind]: next }));
+      const result = await LIMITS[kind].save(next).catch(() => ({ ok: false }));
       if (!result.ok) setError("Couldn't save. Try again.");
     });
   }
@@ -385,10 +452,12 @@ function DailyLimitPicker({
     // Full row on phones, so the label and Change stay on one line.
     <div ref={rootRef} className="relative col-span-2 sm:col-span-1">
       <p className="font-heading text-h2 font-bold text-bark">
-        {optimistic} <span className="font-body text-body font-normal text-bark-muted">/ day</span>
+        {optimistic.words} <span className="font-body text-body font-normal text-bark-muted">/ day</span>
       </p>
-      <div className="flex items-center gap-2">
-        <span className="font-body text-body text-bark-muted">New words</span>
+      <div className="flex flex-wrap items-center gap-x-2">
+        <span className="font-body text-body text-bark-muted">
+          New words · {optimistic.writing} to write
+        </span>
         <button
           ref={triggerRef}
           type="button"
@@ -398,7 +467,7 @@ function DailyLimitPicker({
           onClick={() => onOpenChange(!open)}
           className={`rounded-sm font-body text-body font-medium text-rust-dark underline underline-offset-4 disabled:opacity-60 ${FOCUS_RING}`}
         >
-          Change<span className="sr-only"> daily new words</span>
+          Change<span className="sr-only"> daily limits</span>
         </button>
       </div>
       {error && (
@@ -410,29 +479,43 @@ function DailyLimitPicker({
         <div
           id={panelId}
           role="group"
-          aria-label="New words per day"
+          aria-label="Daily limits"
           // Above on phones, so the floating tab bar can't cover it.
-          className="absolute bottom-full left-0 z-20 mb-2 w-64 rounded-lg border-[1.5px] border-line bg-surface-raised p-3 shadow-float sm:bottom-auto sm:top-full sm:mb-0 sm:mt-2"
+          className="absolute bottom-full left-0 z-20 mb-2 flex w-72 flex-col gap-3 rounded-lg border-[1.5px] border-line bg-surface-raised p-3 shadow-float sm:bottom-auto sm:top-full sm:mb-0 sm:mt-2"
         >
-          <p className="px-1 pb-2 font-body text-body font-medium text-bark">New words per day</p>
-          <div className="grid grid-cols-3 gap-2">
-            {DAILY_NEW_WORD_OPTIONS.map((n, i) => (
-              <button
-                key={n}
-                ref={i === 0 ? firstOptionRef : undefined}
-                type="button"
-                aria-pressed={n === optimistic}
-                onClick={() => choose(n)}
-                className={`h-11 rounded-md border-[1.5px] font-heading text-h3 font-bold transition-colors ${FOCUS_RING} ${
-                  n === optimistic
-                    ? "border-rust-dark bg-highlight text-bark"
-                    : "border-line text-bark hover:bg-highlight/60"
-                }`}
-              >
-                {n}
-              </button>
-            ))}
-          </div>
+          {(["words", "writing"] as const).map((kind) => (
+            <div key={kind} role="group" aria-label={LIMITS[kind].label}>
+              <p className="px-1 pb-2 font-body text-body font-medium text-bark">{LIMITS[kind].label}</p>
+              <div className="grid grid-cols-6 gap-1.5">
+                {LIMITS[kind].options.map((n, i) => (
+                  <button
+                    key={n}
+                    ref={kind === "words" && i === 0 ? firstOptionRef : undefined}
+                    type="button"
+                    aria-pressed={n === optimistic[kind]}
+                    onClick={() => choose(kind, n)}
+                    className={`h-11 rounded-md border-[1.5px] font-heading text-h3 font-bold transition-colors ${FOCUS_RING} ${
+                      n === optimistic[kind]
+                        ? "border-rust-dark bg-highlight text-bark"
+                        : "border-line text-bark hover:bg-highlight/60"
+                    }`}
+                  >
+                    {n}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => {
+              onOpenChange(false);
+              triggerRef.current?.focus();
+            }}
+            className={`self-end rounded-sm px-1 font-body text-body font-medium text-rust-dark underline-offset-4 hover:underline ${FOCUS_RING}`}
+          >
+            Done
+          </button>
         </div>
       )}
     </div>
@@ -454,17 +537,21 @@ export function TrainingHub({
   due,
   newCount,
   newFromDictionary,
+  toWrite,
   learning,
   dueTomorrow,
   dailyNewWords,
+  dailyNewWriting,
   defaultDeckSet,
 }: {
   due: number;
   newCount: number;
   newFromDictionary: number;
+  toWrite: number;
   learning: number;
   dueTomorrow: number;
   dailyNewWords: number;
+  dailyNewWriting: number;
   /** The builder's set when there's no last deck: the user's HSK level. */
   defaultDeckSet: DeckSet;
 }) {
@@ -477,6 +564,7 @@ export function TrainingHub({
       <TodayCard
         due={due}
         newCount={newCount}
+        toWrite={toWrite}
         newFromDictionary={newFromDictionary}
         dueTomorrow={dueTomorrow}
         dailyNewWords={dailyNewWords}
@@ -488,18 +576,19 @@ export function TrainingHub({
         <h2 id="modes-title" className="font-heading text-h2 font-bold text-bark">
           Practice by mode
         </h2>
-        {/* Flashcards takes two columns at xl for its direction tiles; the
-            last column is kept for Writing and Listening. */}
+        {/* Flashcards takes two columns at xl for its direction tiles;
+            Listening will start the next row. */}
         <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <FlashcardsCard defaultSet={defaultDeckSet} />
           <QuizCard defaultSet={defaultDeckSet} />
+          <WritingCard defaultSet={defaultDeckSet} />
         </div>
       </section>
 
       <section aria-label="Your training" className={`${CARD} grid grid-cols-2 gap-x-4 gap-y-5 sm:grid-cols-3`}>
         <Stat value={learning} label="Words learning" />
         <Stat value={dueTomorrow} label="Due tomorrow" />
-        <DailyLimitPicker value={dailyNewWords} open={pickerOpen} onOpenChange={setPickerOpen} />
+        <DailyLimitPicker words={dailyNewWords} writing={dailyNewWriting} open={pickerOpen} onOpenChange={setPickerOpen} />
       </section>
     </div>
   );
