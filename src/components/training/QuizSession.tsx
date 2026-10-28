@@ -18,7 +18,7 @@ import { pickShowing, showingFields, type QuestionFormat, type QuizBank } from "
 import { saveLastQuizShuffle, type QuestionKind } from "./deckStore";
 import { useToast } from "./hooks";
 import { ListenStage, QuizStage } from "./QuizStage";
-import { DoneScreen, MissedWords, SessionFrame, SessionHeader, Toast } from "./SessionParts";
+import { AddToTraining, DoneScreen, MissedWords, SessionFrame, SessionHeader, Toast, useAddToTraining } from "./SessionParts";
 
 const TEXT: Record<QuestionKind, { done: string; again: string }> = {
   quiz: { done: "Quiz done!", again: "Quiz missed words" },
@@ -52,6 +52,7 @@ export function QuizSession({
   const [round, setRound] = useState(0);
   const [shuffleOn, setShuffleOn] = useState(shuffled);
   const [toast, showToast] = useToast();
+  const training = useAddToTraining(items);
   // Questions play on their own after the session's first tap.
   const [audioUnlocked, setAudioUnlocked] = useState(false);
 
@@ -99,6 +100,7 @@ export function QuizSession({
         <Button variant={missed.length > 0 ? "secondary" : "primary"} onClick={() => restart(items)}>
           Start over
         </Button>
+        <AddToTraining training={training} />
         <Button variant="secondary" asChild>
           <Link href="/training">Back to Training</Link>
         </Button>
@@ -115,6 +117,7 @@ export function QuizSession({
         stillLearning={stats.stillLearning}
         onReset={() => restart(items)}
         shuffle={{ on: shuffleOn, onToggle: toggleShuffle }}
+        notSaved="practice"
       />
       <main className="relative flex flex-1 flex-col pb-[calc(16px+env(safe-area-inset-bottom))]">
         <Toast toast={toast} />

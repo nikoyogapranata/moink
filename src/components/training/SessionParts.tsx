@@ -1,11 +1,14 @@
 "use client";
 
-import { RefreshCw, Shuffle, X } from "lucide-react";
+import { Check, RefreshCw, Shuffle, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { AudioButton } from "@/components/dictionary/AudioButton";
+import { Button } from "@/components/ui/Button";
+import { devError } from "@/lib/dev";
+import { addToTraining, fetchUntrainedIds } from "@/lib/training/actions";
 import { DIRECTION_LABELS, type Direction } from "@/lib/training/deck";
 import type { QueueItem } from "@/lib/training/queue";
 
@@ -91,8 +94,8 @@ function ShuffleToggle({ on, onToggle }: { on: boolean; onToggle: () => void }) 
 }
 
 /** Close, progress, counter, Shuffle (practice only) and Reset; then the
- *  direction toggle (flashcards), or another `control`, and the
- *  first-answer pills. */
+ *  direction toggle (flashcards), or another `control`, the not-saved pill
+ *  and the first-answer pills. */
 export function SessionHeader({
   finished,
   total,
@@ -103,7 +106,7 @@ export function SessionHeader({
   onReset,
   shuffle,
   control,
-  practiceRound = false,
+  notSaved,
 }: {
   finished: number;
   total: number;
@@ -115,7 +118,9 @@ export function SessionHeader({
   shuffle?: { on: boolean; onToggle: () => void };
   /** In place of the direction toggle. */
   control?: ReactNode;
-  practiceRound?: boolean;
+  /** "practice" for a built deck, "round" for a practice round after
+   *  Today's review: neither saves anything. */
+  notSaved?: "practice" | "round";
 }) {
   return (
     <header className="flex flex-col gap-3 pb-4 pt-[calc(12px+env(safe-area-inset-top))]">
@@ -149,7 +154,11 @@ export function SessionHeader({
       <div className="flex flex-wrap items-center justify-between gap-2">
         {control ?? (direction && onDirection ? <DirectionToggle value={direction} onChange={onDirection} /> : <span />)}
         <p className="flex flex-wrap items-center gap-2">
-          {practiceRound && <span className={`${PILL} bg-highlight text-bark`}>Practice round · not saved</span>}
+          {notSaved && (
+            <span className={`${PILL} bg-highlight text-bark`}>
+              {notSaved === "round" ? "Practice round · not saved" : "Practice · not saved"}
+            </span>
+          )}
           <span className={`${PILL} bg-good-tint text-good-ink`}>{gotIt} got it</span>
           <span className={`${PILL} bg-learning-tint text-learning-ink`}>{stillLearning} still learning</span>
         </p>
@@ -259,5 +268,76 @@ export function MissedWords({ items, audio = false }: { items: QueueItem[]; audi
         ))}
       </ul>
     </section>
+  );
+}
+
+type AddState = { missing: number[] | null; status: "idle" | "adding" | "added" | "error" };
+
+/**
+ * Which of a practice deck's words aren't in the user's training yet,
+ * looked up when the session starts so the done screen has it at once,
+ * and `add` to put them in as New recognition cards (addToTraining).
+ * Nothing to add when the lookup fails: the button just doesn't show.
+ */
+export function useAddToTraining(items: QueueItem[]) {
+  const [state, setState] = useState<AddState>({ missing: null, status: "idle" });
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchUntrainedIds(items.map((item) => item.word.id))
+      .catch((error) => {
+        devError("useAddToTraining: fetchUntrainedIds threw.", error);
+        return null;
+      })
+      .then((missing) => {
+        if (cancelled) return;
+        if (!missing) devError("useAddToTraining: couldn't check which words are in training; see the server log.");
+        setState({ missing, status: "idle" });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [items]);
+
+  async function add() {
+    if (!state.missing?.length || state.status === "adding") return;
+    setState((s) => ({ ...s, status: "adding" }));
+    const result = await addToTraining(state.missing).catch((error) => {
+      devError("useAddToTraining: addToTraining threw.", error);
+      return { ok: false };
+    });
+    setState((s) => ({ ...s, status: result.ok ? "added" : "error" }));
+  }
+
+  return { ...state, add };
+}
+
+/** The done screen's "Add {n} new words to your training", then "Added".
+ *  Nothing when every word is in training already. */
+export function AddToTraining({ training }: { training: ReturnType<typeof useAddToTraining> }) {
+  const { missing, status, add } = training;
+  if (status === "added") {
+    return (
+      <p
+        role="status"
+        className="inline-flex h-11 items-center justify-center gap-1.5 px-2 font-body text-body font-medium text-deep-grass"
+      >
+        <Check size={18} aria-hidden="true" />
+        Added
+      </p>
+    );
+  }
+  if (!missing?.length) return null;
+  return (
+    <>
+      <Button variant="secondary" onClick={add} disabled={status === "adding"}>
+        Add {missing.length} new {missing.length === 1 ? "word" : "words"} to your training
+      </Button>
+      {status === "error" && (
+        <p role="alert" className="w-full font-body text-body text-again-ink sm:order-last">
+          Couldn&apos;t add them. Try again.
+        </p>
+      )}
+    </>
   );
 }

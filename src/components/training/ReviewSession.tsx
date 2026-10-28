@@ -252,7 +252,7 @@ export function ReviewSession({ initialBatch }: { initialBatch: ReviewBatch }) {
         onReset={() =>
           startRound(startPractice(cards.map(reshow)), startPractice(writingCards.map(firstWriting)), true)
         }
-        practiceRound={practiceRound}
+        notSaved={practiceRound ? "round" : undefined}
       />
       <main className="flex flex-1 flex-col pb-[calc(16px+env(safe-area-inset-bottom))]">
         {writing ? (

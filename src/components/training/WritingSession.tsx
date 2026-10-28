@@ -18,7 +18,7 @@ import { WRITING_STYLE_SHORT, type WritingStyle } from "@/lib/training/writing";
 
 import { updateLastWriting } from "./deckStore";
 import { useToast } from "./hooks";
-import { DoneScreen, MissedWords, SegmentedControl, SessionFrame, SessionHeader, Toast } from "./SessionParts";
+import { AddToTraining, DoneScreen, MissedWords, SegmentedControl, SessionFrame, SessionHeader, Toast, useAddToTraining } from "./SessionParts";
 import { WritingStage } from "./WritingStage";
 
 const STYLES = (["trace", "recall"] as const).map((id) => ({ id, label: WRITING_STYLE_SHORT[id] }));
@@ -57,6 +57,7 @@ export function WritingSession({
   const [style, setStyle] = useState(initialStyle);
   const [shuffleOn, setShuffleOn] = useState(shuffled);
   const [toast, showToast] = useToast();
+  const training = useAddToTraining(items);
 
   const current = run.queue[0];
   const stats = runStats(run);
@@ -105,6 +106,7 @@ export function WritingSession({
         <Button variant={missed.length > 0 ? "secondary" : "primary"} onClick={() => restart(items)}>
           Start over
         </Button>
+        <AddToTraining training={training} />
         <Button variant="secondary" asChild>
           <Link href="/training">Back to Training</Link>
         </Button>
@@ -121,6 +123,7 @@ export function WritingSession({
         stillLearning={stats.stillLearning}
         onReset={() => restart(items)}
         shuffle={{ on: shuffleOn, onToggle: toggleShuffle }}
+        notSaved="practice"
         control={<SegmentedControl label="Writing style" options={STYLES} value={style} onChange={chooseStyle} />}
       />
       <main className="relative flex flex-1 flex-col pb-[calc(16px+env(safe-area-inset-bottom))]">

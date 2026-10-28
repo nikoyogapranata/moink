@@ -864,30 +864,35 @@ export function DeckBuilder({
             to count them.
           </p>
         )}
-        <footer className="flex shrink-0 items-center justify-between gap-3 px-4 pb-[calc(12px+env(safe-area-inset-bottom))] pt-3 sm:px-6 md:pb-4">
-          <label className="flex cursor-pointer items-center gap-2 font-body text-body font-medium text-bark">
-            <input
-              type="checkbox"
-              checked={shuffleOn}
-              onChange={(e) => setShuffleOn(e.target.checked)}
-              className="h-5 w-5 accent-rust focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rust-dark"
-            />
-            Shuffle
-          </label>
-          <button
-            type="button"
-            onClick={start}
-            aria-disabled={selected.size === 0}
-            className={`inline-flex h-11 items-center justify-center whitespace-nowrap rounded-pill px-5 font-heading text-[19px] font-bold leading-6 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rust/40 ${
-              selected.size === 0
-                ? "cursor-default bg-highlight text-bark-muted"
-                : "bg-rust text-background hover:bg-rust-dark"
-            }`}
-          >
-            {selected.size === 0
-              ? "Pick some words"
-              : `Start ${selected.size} ${quiz || writing ? (selected.size === 1 ? "word" : "words") : selected.size === 1 ? "card" : "cards"}`}
-          </button>
+        <footer className="flex shrink-0 flex-col gap-2 px-4 pb-[calc(12px+env(safe-area-inset-bottom))] pt-3 sm:px-6 md:pb-4">
+          <p className="font-body text-body-sm text-bark-muted">
+            Practice doesn&apos;t change your schedule. Use Today&apos;s review to save progress.
+          </p>
+          <div className="flex items-center justify-between gap-3">
+            <label className="flex cursor-pointer items-center gap-2 font-body text-body font-medium text-bark">
+              <input
+                type="checkbox"
+                checked={shuffleOn}
+                onChange={(e) => setShuffleOn(e.target.checked)}
+                className="h-5 w-5 accent-rust focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rust-dark"
+              />
+              Shuffle
+            </label>
+            <button
+              type="button"
+              onClick={start}
+              aria-disabled={selected.size === 0}
+              className={`inline-flex h-11 items-center justify-center whitespace-nowrap rounded-pill px-5 font-heading text-[19px] font-bold leading-6 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rust/40 ${
+                selected.size === 0
+                  ? "cursor-default bg-highlight text-bark-muted"
+                  : "bg-rust text-background hover:bg-rust-dark"
+              }`}
+            >
+              {selected.size === 0
+                ? "Pick some words"
+                : `Start ${selected.size} ${quiz || writing ? (selected.size === 1 ? "word" : "words") : selected.size === 1 ? "card" : "cards"}`}
+            </button>
+          </div>
         </footer>
         <p aria-live="polite" className="sr-only">
           {notice}

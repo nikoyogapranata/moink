@@ -193,31 +193,55 @@ export async function fetchQuizDeck(
   }
 }
 
-export async function setDailyNewWords(value: number): Promise<{ ok: boolean }> {
-  if (!isDailyNewWordOption(value)) return { ok: false };
+/** Which of `ids` have no recognition card for the user yet, for the
+ *  practice done screen's "Add to your training". Reads only; null on a
+ *  bad id list or a failed load. */
+export async function fetchUntrainedIds(ids: number[]): Promise<number[] | null> {
+  if (!isIdList(ids)) return null;
+
+  const supabase = await createClient();
+  const userId = await signedInUserId(supabase);
+  if (!userId) return null;
+
+  try {
+    const training = new Set(await loadTrainingWordIds(supabase, userId));
+    return [...new Set(ids)].filter((id) => !training.has(id));
+  } catch (error) {
+    console.error("fetchUntrainedIds failed", error);
+    return null;
+  }
+}
+
+/**
+ * Adds `ids` to the user's training as New recognition cards, the same
+ * row the Dictionary's Add inserts (user_id, word_id and skill; the
+ * column defaults are an empty FSRS card). get_review_queue then brings
+ * them up in Today's review within the daily new-word limit. Words that
+ * already have a card are left as they are.
+ */
+export async function addToTraining(ids: number[]): Promise<{ ok: boolean }> {
+  if (!isIdList(ids) || ids.length === 0) return { ok: false };
 
   const supabase = await createClient();
   const userId = await signedInUserId(supabase);
   if (!userId) return { ok: false };
 
-  // .select() so an update that RLS filtered down to zero rows reads as a
-  // failure instead of a silent success.
-  const { data, error } = await supabase
-    .from("profiles")
-    .update({ daily_new_words: value })
-    .eq("id", userId)
-    .select("id");
-  if (error || !data?.length) {
-    console.error("setDailyNewWords failed", error);
+  const { error } = await supabase
+    .from("user_words")
+    .upsert(
+      [...new Set(ids)].map((wordId) => ({ user_id: userId, word_id: wordId, skill: "recognition" })),
+      { onConflict: "user_id,word_id,skill", ignoreDuplicates: true },
+    );
+  if (error) {
+    console.error("addToTraining failed", error);
     return { ok: false };
   }
-
-  refresh();
   return { ok: true };
 }
 
-export async function setDailyNewWriting(value: number): Promise<{ ok: boolean }> {
-  if (!isDailyNewWritingOption(value)) return { ok: false };
+/** Saves both daily limits at once: the limits dialog's Save. */
+export async function setDailyLimits(words: number, writing: number): Promise<{ ok: boolean }> {
+  if (!isDailyNewWordOption(words) || !isDailyNewWritingOption(writing)) return { ok: false };
 
   const supabase = await createClient();
   const userId = await signedInUserId(supabase);
@@ -227,11 +251,11 @@ export async function setDailyNewWriting(value: number): Promise<{ ok: boolean }
   // failure instead of a silent success.
   const { data, error } = await supabase
     .from("profiles")
-    .update({ daily_new_writing: value })
+    .update({ daily_new_words: words, daily_new_writing: writing })
     .eq("id", userId)
     .select("id");
   if (error || !data?.length) {
-    console.error("setDailyNewWriting failed", error);
+    console.error("setDailyLimits failed", error);
     return { ok: false };
   }
 

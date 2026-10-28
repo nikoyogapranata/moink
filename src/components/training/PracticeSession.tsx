@@ -11,7 +11,7 @@ import { afterPractice, reorderUnanswered, runStats, startPractice, type QueueIt
 import { saveLastDeckShuffle } from "./deckStore";
 import { CardStage } from "./FlashCard";
 import { useDirection, useToast } from "./hooks";
-import { DoneScreen, SessionFrame, SessionHeader, Toast } from "./SessionParts";
+import { AddToTraining, DoneScreen, SessionFrame, SessionHeader, Toast, useAddToTraining } from "./SessionParts";
 
 /**
  * A built deck. Nothing here is saved: Still learning cards go to the end
@@ -36,6 +36,7 @@ export function PracticeSession({
   const [round, setRound] = useState(0);
   const [shuffleOn, setShuffleOn] = useState(shuffled);
   const [toast, showToast] = useToast();
+  const training = useAddToTraining(items);
 
   const current = run.queue[0];
   const stats = runStats(run);
@@ -73,6 +74,7 @@ export function PracticeSession({
         <Button variant={any ? "secondary" : "primary"} onClick={() => restart(items)}>
           Start over
         </Button>
+        <AddToTraining training={training} />
         <Button variant="secondary" asChild>
           <Link href="/training">Back to Training</Link>
         </Button>
@@ -91,6 +93,7 @@ export function PracticeSession({
         onDirection={setDirection}
         onReset={() => restart(items)}
         shuffle={{ on: shuffleOn, onToggle: toggleShuffle }}
+        notSaved="practice"
       />
       <main className="relative flex flex-1 flex-col pb-[calc(16px+env(safe-area-inset-bottom))]">
         <Toast toast={toast} />

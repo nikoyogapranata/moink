@@ -1,17 +1,19 @@
 "use client";
 
-import { ArrowLeftRight, Headphones, Layers, ListChecks, PenLine, Play, type LucideIcon } from "lucide-react";
+import { ArrowLeftRight, Headphones, Info, Layers, ListChecks, PenLine, Play, type LucideIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useId, useOptimistic, useRef, useState, useTransition, type ReactNode, type Ref } from "react";
+import { useEffect, useId, useRef, useState, useTransition, type ReactNode, type Ref } from "react";
 
 import { PageHeader } from "@/components/app/PageHeader";
 import { CARD } from "@/components/dictionary/SideCards";
 import { Button } from "@/components/ui/Button";
 import { NO_VOICE_HELP, useChineseVoiceStatus } from "@/lib/dictionary/speech";
-import { setDailyNewWords, setDailyNewWriting } from "@/lib/training/actions";
+import { devError } from "@/lib/dev";
+import { setDailyLimits } from "@/lib/training/actions";
 import { DAILY_NEW_WORD_OPTIONS, DAILY_NEW_WRITING_OPTIONS } from "@/lib/training/daily";
 import { DIRECTION_LABELS, type DeckSet, type Direction } from "@/lib/training/deck";
+import { WORD_STAT_INFO, type WordStats } from "@/lib/training/stats";
 
 import { baoImage, type BaoPose } from "./bao";
 import { DeckBuilder } from "./DeckBuilder";
@@ -130,7 +132,8 @@ function TodayCard({
         <Button asChild className="mt-4">
           <Link href={REVIEW_HREF}>Start review</Link>
         </Button>
-        <p className="mt-3 font-body text-body text-bark-muted">
+        <p className="mt-2 font-body text-body-sm text-bark-muted">Saves your progress and keeps your streak</p>
+        <p className="mt-2 font-body text-body text-bark-muted">
           About {minutes} min
           {newFromDictionary > 0 &&
             ` · ${newFromDictionary} of your new words ${newFromDictionary === 1 ? "is" : "are"} from the Dictionary`}
@@ -417,144 +420,237 @@ function ModeCard({ mode, defaultSet }: { mode: ModeId; defaultSet: DeckSet }) {
 /* Daily limits */
 
 type LimitKind = "words" | "writing";
+type Limits = Record<LimitKind, number>;
 
-const LIMITS: Record<LimitKind, { label: string; options: readonly number[]; save: (n: number) => Promise<{ ok: boolean }> }> = {
-  words: { label: "New words per day", options: DAILY_NEW_WORD_OPTIONS, save: setDailyNewWords },
-  writing: { label: "New writing per day", options: DAILY_NEW_WRITING_OPTIONS, save: setDailyNewWriting },
+const LIMITS: Record<LimitKind, { label: string; info: string; options: readonly number[] }> = {
+  words: {
+    label: "New words per day",
+    info: "New words introduced in Today's review",
+    options: DAILY_NEW_WORD_OPTIONS,
+  },
+  writing: {
+    label: "New writing per day",
+    info: "Words added to writing once you know them",
+    options: DAILY_NEW_WRITING_OPTIONS,
+  },
 };
 
-function DailyLimitPicker({
+/**
+ * The daily limits editor: a native modal dialog, centered from md up and
+ * a bottom sheet on phones, short enough to show in full. Choices apply
+ * on Save only; Cancel and Escape drop them. Mounted while open; the
+ * opener takes focus back in `onClose`.
+ */
+function DailyLimitsDialog({
   words,
   writing,
-  open,
-  onOpenChange,
+  onSaved,
+  onClose,
 }: {
   words: number;
   writing: number;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  /** Called with both limits once they're saved, before the dialog
+   *  closes. */
+  onSaved: (limits: Limits) => void;
+  /** Called after the dialog has closed. */
+  onClose: () => void;
 }) {
-  const [optimistic, setOptimistic] = useOptimistic({ words, writing });
+  const [draft, setDraft] = useState({ words, writing });
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const panelId = useId();
-  const rootRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const firstOptionRef = useRef<HTMLButtonElement>(null);
+  const titleId = useId();
+  const dialogRef = useRef<HTMLDialogElement>(null);
 
+  const onCloseRef = useRef(onClose);
   useEffect(() => {
-    if (!open) return;
-    rootRef.current?.scrollIntoView({ block: "nearest" });
-    (rootRef.current?.querySelector<HTMLButtonElement>("[aria-pressed=true]") ?? firstOptionRef.current)?.focus();
+    onCloseRef.current = onClose;
+  });
 
-    function onPointerDown(e: PointerEvent) {
-      if (!rootRef.current?.contains(e.target as Node)) onOpenChange(false);
+  // As in DeckBuilder: open on mount, and never close() in the cleanup
+  // (under Strict Mode its queued close event would land after the second
+  // showModal()). Focus starts on the chosen number of new words.
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) {
+      devError("DailyLimitsDialog: the dialog ref is null on mount, so it can't open.");
+      return;
     }
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") {
-        onOpenChange(false);
-        triggerRef.current?.focus();
+    if (!dialog.open) {
+      try {
+        dialog.showModal();
+      } catch (error) {
+        devError("DailyLimitsDialog: dialog.showModal() threw, so it isn't open.", error);
       }
     }
-    document.addEventListener("pointerdown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("pointerdown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open, onOpenChange]);
+    dialog.querySelector<HTMLButtonElement>("[aria-pressed=true]")?.focus();
+  }, []);
 
-  /** Saves one limit; the panel stays open so the other can change too. */
-  function choose(kind: LimitKind, next: number) {
+  function save() {
     setError(null);
-    if (next === (kind === "words" ? words : writing)) return;
+    if (draft.words === words && draft.writing === writing) {
+      dialogRef.current?.close();
+      return;
+    }
     startTransition(async () => {
-      setOptimistic((current) => ({ ...current, [kind]: next }));
-      const result = await LIMITS[kind].save(next).catch(() => ({ ok: false }));
-      if (!result.ok) setError("Couldn't save. Try again.");
+      const result = await setDailyLimits(draft.words, draft.writing).catch(() => ({ ok: false }));
+      if (!result.ok) {
+        setError("Couldn't save. Try again.");
+        return;
+      }
+      onSaved(draft);
+      dialogRef.current?.close();
     });
   }
 
   return (
-    // Full row on phones, so the label and Change stay on one line.
-    <div ref={rootRef} className="relative col-span-2 sm:col-span-1">
-      <p className="font-heading text-h2 font-bold text-bark">
-        {optimistic.words} <span className="font-body text-body font-normal text-bark-muted">/ day</span>
-      </p>
-      <div className="flex flex-wrap items-center gap-x-2">
-        <span className="font-body text-body text-bark-muted">
-          New words · {optimistic.writing} to write
-        </span>
-        <button
-          ref={triggerRef}
-          type="button"
-          aria-expanded={open}
-          aria-controls={panelId}
-          disabled={pending}
-          onClick={() => onOpenChange(!open)}
-          className={`rounded-sm font-body text-body font-medium text-rust-dark underline underline-offset-4 disabled:opacity-60 ${FOCUS_RING}`}
-        >
-          Change<span className="sr-only"> daily limits</span>
-        </button>
-      </div>
+    <dialog
+      ref={dialogRef}
+      aria-labelledby={titleId}
+      onClose={(e) => {
+        // A close event that lands while the dialog is open again is stale.
+        if (!e.currentTarget.open) onCloseRef.current();
+      }}
+      className="deck-dialog mx-0 mb-0 mt-auto hidden max-h-dvh w-full max-w-none flex-col gap-5 overflow-y-auto rounded-t-[22px] border-0 bg-surface-raised px-4 pb-[calc(16px+env(safe-area-inset-bottom))] pt-5 text-bark open:flex backdrop:bg-black/50 sm:px-6 md:m-auto md:w-[calc(100%-48px)] md:max-w-120 md:rounded-[22px] md:border-[1.5px] md:border-line md:pb-5"
+    >
+      <h2 id={titleId} className="font-heading text-h1 font-bold text-bark">
+        Daily limits
+      </h2>
+      {(["words", "writing"] as const).map((kind) => {
+        const { label, info, options } = LIMITS[kind];
+        const labelId = `${titleId}-${kind}`;
+        return (
+          <section key={kind} aria-labelledby={labelId}>
+            <h3 id={labelId} className="font-heading text-h3 font-bold text-bark">
+              {label}
+            </h3>
+            <p className="font-body text-body-sm text-bark-muted">{info}</p>
+            <div
+              role="group"
+              aria-labelledby={labelId}
+              className="mt-3 grid grid-cols-6 gap-1 rounded-lg bg-highlight p-1"
+            >
+              {options.map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  aria-pressed={n === draft[kind]}
+                  onClick={() => setDraft((current) => ({ ...current, [kind]: n }))}
+                  className={`h-12 rounded-md font-heading text-h3 font-bold tabular-nums transition-colors ${FOCUS_RING} ${
+                    n === draft[kind]
+                      ? "bg-surface-raised text-rust-dark shadow-float"
+                      : "text-bark-muted hover:bg-surface-raised/60 hover:text-bark"
+                  }`}
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
+          </section>
+        );
+      })}
       {error && (
-        <p role="alert" className="mt-1 font-body text-body text-again-ink">
+        <p role="alert" className="font-body text-body text-again-ink">
           {error}
         </p>
       )}
-      {open && (
-        <div
-          id={panelId}
-          role="group"
-          aria-label="Daily limits"
-          // Above on phones, so the floating tab bar can't cover it.
-          className="absolute bottom-full left-0 z-20 mb-2 flex w-72 flex-col gap-3 rounded-lg border-[1.5px] border-line bg-surface-raised p-3 shadow-float sm:bottom-auto sm:top-full sm:mb-0 sm:mt-2"
-        >
-          {(["words", "writing"] as const).map((kind) => (
-            <div key={kind} role="group" aria-label={LIMITS[kind].label}>
-              <p className="px-1 pb-2 font-body text-body font-medium text-bark">{LIMITS[kind].label}</p>
-              <div className="grid grid-cols-6 gap-1.5">
-                {LIMITS[kind].options.map((n, i) => (
-                  <button
-                    key={n}
-                    ref={kind === "words" && i === 0 ? firstOptionRef : undefined}
-                    type="button"
-                    aria-pressed={n === optimistic[kind]}
-                    onClick={() => choose(kind, n)}
-                    className={`h-11 rounded-md border-[1.5px] font-heading text-h3 font-bold transition-colors ${FOCUS_RING} ${
-                      n === optimistic[kind]
-                        ? "border-rust-dark bg-highlight text-bark"
-                        : "border-line text-bark hover:bg-highlight/60"
-                    }`}
-                  >
-                    {n}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={() => {
-              onOpenChange(false);
-              triggerRef.current?.focus();
-            }}
-            className={`self-end rounded-sm px-1 font-body text-body font-medium text-rust-dark underline-offset-4 hover:underline ${FOCUS_RING}`}
-          >
-            Done
-          </button>
-        </div>
-      )}
-    </div>
+      <footer className="flex flex-row-reverse flex-wrap items-center gap-3">
+        <Button onClick={save} disabled={pending}>
+          {pending ? "Saving…" : "Save"}
+        </Button>
+        <Button variant="secondary" onClick={() => dialogRef.current?.close()} disabled={pending}>
+          Cancel
+        </Button>
+      </footer>
+    </dialog>
   );
 }
 
-function Stat({ value, label }: { value: number; label: string }) {
+/* Stats */
+
+/** An (i) button with a one-sentence tooltip: shown on hover and keyboard
+ *  focus, and toggled by a tap. Screen readers get it as the button's
+ *  description. */
+function InfoTip({ label, info, align }: { label: string; info: string; align: "start" | "center" | "end" }) {
+  const [open, setOpen] = useState(false);
+  const tipId = useId();
   return (
-    <div>
-      <p className="font-heading text-h2 font-bold text-bark">{value}</p>
-      <p className="font-body text-body text-bark-muted">{label}</p>
-    </div>
+    <span className="group relative inline-flex align-middle">
+      <button
+        type="button"
+        aria-label={`About ${label}`}
+        aria-describedby={tipId}
+        onClick={() => setOpen((o) => !o)}
+        onBlur={() => setOpen(false)}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") setOpen(false);
+        }}
+        className={`-m-1.5 flex h-8 w-8 items-center justify-center rounded-full text-bark-muted transition-colors hover:text-bark ${FOCUS_RING}`}
+      >
+        <Info size={16} aria-hidden="true" />
+      </button>
+      <span
+        id={tipId}
+        role="tooltip"
+        className={`pointer-events-none absolute top-full z-20 mt-1.5 w-52 max-w-[calc(100vw-48px)] rounded-md bg-bark px-2.5 py-1.5 text-left font-body text-[13px] font-medium leading-5 text-background group-hover:block group-has-[:focus-visible]:block ${TIP_ALIGN[align]} ${
+          open ? "block" : "hidden"
+        }`}
+      >
+        {info}
+      </span>
+    </span>
+  );
+}
+
+const TIP_ALIGN = { start: "left-0", center: "left-1/2 -translate-x-1/2", end: "right-0" };
+
+/** The three stats in columns, each tooltip kept on screen by aligning it
+ *  with its column. */
+const STATS = [
+  { key: "started", align: "start" },
+  { key: "learned", align: "center" },
+  { key: "dueTomorrow", align: "end" },
+] as const;
+
+function StatsStrip({
+  stats,
+  dailyNewWords,
+  dailyNewWriting,
+  changeRef,
+  onChange,
+}: {
+  stats: WordStats;
+  dailyNewWords: number;
+  dailyNewWriting: number;
+  changeRef: Ref<HTMLButtonElement>;
+  onChange: () => void;
+}) {
+  return (
+    <section aria-label="Your training" className={`${CARD} flex flex-col gap-4`}>
+      <dl className="grid grid-cols-3 gap-x-3">
+        {STATS.map(({ key, align }) => {
+          const { label, info } = WORD_STAT_INFO[key];
+          return (
+            <div key={key} className="flex flex-col">
+              {/* The (i) flows after the label's last word when it wraps. */}
+              <dt className="order-last font-body text-body text-bark-muted">
+                {label}{" "}
+                <InfoTip label={label} info={info} align={align} />
+              </dt>
+              <dd className="font-heading text-h2 font-bold tabular-nums text-bark">{stats[key]}</dd>
+            </div>
+          );
+        })}
+      </dl>
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t-[1.5px] border-line pt-4">
+        <p className="font-body text-body text-bark">
+          <span className="font-bold tabular-nums">{dailyNewWords}</span> new words ·{" "}
+          <span className="font-bold tabular-nums">{dailyNewWriting}</span> writing / day
+        </p>
+        <Button ref={changeRef} variant="secondary" size="sm" aria-haspopup="dialog" onClick={onChange}>
+          Change<span className="sr-only"> daily limits</span>
+        </Button>
+      </div>
+    </section>
   );
 }
 
@@ -565,8 +661,7 @@ export function TrainingHub({
   newCount,
   newFromDictionary,
   toWrite,
-  learning,
-  dueTomorrow,
+  stats,
   dailyNewWords,
   dailyNewWriting,
   defaultDeckSet,
@@ -575,14 +670,25 @@ export function TrainingHub({
   newCount: number;
   newFromDictionary: number;
   toWrite: number;
-  learning: number;
-  dueTomorrow: number;
+  stats: WordStats;
   dailyNewWords: number;
   dailyNewWriting: number;
   /** The builder's set when there's no last deck: the user's HSK level. */
   defaultDeckSet: DeckSet;
 }) {
-  const [pickerOpen, setPickerOpen] = useState(false);
+  const [limitsOpen, setLimitsOpen] = useState(false);
+  // Focus returns here when the limits dialog closes, also when the Today
+  // card's "Change the limit" opened it: that link is gone once a limit
+  // above 0 is saved.
+  const changeRef = useRef<HTMLButtonElement>(null);
+  // The limits just saved, shown until the refreshed page (setDailyLimits
+  // refreshes it; that can take a few seconds) brings new props: while
+  // the props are still the ones from before the save.
+  const [saved, setSaved] = useState<{ limits: Limits; before: Limits } | null>(null);
+  const limits =
+    saved && saved.before.words === dailyNewWords && saved.before.writing === dailyNewWriting
+      ? saved.limits
+      : { words: dailyNewWords, writing: dailyNewWriting };
 
   return (
     <div className="flex flex-col gap-6">
@@ -593,10 +699,10 @@ export function TrainingHub({
         newCount={newCount}
         toWrite={toWrite}
         newFromDictionary={newFromDictionary}
-        dueTomorrow={dueTomorrow}
-        dailyNewWords={dailyNewWords}
-        nothingStarted={learning === 0}
-        onChangeLimit={() => setPickerOpen(true)}
+        dueTomorrow={stats.dueTomorrow}
+        dailyNewWords={limits.words}
+        nothingStarted={stats.started === 0}
+        onChangeLimit={() => setLimitsOpen(true)}
       />
 
       <section aria-labelledby="modes-title">
@@ -613,11 +719,25 @@ export function TrainingHub({
         </div>
       </section>
 
-      <section aria-label="Your training" className={`${CARD} grid grid-cols-2 gap-x-4 gap-y-5 sm:grid-cols-3`}>
-        <Stat value={learning} label="Words learning" />
-        <Stat value={dueTomorrow} label="Due tomorrow" />
-        <DailyLimitPicker words={dailyNewWords} writing={dailyNewWriting} open={pickerOpen} onOpenChange={setPickerOpen} />
-      </section>
+      <StatsStrip
+        stats={stats}
+        dailyNewWords={limits.words}
+        dailyNewWriting={limits.writing}
+        changeRef={changeRef}
+        onChange={() => setLimitsOpen(true)}
+      />
+
+      {limitsOpen && (
+        <DailyLimitsDialog
+          words={limits.words}
+          writing={limits.writing}
+          onSaved={(next) => setSaved({ limits: next, before: { words: dailyNewWords, writing: dailyNewWriting } })}
+          onClose={() => {
+            setLimitsOpen(false);
+            changeRef.current?.focus();
+          }}
+        />
+      )}
     </div>
   );
 }

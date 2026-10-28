@@ -4,6 +4,7 @@ import { TrainingHub } from "@/components/training/TrainingHub";
 import { createClient } from "@/lib/supabase/server";
 import { hskSet } from "@/lib/training/deck";
 import { loadQueue, loadTrainingProfile, loadWritingQueue } from "@/lib/training/server";
+import { loadWordStats } from "@/lib/training/stats";
 
 export const metadata: Metadata = {
   title: "Training - moink",
@@ -18,27 +19,21 @@ export default async function TrainingPage() {
   const now = new Date();
   const { dailyNewWords, dailyNewWriting, hskLevel, days } = await loadTrainingProfile(supabase, user!.id, now);
 
-  // Recognition cards only; head: true returns just the count.
-  const cards = () =>
-    supabase
-      .from("user_words")
-      .select("word_id", { count: "exact", head: true })
-      .eq("user_id", user!.id)
-      .eq("skill", "recognition");
-
-  const [queue, writing, dueNow, learning, dueTomorrow] = await Promise.all([
+  const [queue, writing, dueNow, stats] = await Promise.all([
     loadQueue(supabase, days.today, now),
     loadWritingQueue(supabase, days.today, now).catch((error) => {
       console.error("TrainingPage: couldn't load the writing queue.", error);
       return [];
     }),
-    cards().eq("suspended", false).neq("state", 0).lte("due", now.toISOString()),
-    cards().neq("state", 0),
-    cards()
+    supabase
+      .from("user_words")
+      .select("word_id", { count: "exact", head: true })
+      .eq("user_id", user!.id)
+      .eq("skill", "recognition")
       .eq("suspended", false)
       .neq("state", 0)
-      .gte("due", days.tomorrow.toISOString())
-      .lt("due", days.dayAfter.toISOString()),
+      .lte("due", now.toISOString()),
+    loadWordStats(supabase, user!.id, days),
   ]);
 
   const fresh = queue.filter((item) => item.isNew);
@@ -49,8 +44,7 @@ export default async function TrainingPage() {
       newCount={fresh.length}
       newFromDictionary={fresh.filter((item) => item.card !== null).length}
       toWrite={writing.length}
-      learning={learning.count ?? 0}
-      dueTomorrow={dueTomorrow.count ?? 0}
+      stats={stats}
       dailyNewWords={dailyNewWords}
       dailyNewWriting={dailyNewWriting}
       defaultDeckSet={hskSet(hskLevel)}
