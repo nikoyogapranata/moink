@@ -9,6 +9,7 @@ import { inGridOrder, shuffle } from "@/lib/training/deck";
 import {
   afterRetryPractice,
   reorderUnanswered,
+  runProgress,
   runStats,
   skipFront,
   startPractice,
@@ -117,8 +118,7 @@ export function WritingSession({
   return (
     <SessionFrame>
       <SessionHeader
-        finished={run.finished.size}
-        total={run.total}
+        progress={runProgress(run)}
         gotIt={stats.gotIt}
         stillLearning={stats.stillLearning}
         onReset={() => restart(items)}

@@ -6,7 +6,14 @@ import { Rating } from "ts-fsrs";
 
 import { Button } from "@/components/ui/Button";
 import { inGridOrder, shuffle, type Direction } from "@/lib/training/deck";
-import { afterPractice, reorderUnanswered, runStats, startPractice, type QueueItem } from "@/lib/training/queue";
+import {
+  afterPractice,
+  reorderUnanswered,
+  runProgress,
+  runStats,
+  startPractice,
+  type QueueItem,
+} from "@/lib/training/queue";
 
 import { saveLastDeckShuffle } from "./deckStore";
 import { CardStage } from "./FlashCard";
@@ -85,8 +92,7 @@ export function PracticeSession({
   return (
     <SessionFrame>
       <SessionHeader
-        finished={run.finished.size}
-        total={run.total}
+        progress={runProgress(run)}
         gotIt={stats.gotIt}
         stillLearning={stats.stillLearning}
         direction={direction}

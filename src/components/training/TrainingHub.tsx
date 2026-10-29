@@ -45,8 +45,22 @@ function Bao({ pose, className }: { pose: BaoPose; className: string }) {
 
 /* Today's review */
 
+const LATER_TODAY_INFO = "Words you just learned come back once more today to help them stick.";
+
+/** "{n} later today": cards in a learning or relearning step due later
+ *  today, with why. */
+function LaterToday({ count, className = "" }: { count: number; className?: string }) {
+  return (
+    <p className={`whitespace-nowrap font-body text-body-sm text-bark-muted ${className}`}>
+      {count} later today <InfoTip label="later today" info={LATER_TODAY_INFO} align="start" />
+    </p>
+  );
+}
+
 function TodayCard({
   due,
+  soon,
+  laterToday,
   newCount,
   toWrite,
   newFromDictionary,
@@ -56,6 +70,11 @@ function TodayCard({
   onChangeLimit,
 }: {
   due: number;
+  /** Learning and relearning cards due within LEARNING_SOON_MS: not due
+   *  yet, but Start review includes them. */
+  soon: number;
+  /** Learning and relearning cards due later today (soon included). */
+  laterToday: number;
   newCount: number;
   /** Writing cards in Today's review: due and new. */
   toWrite: number;
@@ -65,7 +84,7 @@ function TodayCard({
   nothingStarted: boolean;
   onChangeLimit: () => void;
 }) {
-  if (due === 0 && newCount === 0 && toWrite === 0) {
+  if (due === 0 && soon === 0 && newCount === 0 && toWrite === 0) {
     const limitZero = nothingStarted && dailyNewWords === 0;
     return (
       <section aria-labelledby="today-title" className={`${CARD} flex items-center justify-between gap-4`}>
@@ -89,6 +108,7 @@ function TodayCard({
               {dueTomorrow === 1 ? "1 card due tomorrow" : `${dueTomorrow} due tomorrow`}
             </p>
           )}
+          {laterToday > 0 && <LaterToday count={laterToday} className="mt-1" />}
         </div>
         <Bao pose={limitZero ? "ready" : "happy"} className="h-24 sm:h-32" />
       </section>
@@ -97,7 +117,7 @@ function TodayCard({
 
   const minutes = Math.max(
     1,
-    Math.round((due * SECONDS_PER_DUE + newCount * SECONDS_PER_NEW + toWrite * SECONDS_PER_WRITE) / 60),
+    Math.round(((due + soon) * SECONDS_PER_DUE + newCount * SECONDS_PER_NEW + toWrite * SECONDS_PER_WRITE) / 60),
   );
 
   return (
@@ -129,6 +149,8 @@ function TodayCard({
             </dd>
           </div>
         </dl>
+        {/* Below the counts, so it doesn't widen the due column. */}
+        {laterToday > 0 && <LaterToday count={laterToday} className="mt-1" />}
         <Button asChild className="mt-4">
           <Link href={REVIEW_HREF}>Start review</Link>
         </Button>
@@ -591,7 +613,7 @@ function InfoTip({ label, info, align }: { label: string; info: string; align: "
       <span
         id={tipId}
         role="tooltip"
-        className={`pointer-events-none absolute top-full z-20 mt-1.5 w-52 max-w-[calc(100vw-48px)] rounded-md bg-bark px-2.5 py-1.5 text-left font-body text-[13px] font-medium leading-5 text-background group-hover:block group-has-[:focus-visible]:block ${TIP_ALIGN[align]} ${
+        className={`pointer-events-none absolute top-full z-20 mt-1.5 w-52 whitespace-normal max-w-[calc(100vw-48px)] rounded-md bg-bark px-2.5 py-1.5 text-left font-body text-[13px] font-medium leading-5 text-background group-hover:block group-has-[:focus-visible]:block ${TIP_ALIGN[align]} ${
           open ? "block" : "hidden"
         }`}
       >
@@ -626,21 +648,24 @@ function StatsStrip({
 }) {
   return (
     <section aria-label="Your training" className={`${CARD} flex flex-col gap-4`}>
-      <dl className="grid grid-cols-3 gap-x-3">
+      {/* Each stat is one labelled group, its number then its label in
+          DOM order, so reading, copying and screen readers all pair them. */}
+      <div className="grid grid-cols-3 gap-x-3">
         {STATS.map(({ key, align }) => {
           const { label, info } = WORD_STAT_INFO[key];
           return (
-            <div key={key} className="flex flex-col">
+            <div key={key} role="group" aria-label={`${stats[key]} ${label.toLowerCase()}`}>
+              <p aria-hidden="true" className="font-heading text-h2 font-bold tabular-nums text-bark">
+                {stats[key]}
+              </p>
               {/* The (i) flows after the label's last word when it wraps. */}
-              <dt className="order-last font-body text-body text-bark-muted">
-                {label}{" "}
-                <InfoTip label={label} info={info} align={align} />
-              </dt>
-              <dd className="font-heading text-h2 font-bold tabular-nums text-bark">{stats[key]}</dd>
+              <p className="font-body text-body text-bark-muted">
+                <span aria-hidden="true">{label}</span> <InfoTip label={label} info={info} align={align} />
+              </p>
             </div>
           );
         })}
-      </dl>
+      </div>
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t-[1.5px] border-line pt-4">
         <p className="font-body text-body text-bark">
           <span className="font-bold tabular-nums">{dailyNewWords}</span> new words ·{" "}
@@ -658,6 +683,8 @@ function StatsStrip({
 
 export function TrainingHub({
   due,
+  soon,
+  laterToday,
   newCount,
   newFromDictionary,
   toWrite,
@@ -667,6 +694,8 @@ export function TrainingHub({
   defaultDeckSet,
 }: {
   due: number;
+  soon: number;
+  laterToday: number;
   newCount: number;
   newFromDictionary: number;
   toWrite: number;
@@ -696,6 +725,8 @@ export function TrainingHub({
 
       <TodayCard
         due={due}
+        soon={soon}
+        laterToday={laterToday}
         newCount={newCount}
         toWrite={toWrite}
         newFromDictionary={newFromDictionary}

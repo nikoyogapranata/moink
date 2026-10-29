@@ -102,7 +102,7 @@ export async function fetchQueue(): Promise<ReviewBatch> {
   const now = new Date();
   const { days } = await loadTrainingProfile(supabase, userId, now);
   try {
-    return await loadReviewBatch(supabase, days.today, now);
+    return await loadReviewBatch(supabase, userId, days.today, now);
   } catch (error) {
     console.error("fetchQueue failed", error);
     return EMPTY_BATCH;

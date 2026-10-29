@@ -205,6 +205,18 @@ export function reshowCard(run: Run, id: number, reshow: (item: QueueItem) => Qu
   return { ...run, queue };
 }
 
+/** The header's progress: cards answered at least once out of the run's
+ *  starting total, so one pass through the cards fills the bar, and how
+ *  many of the queued cards are coming back (a learning step, or Again in
+ *  practice). The run isn't done until those are done too. */
+export function runProgress(run: Run) {
+  return {
+    answered: run.firstAnswers.size,
+    total: run.total,
+    comingBack: run.queue.filter((item) => run.firstAnswers.has(item.word.id)).length,
+  };
+}
+
 /** Counts of first answers so far: Got it is anything but Again. */
 export function runStats(run: Run) {
   const answers = [...run.firstAnswers.values()];

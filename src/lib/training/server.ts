@@ -204,6 +204,46 @@ export async function loadWritingQueue(supabase: Client, todayStart: Date, now: 
   return toQueueItems(data ?? []).map((item) => ({ ...item, writing: { trace: item.isNew } }));
 }
 
+/** Learning and relearning cards due within this window are part of
+ *  Today's review: a learning step a few minutes away is reviewed now
+ *  rather than left out of the session. */
+export const LEARNING_SOON_MS = 30 * 60_000;
+
+/** ts-fsrs states for cards between steps: Learning and Relearning. */
+const STEP_STATES = [1, 3];
+
+/** The user's cards of `skill` in a learning or relearning step (not
+ *  suspended) due after `now` and within LEARNING_SOON_MS, earliest
+ *  first. get_review_queue and get_writing_queue have those due by `now`,
+ *  so they don't overlap. */
+export async function loadLearningSoon(
+  supabase: Client,
+  userId: string,
+  skill: Skill,
+  now: Date,
+): Promise<QueueItem[]> {
+  const { data, error } = await supabase
+    .from("user_words")
+    .select(
+      `due, stability, difficulty, elapsed_days, scheduled_days, learning_steps, reps, lapses, state, last_review, words(${WORD_FIELDS})`,
+    )
+    .eq("user_id", userId)
+    .eq("skill", skill)
+    .eq("suspended", false)
+    .in("state", STEP_STATES)
+    .gt("due", now.toISOString())
+    .lte("due", new Date(now.getTime() + LEARNING_SOON_MS).toISOString())
+    .order("due");
+  if (error) throw error;
+  return (data ?? []).flatMap(({ words, ...card }) => (words ? [{ word: words, card, isNew: false }] : []));
+}
+
+/** `queue` (due cards, then new ones) with `soon` between the two. */
+function beforeNew(queue: QueueItem[], soon: QueueItem[]): QueueItem[] {
+  const firstNew = queue.findIndex((item) => item.isNew);
+  return firstNew === -1 ? [...queue, ...soon] : [...queue.slice(0, firstNew), ...soon, ...queue.slice(firstNew)];
+}
+
 /** Today's review: the recognition queue with its quiz questions, then
  *  the writing queue. */
 export interface ReviewBatch {
@@ -212,20 +252,41 @@ export interface ReviewBatch {
   writing: QueueItem[];
 }
 
-/** The session queue (loadQueue), each card past New shown as a
+/** The session queue (loadQueue, with loadLearningSoon's recognition
+ *  cards after the due ones), each card past New shown as a
  *  flashcard, quiz or listening question (REVIEW_MIX; the client swaps
- *  listening out when it has no Chinese voice), and the writing queue.
+ *  listening out when it has no Chinese voice), and the writing queue
+ *  (loadWritingQueue, with loadLearningSoon's writing cards after the
+ *  due ones).
  *  Without questions
  *  (their load failed) every card is a flashcard; without the writing
  *  queue (its load failed) the session is recognition only. */
-export async function loadReviewBatch(supabase: Client, todayStart: Date, now: Date): Promise<ReviewBatch> {
-  const [queue, writing] = await Promise.all([
+export async function loadReviewBatch(
+  supabase: Client,
+  userId: string,
+  todayStart: Date,
+  now: Date,
+): Promise<ReviewBatch> {
+  const soonOf = (skill: Skill) =>
+    loadLearningSoon(supabase, userId, skill, now).catch((error) => {
+      console.error(`loadReviewBatch: couldn't load ${skill} cards due soon; due now only.`, error);
+      return [] as QueueItem[];
+    });
+  const [scheduled, soon, writingScheduled, writingSoon] = await Promise.all([
     loadQueue(supabase, todayStart, now),
+    soonOf("recognition"),
     loadWritingQueue(supabase, todayStart, now).catch((error) => {
       console.error("loadReviewBatch: couldn't load the writing queue; recognition only.", error);
       return [] as QueueItem[];
     }),
+    soonOf("writing"),
   ]);
+  const queue = beforeNew(scheduled, soon);
+  // A writing card in a step is past Trace: Recall only.
+  const writing = beforeNew(
+    writingScheduled,
+    writingSoon.map((item) => ({ ...item, writing: { trace: false } })),
+  );
   const bank = await buildQuestions(
     supabase,
     queue.map((item) => item.word.id),

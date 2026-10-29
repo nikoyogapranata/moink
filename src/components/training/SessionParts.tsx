@@ -3,7 +3,7 @@
 import { Check, RefreshCw, Shuffle, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 
 import { AudioButton } from "@/components/dictionary/AudioButton";
 import { Button } from "@/components/ui/Button";
@@ -93,28 +93,30 @@ function ShuffleToggle({ on, onToggle }: { on: boolean; onToggle: () => void }) 
   );
 }
 
-/** Close, progress, counter, Shuffle (practice only) and Reset; then the
- *  direction toggle (flashcards), or another `control`, the not-saved pill
- *  and the first-answer pills. */
+/** Close, progress (cards answered at least once, see runProgress), the
+ *  counter and the cards coming back, Shuffle (practice only) and Reset;
+ *  then the direction toggle (flashcards), or another `control`, the
+ *  not-saved pill and the first-answer pills. With `confirmReset`, Reset
+ *  asks first (Today's review, where it turns the rest into practice). */
 export function SessionHeader({
-  finished,
-  total,
+  progress,
   gotIt,
   stillLearning,
   direction,
   onDirection,
   onReset,
+  confirmReset = false,
   shuffle,
   control,
   notSaved,
 }: {
-  finished: number;
-  total: number;
+  progress: { answered: number; total: number; comingBack: number };
   gotIt: number;
   stillLearning: number;
   direction?: Direction;
   onDirection?: (next: Direction) => void;
   onReset: () => void;
+  confirmReset?: boolean;
   shuffle?: { on: boolean; onToggle: () => void };
   /** In place of the direction toggle. */
   control?: ReactNode;
@@ -122,6 +124,9 @@ export function SessionHeader({
    *  Today's review: neither saves anything. */
   notSaved?: "practice" | "round";
 }) {
+  const { answered, total, comingBack } = progress;
+  const [confirming, setConfirming] = useState(false);
+  const resetRef = useRef<HTMLButtonElement>(null);
   return (
     <header className="flex flex-col gap-3 pb-4 pt-[calc(12px+env(safe-area-inset-top))]">
       <div className="flex items-center gap-3">
@@ -130,23 +135,33 @@ export function SessionHeader({
         </Link>
         <div
           role="progressbar"
-          aria-label="Cards finished"
+          aria-label="Cards answered"
           aria-valuemin={0}
           aria-valuemax={total}
-          aria-valuenow={finished}
-          className="h-2.5 flex-1 overflow-hidden rounded-pill bg-highlight"
+          aria-valuenow={answered}
+          className="h-2.5 min-w-12 flex-1 overflow-hidden rounded-pill bg-highlight"
         >
           <div
             className="h-full rounded-pill bg-deep-grass transition-[width] duration-300 motion-reduce:transition-none"
-            style={{ width: `${total ? (finished / total) * 100 : 0}%` }}
+            style={{ width: `${total ? (answered / total) * 100 : 0}%` }}
           />
         </div>
-        <p className="shrink-0 font-body text-body font-medium tabular-nums text-bark">
-          {finished} / {total}
+        <p className="flex shrink-0 items-center gap-2 font-body text-body font-medium tabular-nums text-bark">
+          {answered} / {total}
+          {comingBack > 0 && (
+            <span className={`${PILL} bg-learning-tint text-learning-ink`}>{comingBack} coming back</span>
+          )}
         </p>
         <div className="-mr-2 flex items-center gap-1">
           {shuffle && <ShuffleToggle on={shuffle.on} onToggle={shuffle.onToggle} />}
-          <button type="button" onClick={onReset} aria-label="Start over from the first card" className={ICON_BUTTON}>
+          <button
+            ref={resetRef}
+            type="button"
+            onClick={confirmReset ? () => setConfirming(true) : onReset}
+            aria-label="Start over from the first card"
+            aria-haspopup={confirmReset ? "dialog" : undefined}
+            className={ICON_BUTTON}
+          >
             <RefreshCw size={20} aria-hidden="true" />
           </button>
         </div>
@@ -163,7 +178,84 @@ export function SessionHeader({
           <span className={`${PILL} bg-learning-tint text-learning-ink`}>{stillLearning} still learning</span>
         </p>
       </div>
+      {confirming && (
+        <ResetConfirm
+          onConfirm={onReset}
+          onClose={() => {
+            setConfirming(false);
+            resetRef.current?.focus();
+          }}
+        />
+      )}
     </header>
+  );
+}
+
+/** Today's review asks before Reset: a small native modal dialog. Cancel
+ *  and Escape close it; mounted while open. */
+function ResetConfirm({ onConfirm, onClose }: { onConfirm: () => void; onClose: () => void }) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  const titleId = useId();
+  const confirmed = useRef(false);
+
+  const onCloseRef = useRef(onClose);
+  const onConfirmRef = useRef(onConfirm);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+    onConfirmRef.current = onConfirm;
+  });
+
+  // As in DeckBuilder: open on mount, never close() in the cleanup. Focus
+  // starts on Cancel, the safe choice.
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) {
+      devError("ResetConfirm: the dialog ref is null on mount, so it can't open.");
+      return;
+    }
+    if (!dialog.open) {
+      try {
+        dialog.showModal();
+      } catch (error) {
+        devError("ResetConfirm: dialog.showModal() threw.", error);
+      }
+    }
+    cancelRef.current?.focus();
+  }, []);
+
+  return (
+    <dialog
+      ref={dialogRef}
+      aria-labelledby={titleId}
+      onClose={(e) => {
+        // A close event that lands while the dialog is open again is stale.
+        if (e.currentTarget.open) return;
+        onCloseRef.current();
+        if (confirmed.current) onConfirmRef.current();
+      }}
+      className="m-auto hidden w-[calc(100%-32px)] max-w-100 open:animate-[fade-in_150ms_ease-out] flex-col gap-4 rounded-[22px] border-[1.5px] border-line bg-surface-raised p-5 text-bark open:flex backdrop:bg-black/50"
+    >
+      <h2 id={titleId} className="font-heading text-h2 font-bold text-bark">
+        Restart as practice?
+      </h2>
+      <p className="font-body text-body text-bark-muted">
+        Answers you&apos;ve already given stay saved. The replay won&apos;t be saved.
+      </p>
+      <div className="flex flex-row-reverse flex-wrap gap-3">
+        <Button
+          onClick={() => {
+            confirmed.current = true;
+            dialogRef.current?.close();
+          }}
+        >
+          Restart as practice
+        </Button>
+        <Button ref={cancelRef} variant="secondary" onClick={() => dialogRef.current?.close()}>
+          Cancel
+        </Button>
+      </div>
+    </dialog>
   );
 }
 

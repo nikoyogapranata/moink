@@ -14,6 +14,7 @@ import {
   afterRating,
   interleave,
   reshowCard,
+  runProgress,
   runStats,
   skipFront,
   startPractice,
@@ -243,8 +244,7 @@ export function ReviewSession({ initialBatch }: { initialBatch: ReviewBatch }) {
   return (
     <SessionFrame>
       <SessionHeader
-        finished={active.finished.size}
-        total={active.total}
+        progress={runProgress(active)}
         gotIt={stats.gotIt}
         stillLearning={stats.stillLearning}
         direction={writing ? undefined : direction}
@@ -252,6 +252,7 @@ export function ReviewSession({ initialBatch }: { initialBatch: ReviewBatch }) {
         onReset={() =>
           startRound(startPractice(cards.map(reshow)), startPractice(writingCards.map(firstWriting)), true)
         }
+        confirmReset={!practiceRound}
         notSaved={practiceRound ? "round" : undefined}
       />
       <main className="flex flex-1 flex-col pb-[calc(16px+env(safe-area-inset-bottom))]">
