@@ -14,10 +14,12 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 
+import { useHskStandard } from "@/components/app/HskStandard";
 import { devError } from "@/lib/dev";
+import type { HskStandard } from "@/lib/hsk";
 import type { Skill } from "@/lib/supabase/database.types";
 import { fetchDeckSet } from "@/lib/training/actions";
-import { DECK_SETS, type DeckSet, type Direction } from "@/lib/training/deck";
+import { deckSets, type DeckSet, type Direction } from "@/lib/training/deck";
 import type { QueueWord } from "@/lib/training/queue";
 import { FORMAT_LABELS, LISTEN_FORMATS, QUIZ_FORMATS, type QuestionFormat } from "@/lib/training/quiz";
 import { isWritable, WRITING_STYLE_LABELS, type WritingStyle } from "@/lib/training/writing";
@@ -55,14 +57,20 @@ type SetData = LoadedSet | "error";
 
 /* Sets and due ids already loaded on this page, so opening the builder
    again (or switching back to a set) doesn't wait on the server. Kept a
-   few minutes at most: a review in between changes them. */
+   few minutes at most: a review in between changes them. Sets are keyed
+   by standard too: "hsk3" is a different list in HSK 2.0 and 3.0. */
 const CACHE_MS = 5 * 60_000;
-const setCache = new Map<DeckSet, { data: LoadedSet; at: number }>();
+const setCache = new Map<`${HskStandard}:${DeckSet}`, { data: LoadedSet; at: number }>();
 const dueCache = new Map<Skill, { ids: ReadonlySet<number>; at: number }>();
 const fresh = (at: number) => Date.now() - at < CACHE_MS;
 
-function cachedSets(): Partial<Record<DeckSet, SetData>> {
-  return Object.fromEntries([...setCache].flatMap(([set, { data, at }]) => (fresh(at) ? [[set, data]] : [])));
+function cachedSets(standard: HskStandard): Partial<Record<DeckSet, SetData>> {
+  return Object.fromEntries(
+    [...setCache].flatMap(([key, { data, at }]) => {
+      const [keyStandard, set] = key.split(":");
+      return keyStandard === standard && fresh(at) ? [[set, data]] : [];
+    }),
+  );
 }
 
 function cachedDue(skill: Skill | null) {
@@ -180,6 +188,8 @@ export function DeckBuilder({
   const router = useRouter();
   const reducedMotion = useReducedMotion();
   const titleId = useId();
+  const standard = useHskStandard();
+  const setList = deckSets(standard);
 
   // The quiz and listening are question modes: format chips, and the
   // recognition schedule for the due hint.
@@ -198,10 +208,14 @@ export function DeckBuilder({
   // listening, writing for writing; none for flashcards.
   const dueSkill: Skill | null = quiz ? "recognition" : writing ? "writing" : null;
   const [dueToday, setDueToday] = useState<ReadonlySet<number> | null>(() => cachedDue(dueSkill));
-  const [set, setSet] = useState<DeckSet>(lastDeck?.set ?? defaultSet);
+  // A saved set that isn't one of this standard's (HSK 7–9 after a switch
+  // to HSK 2.0) falls back to the default.
+  const [set, setSet] = useState<DeckSet>(() =>
+    lastDeck && setList.some((s) => s.id === lastDeck.set) ? lastDeck.set : defaultSet,
+  );
   const [selected, setSelected] = useState<ReadonlySet<number>>(() => new Set(lastDeck?.ids));
   const [shuffleOn, setShuffleOn] = useState(lastDeck?.shuffle ?? true);
-  const [sets, setSets] = useState<Partial<Record<DeckSet, SetData>>>(cachedSets);
+  const [sets, setSets] = useState<Partial<Record<DeckSet, SetData>>>(() => cachedSets(standard));
   const [focusIndex, setFocusIndex] = useState(0);
   const [peek, setPeek] = useState<Peek | null>(null);
   const [shaking, setShaking] = useState(false);
@@ -222,7 +236,7 @@ export function DeckBuilder({
   const data = sets[set];
   const words = data && data !== "error" ? data.words : [];
   const loaded = data !== undefined;
-  const setLabel = DECK_SETS.find((s) => s.id === set)!.label;
+  const setLabel = setList.find((s) => s.id === set)!.label;
   const selectedHere = words.reduce((n, w) => (selected.has(w.id) ? n + 1 : n), 0);
   const selectedDue = dueToday ? [...selected].reduce((n, id) => (dueToday.has(id) ? n + 1 : n), 0) : 0;
   /** Writing only takes words the pad can write. */
@@ -283,7 +297,7 @@ export function DeckBuilder({
   useEffect(() => {
     if (loaded && !needDue) return;
     let cancelled = false;
-    fetchDeckSet(set, needDue ? dueSkill : undefined)
+    fetchDeckSet(set, standard, needDue ? dueSkill : undefined)
       .catch((error) => {
         devError(`DeckBuilder: fetchDeckSet("${set}") threw.`, error);
         return { ok: false } as const;
@@ -296,7 +310,7 @@ export function DeckBuilder({
           return;
         }
         const data = { words: result.words, inTraining: new Set(result.inTraining) };
-        setCache.set(set, { data, at: Date.now() });
+        setCache.set(`${standard}:${set}`, { data, at: Date.now() });
         setSets((all) => ({ ...all, [set]: data }));
         if (result.dueToday && dueSkill) {
           const ids = new Set(result.dueToday);
@@ -307,7 +321,7 @@ export function DeckBuilder({
     return () => {
       cancelled = true;
     };
-  }, [set, loaded, needDue, dueSkill]);
+  }, [set, standard, loaded, needDue, dueSkill]);
 
   // Touch painting runs on touch events. After a long press Chrome sends
   // touchmove uncancelable and cancels the pointer once it starts a pan,
@@ -754,7 +768,7 @@ export function DeckBuilder({
             aria-label="Set"
             className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:px-6 md:flex-wrap md:overflow-visible"
           >
-            {DECK_SETS.map(({ id, label }) => (
+            {setList.map(({ id, label }) => (
               <button key={id} type="button" aria-pressed={set === id} onClick={() => chooseSet(id)} className={chip(set === id)}>
                 {label}
               </button>

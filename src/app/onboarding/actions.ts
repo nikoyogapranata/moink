@@ -1,9 +1,8 @@
 "use server";
 
+import { isHskStandard, isLevelOf } from "@/lib/hsk";
 import { createClient } from "@/lib/supabase/server";
 import { isValidUsername } from "@/lib/username";
-
-import { isHskLevel } from "./levels";
 
 export type UsernameCheck = "available" | "taken" | "invalid" | "error";
 
@@ -25,12 +24,14 @@ export type CompleteOnboardingResult =
 
 export async function completeOnboarding(
   username: string,
+  standard: string,
   level: number,
 ): Promise<CompleteOnboardingResult> {
   if (
     typeof username !== "string" ||
     !isValidUsername(username) ||
-    !isHskLevel(level)
+    !isHskStandard(standard) ||
+    !isLevelOf(standard, level)
   ) {
     return { ok: false, error: "invalid" };
   }
@@ -46,7 +47,7 @@ export async function completeOnboarding(
   // failure instead of a silent success.
   const { data, error } = await supabase
     .from("profiles")
-    .update({ username, hsk_level_target: level })
+    .update({ username, hsk_standard: standard, hsk_level_target: level })
     .eq("id", user.id)
     .select("id");
 

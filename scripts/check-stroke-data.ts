@@ -1,6 +1,11 @@
-// Checks every character in old-HSK 1 to 6 against hanzi-writer's stroke
-// data (the hanzi-writer-data package on jsDelivr, the source the app's
-// writing pad loads from) and records the ones it can't write:
+// Checks every character of every word with a level (old HSK, or HSK 3.0
+// in either standard) against hanzi-writer's stroke data (the
+// hanzi-writer-data package on jsDelivr, the source the app's writing pad
+// loads from) and records the ones it can't write. The words are every
+// row in words plus the dataset's HSK 3.0 words not seeded yet, so the
+// list is ready before scripts/seed-hsk3.ts --write adds them.
+//
+// Writes:
 //
 //   - src/lib/training/writing-excluded.json, which the app reads (the
 //     deck builder disables words containing these), and
@@ -18,6 +23,7 @@ import { config } from "dotenv";
 import { createClient } from "@supabase/supabase-js";
 
 import type { Database } from "../src/lib/supabase/database.types";
+import { extractHsk3_2025Level, extractHsk3Level, fetchDataset } from "./lib/readings";
 
 config({ path: ".env.local" });
 config();
@@ -55,19 +61,24 @@ async function hasStrokes(char: string): Promise<boolean> {
 async function main() {
   const supabase = createClient<Database>(SUPABASE_URL!, SUPABASE_SECRET_KEY!);
 
-  const words: { simplified: string; hsk_level: number }[] = [];
+  // Every word in the table has a level in some standard.
+  const seeded: { simplified: string }[] = [];
   for (let from = 0; ; from += PAGE_SIZE) {
     const { data, error } = await supabase
       .from("words")
-      .select("simplified, hsk_level")
-      .gte("hsk_level", 1)
-      .lte("hsk_level", 6)
+      .select("simplified")
       .order("id")
       .range(from, from + PAGE_SIZE - 1);
     if (error) throw error;
-    words.push(...(data ?? []));
+    seeded.push(...(data ?? []));
     if (!data || data.length < PAGE_SIZE) break;
   }
+  const inTable = new Set(seeded.map((w) => w.simplified));
+  const unseeded = (await fetchDataset())
+    .filter((e) => extractHsk3Level(e.level) !== null || extractHsk3_2025Level(e.level) !== null)
+    .filter((e) => !inTable.has(e.simplified))
+    .map((e) => ({ simplified: e.simplified }));
+  const words = [...seeded, ...unseeded];
 
   const chars = [...new Set(words.flatMap((w) => [...w.simplified]))].sort();
   const notHanzi = chars.filter((c) => !HANZI.test(c));
@@ -105,7 +116,9 @@ async function main() {
     console.log(`writing_excluded table synced (${excluded.length} rows).`);
   }
 
-  console.log(`Checked ${chars.length} characters in ${words.length} HSK 1 to 6 words.`);
+  console.log(
+    `Checked ${chars.length} characters in ${words.length} words (${seeded.length} in the table, ${unseeded.length} HSK 3.0 words not seeded yet).`,
+  );
   console.log(`No stroke data: ${missing.length} hanzi${missing.length ? ` (${missing.join(" ")})` : ""}.`);
   console.log(`Not hanzi: ${notHanzi.length}${notHanzi.length ? ` (${notHanzi.map((c) => JSON.stringify(c)).join(" ")})` : ""}.`);
   console.log(`${affected.length} words can't be written: ${affected.map((w) => w.simplified).join(" ")}`);

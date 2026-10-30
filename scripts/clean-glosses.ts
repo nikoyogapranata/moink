@@ -57,7 +57,7 @@ async function main() {
     const row = [
       w.simplified,
       w.pinyin,
-      w.hsk_level,
+      w.hsk_level ?? "",
       w.meanings.join(" | "),
       result.gloss,
       result.fallback ? "empty: kept first raw sense" : "",

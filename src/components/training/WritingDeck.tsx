@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { useHskStandard } from "@/components/app/HskStandard";
 import { devError } from "@/lib/dev";
 import { fetchDeckWords } from "@/lib/training/actions";
 import { byGridOrder, shuffle } from "@/lib/training/deck";
@@ -18,6 +19,7 @@ type Loaded = { set: PracticeWriting; items: QueueItem[] } | { set: PracticeWrit
  *  it. Words the pad can't write are left out. */
 export function WritingDeck() {
   const set = usePracticeWriting();
+  const standard = useHskStandard();
   const [loaded, setLoaded] = useState<Loaded | null>(null);
 
   useEffect(() => {
@@ -39,13 +41,13 @@ export function WritingDeck() {
         if (writable.length < words.length) {
           devError(`WritingDeck: ${words.length - writable.length} words have no stroke data; left out.`);
         }
-        const ordered = set.shuffle ? shuffle(writable) : [...writable].sort(byGridOrder);
+        const ordered = set.shuffle ? shuffle(writable) : [...writable].sort(byGridOrder(standard));
         setLoaded({ set, items: ordered.map((word) => ({ word, card: null, isNew: false })) });
       });
     return () => {
       cancelled = true;
     };
-  }, [set]);
+  }, [set, standard]);
 
   const current = loaded?.set === set ? loaded : null;
 

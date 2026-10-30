@@ -20,9 +20,9 @@ export async function getAppUser(): Promise<AppUser> {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("username, hsk_level_target")
+    .select("username, hsk_level_target, hsk_standard")
     .eq("id", user.id)
-    .maybeSingle<Pick<Profile, "username" | "hsk_level_target">>();
+    .maybeSingle<Pick<Profile, "username" | "hsk_level_target" | "hsk_standard">>();
 
   if (!profile?.username) redirect("/onboarding");
 
@@ -31,6 +31,7 @@ export async function getAppUser(): Promise<AppUser> {
     id: user.id,
     username: profile.username,
     hskLevel: profile.hsk_level_target,
+    hskStandard: profile.hsk_standard,
     avatarUrl:
       typeof meta.avatar_url === "string"
         ? meta.avatar_url

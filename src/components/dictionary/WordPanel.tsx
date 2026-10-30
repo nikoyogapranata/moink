@@ -5,6 +5,7 @@ import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 
 import { rememberWord } from "@/lib/dictionary/recent";
 import { hanziOf, type WordDetail } from "@/lib/dictionary/words";
+import { levelNumber } from "@/lib/hsk";
 import { createClient } from "@/lib/supabase/client";
 
 import { AudioButton } from "./AudioButton";
@@ -40,12 +41,12 @@ function MeaningTab({ word }: { word: WordDetail }) {
       )}
 
       <div className="flex flex-wrap gap-2">
-        <Chip>HSK 2.0 · level {word.hsk_level}</Chip>
-        {word.hsk3_level !== null && (
-          <Chip>
-            {word.hsk3_level >= 7 ? "HSK 3.0 · bands 7 to 9" : `HSK 3.0 · level ${word.hsk3_level}`}
-          </Chip>
+        {/* Both standards, when the word has a level in them; the 2021
+            HSK 3.0 level (hsk3_level) isn't shown. */}
+        {word.hsk3_2025_level !== null && (
+          <Chip>HSK 3.0 · level {levelNumber(word.hsk3_2025_level, "hsk3")}</Chip>
         )}
+        {word.hsk_level !== null && <Chip>HSK 2.0 · level {levelNumber(word.hsk_level, "hsk2")}</Chip>}
         {word.traditional && word.traditional !== word.simplified && (
           <Chip>
             Traditional <span className="ml-1 font-hanzi">{word.traditional}</span>

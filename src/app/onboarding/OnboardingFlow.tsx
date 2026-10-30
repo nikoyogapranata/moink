@@ -11,13 +11,15 @@ import {
   type KeyboardEvent,
 } from "react";
 
+import { StandardChoice } from "@/components/app/StandardChoice";
 import { HillScene, MOUND_PEAK_X, hillSurfaceAt } from "@/components/HillScene";
 import { Button } from "@/components/ui/Button";
 import { Wordmark } from "@/components/Wordmark";
+import { closestLevel, levelLabel, type HskStandard } from "@/lib/hsk";
 import { normalizeUsernameInput, usernameProblem } from "@/lib/username";
 
 import { checkUsername, completeOnboarding } from "./actions";
-import { LEVEL_CARDS, type HskLevel } from "./levels";
+import { LEVEL_CARDS } from "./levels";
 
 // Bao's poses. feetY / topY are the measured soles and crown as fractions of
 // the image height, feetX the middle of his feet as a fraction of its width,
@@ -421,7 +423,9 @@ export function OnboardingFlow({
   // Which way the incoming step slides from: forward comes from the right.
   const [direction, setDirection] = useState<1 | -1>(1);
   const [username, setUsername] = useState(suggestedUsername ?? "");
-  const [level, setLevel] = useState<HskLevel | null>(null);
+  // HSK 3.0 by default; the level is one of the standard's.
+  const [standard, setStandard] = useState<HskStandard>("hsk3");
+  const [level, setLevel] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [celebrating, setCelebrating] = useState(false);
@@ -499,9 +503,20 @@ export function OnboardingFlow({
     if (status === "available") goToStep(2);
   }
 
+  const cards = LEVEL_CARDS[standard];
+  // From lg, HSK 3.0's seven cards go four across so the step stays as
+  // short as HSK 2.0's six in three (two rows either way).
+  const wideCols = cards.length > 6 ? 4 : 3;
+
+  /** A level picked in the other standard moves to the closest one. */
+  function chooseStandard(next: HskStandard) {
+    setLevel((current) => (current === null ? null : closestLevel(current, standard, next)));
+    setStandard(next);
+  }
+
   function handleCardKeyDown(event: KeyboardEvent, index: number) {
-    const last = LEVEL_CARDS.length - 1;
-    const cols = window.matchMedia("(min-width: 1024px)").matches ? 3 : 2;
+    const last = cards.length - 1;
+    const cols = window.matchMedia("(min-width: 1024px)").matches ? wideCols : 2;
     let next: number;
 
     switch (event.key) {
@@ -528,7 +543,7 @@ export function OnboardingFlow({
     }
 
     event.preventDefault();
-    setLevel(LEVEL_CARDS[next].level);
+    setLevel(cards[next].level);
     cardRefs.current[next]?.focus();
   }
 
@@ -540,7 +555,7 @@ export function OnboardingFlow({
     setSaving(true);
     setSaveError(null);
 
-    const result = await completeOnboarding(username, level).catch(
+    const result = await completeOnboarding(username, standard, level).catch(
       () => ({ ok: false, error: "unknown" }) as const,
     );
 
@@ -575,7 +590,7 @@ export function OnboardingFlow({
 
   const tabbableIndex = Math.max(
     0,
-    LEVEL_CARDS.findIndex((card) => card.level === level),
+    cards.findIndex((card) => card.level === level),
   );
 
   return (
@@ -680,13 +695,17 @@ export function OnboardingFlow({
                   You can change this later.
                 </p>
 
+                <div className="mt-5">
+                  <StandardChoice name="standard" value={standard} onChange={chooseStandard} disabled={saving} />
+                </div>
+
                 <button
                   type="button"
                   onClick={() => {
                     setLevel(1);
                     cardRefs.current[0]?.focus();
                   }}
-                  className="mt-5 flex items-center justify-between gap-3 rounded-md border-2 border-dashed border-bamboo-gold px-4 py-3 text-left font-body text-body text-bark transition-colors hover:bg-bamboo-gold/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rust/40"
+                  className="mt-3 flex items-center justify-between gap-3 rounded-md border-2 border-dashed border-bamboo-gold px-4 py-3 text-left font-body text-body text-bark transition-colors hover:bg-bamboo-gold/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rust/40"
                 >
                   <span>
                     Brand new to Chinese?{" "}
@@ -702,9 +721,9 @@ export function OnboardingFlow({
                 <div
                   role="radiogroup"
                   aria-label="Starting level"
-                  className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-3"
+                  className={`mt-4 grid grid-cols-2 gap-3 ${wideCols === 4 ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}
                 >
-                  {LEVEL_CARDS.map((card, index) => {
+                  {cards.map((card, index) => {
                     const selected = card.level === level;
                     return (
                       <button
@@ -715,7 +734,7 @@ export function OnboardingFlow({
                         type="button"
                         role="radio"
                         aria-checked={selected}
-                        aria-label={`HSK ${card.level}, about ${numberFormat.format(card.count)} words, for example ${card.word}, ${card.pinyin}`}
+                        aria-label={`${levelLabel(card.level, standard)}, about ${numberFormat.format(card.count)} words, for example ${card.word}, ${card.pinyin}`}
                         tabIndex={index === tabbableIndex ? 0 : -1}
                         onClick={() => setLevel(card.level)}
                         onKeyDown={(e) => handleCardKeyDown(e, index)}
@@ -731,7 +750,7 @@ export function OnboardingFlow({
                           </span>
                         )}
                         <span className="font-heading text-body-sm font-bold text-bark-muted">
-                          HSK {card.level}
+                          {levelLabel(card.level, standard)}
                         </span>
                         <span lang="zh-CN" className="text-display font-medium text-bark">
                           {card.word}

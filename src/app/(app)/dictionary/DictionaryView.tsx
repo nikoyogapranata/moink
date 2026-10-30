@@ -7,8 +7,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent } from "react";
 
 import { useAppUser } from "@/components/app/AppShell";
+import { useHskStandard } from "@/components/app/HskStandard";
+import { RetryButton } from "@/components/app/RetryButton";
 import { CARD, RecentlyViewedCard, WordOfTheDayCard } from "@/components/dictionary/SideCards";
 import { WordPanel, type WordTab } from "@/components/dictionary/WordPanel";
+import { devError } from "@/lib/dev";
 import { TrainingIdsContext } from "@/lib/dictionary/training";
 import {
   LEVEL_FILTERS,
@@ -22,6 +25,13 @@ import {
   type WordDetail,
   type WordListItem,
 } from "@/lib/dictionary/words";
+import {
+  levelLabel as hskLevelLabel,
+  LEVEL_COLUMN,
+  SORT_COLUMN,
+  wordLevel,
+  type HskStandard,
+} from "@/lib/hsk";
 import { createClient } from "@/lib/supabase/client";
 
 const PAGE = 50;
@@ -53,7 +63,10 @@ interface ListState {
   error: boolean;
 }
 
-async function fetchPage(q: string, level: LevelFilter, offset: number) {
+/** One page of the list: search results (search_words, which reads the
+ *  standard from the profile) or the words in level order in `standard`,
+ *  words with no level in it last. */
+async function fetchPage(q: string, level: LevelFilter, offset: number, standard: HskStandard) {
   const supabase = createClient();
   if (q) {
     const { data, error } = await supabase.rpc("search_words", {
@@ -65,12 +78,13 @@ async function fetchPage(q: string, level: LevelFilter, offset: number) {
     if (error) throw error;
     return { items: data ?? [], total: data?.[0]?.total_count ?? (offset === 0 ? 0 : null) };
   }
+  const column = LEVEL_COLUMN[standard];
   let query = supabase.from("words").select(WORD_LIST_COLUMNS, { count: "exact" });
-  if (level === "5") query = query.gte("hsk_level", 5);
-  else if (level !== "all") query = query.eq("hsk_level", Number(level));
+  if (level === "5") query = query.gte(column, 5);
+  else if (level !== "all") query = query.eq(column, Number(level));
   const { data, error, count } = await query
-    .order("hsk_level")
-    .order("sort_order", { nullsFirst: false })
+    .order(column, { nullsFirst: false })
+    .order(SORT_COLUMN[standard], { nullsFirst: false })
     .order("id")
     .range(offset, offset + PAGE - 1);
   if (error) throw error;
@@ -93,17 +107,33 @@ function SkeletonRows({ count = 6 }: { count?: number }) {
   );
 }
 
+/** In place of the word of the day when the page couldn't load it. */
+function WordOfTheDayError() {
+  return (
+    <section aria-label="Word of the day" className={`${CARD} flex flex-col items-start gap-3`}>
+      <p role="alert" className="font-body text-body text-bark">
+        Couldn&apos;t load the word of the day.
+      </p>
+      <RetryButton />
+    </section>
+  );
+}
+
 export function DictionaryView({
   defaultLevel,
   wordOfTheDay,
+  wordOfTheDayFailed = false,
   dateLabel,
 }: {
   defaultLevel: LevelFilter;
   wordOfTheDay: WordDetail | null;
+  /** The page's word_of_the_day call failed (not: there's none today). */
+  wordOfTheDayFailed?: boolean;
   dateLabel: string;
 }) {
   const router = useRouter();
   const user = useAppUser();
+  const standard = useHskStandard();
   const params = useSearchParams();
 
   const q = (params.get("q") ?? "").trim();
@@ -111,7 +141,7 @@ export function DictionaryView({
   const level = levelParam ?? defaultLevel;
   const wordId = Number(params.get("word")) || null;
   const tab: WordTab = params.get("tab") === "writing" ? "writing" : "meaning";
-  const listKey = `${level}|${q}`;
+  const listKey = `${standard}|${level}|${q}`;
 
   /* Search field: local while typing, written to ?q= after a pause. When
      ?q= changes from outside (back/forward), the field follows. */
@@ -148,28 +178,35 @@ export function DictionaryView({
      for an older key are dropped. */
   const [list, setList] = useState<ListState | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
+  // Bumped by Try again: the first page loads again.
+  const [listAttempt, setListAttempt] = useState(0);
+  // The list whose later page failed: scrolling stops loading it until
+  // Try again. Keyed, so another query or level starts clean.
+  const [moreErrorKey, setMoreErrorKey] = useState<string | null>(null);
+  const moreError = moreErrorKey === listKey;
   const requestRef = useRef(0);
 
   useEffect(() => {
     const request = ++requestRef.current;
-    fetchPage(q, level, 0)
+    fetchPage(q, level, 0, standard)
       .then(({ items, total }) => {
         if (requestRef.current !== request) return;
         setList({ key: listKey, items, total: total ?? items.length, done: items.length < PAGE, error: false });
       })
-      .catch(() => {
+      .catch((error) => {
         if (requestRef.current !== request) return;
+        devError(`DictionaryView: couldn't load the list (${listKey}).`, error);
         setList({ key: listKey, items: [], total: 0, done: true, error: true });
       });
-  }, [q, level, listKey]);
+  }, [q, level, standard, listKey, listAttempt]);
 
   const current = list?.key === listKey ? list : null;
 
   const loadMore = useCallback(() => {
-    if (!current || current.done || loadingMore) return;
+    if (!current || current.done || loadingMore || moreError) return;
     const request = requestRef.current;
     setLoadingMore(true);
-    fetchPage(q, level, current.items.length)
+    fetchPage(q, level, current.items.length, standard)
       .then(({ items }) => {
         if (requestRef.current !== request) return;
         setList((prev) =>
@@ -178,11 +215,12 @@ export function DictionaryView({
             : prev,
         );
       })
-      .catch(() => {
-        if (requestRef.current === request) setList((prev) => (prev ? { ...prev, done: true } : prev));
+      .catch((error) => {
+        devError(`DictionaryView: couldn't load more of the list (${listKey}).`, error);
+        if (requestRef.current === request) setMoreErrorKey(listKey);
       })
       .finally(() => setLoadingMore(false));
-  }, [current, loadingMore, q, level, listKey]);
+  }, [current, loadingMore, moreError, q, level, standard, listKey]);
 
   const sentinelRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -237,7 +275,9 @@ export function DictionaryView({
   );
 
   /* Selected word (desktop panel). */
-  const [selected, setSelected] = useState<{ id: number; word: WordDetail | null } | null>(null);
+  // failed: the load errored (as opposed to no such word).
+  const [selected, setSelected] = useState<{ id: number; word: WordDetail | null; failed: boolean } | null>(null);
+  const [selectedAttempt, setSelectedAttempt] = useState(0);
   useEffect(() => {
     if (!wordId) return;
     let cancelled = false;
@@ -246,15 +286,18 @@ export function DictionaryView({
       .select(WORD_DETAIL_COLUMNS)
       .eq("id", wordId)
       .maybeSingle()
-      .then(({ data }) => {
-        if (!cancelled) setSelected({ id: wordId, word: data ?? null });
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error) devError(`DictionaryView: couldn't load word ${wordId}.`, error);
+        setSelected({ id: wordId, word: data ?? null, failed: Boolean(error) });
       });
     return () => {
       cancelled = true;
     };
-  }, [wordId]);
+  }, [wordId, selectedAttempt]);
   const selectedWord = wordId && selected?.id === wordId ? selected.word : null;
   const selectedLoading = wordId !== null && selected?.id !== wordId;
+  const selectedFailed = wordId !== null && selected?.id === wordId && selected.failed;
 
   const wordHref = (id: number) => `/dictionary/${id}${listQuery(q, levelParam)}`;
 
@@ -312,6 +355,11 @@ export function DictionaryView({
                 dateLabel={dateLabel}
                 onDetails={() => openWord(wordOfTheDay.id)}
               />
+            </div>
+          )}
+          {!q && wordOfTheDayFailed && (
+            <div className="lg:hidden">
+              <WordOfTheDayError />
             </div>
           )}
 
@@ -387,9 +435,17 @@ export function DictionaryView({
             {!current && <SkeletonRows />}
 
             {current?.error && (
-              <p role="alert" className="px-1 font-body text-body text-bark">
-                Couldn&apos;t load words. Check your connection and try again.
-              </p>
+              <div className="flex flex-col items-start gap-3 px-1">
+                <p role="alert" className="font-body text-body text-bark">
+                  Couldn&apos;t load words. Check your connection and try again.
+                </p>
+                <RetryButton
+                  onRetry={() => {
+                    setList(null);
+                    setListAttempt((n) => n + 1);
+                  }}
+                />
+              </div>
             )}
 
             {current && !current.error && current.items.length === 0 && q && (
@@ -437,9 +493,9 @@ export function DictionaryView({
                             {w.gloss ?? ""}
                           </span>
                         </span>
-                        {showLevelPill && (
+                        {showLevelPill && wordLevel(w, standard) !== null && (
                           <span className="shrink-0 rounded-pill border-[1.5px] border-line px-2 py-0.5 font-body text-[12px] leading-4 text-bark-muted">
-                            HSK {w.hsk_level}
+                            {hskLevelLabel(wordLevel(w, standard)!, standard)}
                           </span>
                         )}
                       </Link>
@@ -449,7 +505,15 @@ export function DictionaryView({
               </ul>
             )}
 
-            {current && !current.done && (
+            {current && !current.done && moreError && (
+              <div className="flex flex-wrap items-center gap-3 px-1 py-3">
+                <p role="alert" className="font-body text-body text-bark">
+                  Couldn&apos;t load more words.
+                </p>
+                <RetryButton onRetry={() => setMoreErrorKey(null)} />
+              </div>
+            )}
+            {current && !current.done && !moreError && (
               <div ref={sentinelRef}>{loadingMore && <SkeletonRows count={3} />}</div>
             )}
           </div>
@@ -461,7 +525,20 @@ export function DictionaryView({
             {wordId ? (
               <div className={CARD}>
                 {selectedLoading && <SkeletonRows count={4} />}
-                {!selectedLoading && !selectedWord && (
+                {selectedFailed && (
+                  <div className="flex flex-col items-start gap-3">
+                    <p role="alert" className="font-body text-body text-bark">
+                      Couldn&apos;t load this word.
+                    </p>
+                    <RetryButton
+                      onRetry={() => {
+                        setSelected(null);
+                        setSelectedAttempt((n) => n + 1);
+                      }}
+                    />
+                  </div>
+                )}
+                {!selectedLoading && !selectedFailed && !selectedWord && (
                   <p className="font-body text-body text-bark">That word couldn&apos;t be found.</p>
                 )}
                 {selectedWord && (
@@ -482,6 +559,7 @@ export function DictionaryView({
                     onDetails={() => openWord(wordOfTheDay.id)}
                   />
                 )}
+                {wordOfTheDayFailed && <WordOfTheDayError />}
                 <RecentlyViewedCard onOpen={(w) => openWord(w.id)} />
               </>
             )}

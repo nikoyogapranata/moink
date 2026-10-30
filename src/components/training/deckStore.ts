@@ -3,7 +3,7 @@
 import { useMemo, useSyncExternalStore } from "react";
 
 import { devErrorOnce } from "@/lib/dev";
-import { MAX_DECK_WORDS, parseDeckSet, parseDirection, type DeckSet, type Direction } from "@/lib/training/deck";
+import { MAX_DECK_WORDS, parseAnyDeckSet, parseDirection, type DeckSet, type Direction } from "@/lib/training/deck";
 import { LISTEN_FORMATS, parseFormats, QUIZ_FORMATS, type QuestionFormat } from "@/lib/training/quiz";
 import { parseWritingStyle, type WritingStyle } from "@/lib/training/writing";
 
@@ -123,7 +123,7 @@ function parseJson(raw: string | null): Record<string, unknown> | null {
 export function parseSavedDeck(raw: string | null): SavedDeck | null {
   const value = parseJson(raw);
   const direction = parseDirection(value?.direction);
-  const set = parseDeckSet(value?.set);
+  const set = parseAnyDeckSet(value?.set);
   const ids = parseIds(value?.ids);
   if (!direction || !set || !ids) return null;
   return { direction, set, ids, shuffle: value?.shuffle !== false };
@@ -174,7 +174,7 @@ export function usePracticeDeck() {
 function parseSavedQuiz(kind: QuestionKind, raw: string | null): SavedQuiz | null {
   const value = parseJson(raw);
   const formats = parseFormats(value?.formats, QUESTION_KINDS[kind].formats);
-  const set = parseDeckSet(value?.set);
+  const set = parseAnyDeckSet(value?.set);
   const ids = parseIds(value?.ids);
   if (!formats || !set || !ids) return null;
   return { formats, set, ids, shuffle: value?.shuffle !== false };
@@ -226,7 +226,7 @@ export function usePracticeQuiz(kind: QuestionKind) {
 function parseSavedWriting(raw: string | null): SavedWriting | null {
   const value = parseJson(raw);
   const style = parseWritingStyle(value?.style);
-  const set = parseDeckSet(value?.set);
+  const set = parseAnyDeckSet(value?.set);
   const ids = parseIds(value?.ids);
   if (!style || !set || !ids) return null;
   return { style, set, ids, shuffle: value?.shuffle !== false };

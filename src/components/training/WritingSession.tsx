@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Rating } from "ts-fsrs";
 
+import { useHskStandard } from "@/components/app/HskStandard";
 import { Button } from "@/components/ui/Button";
 import { inGridOrder, shuffle } from "@/lib/training/deck";
 import {
@@ -51,6 +52,7 @@ export function WritingSession({
   initialStyle: WritingStyle;
   shuffled: boolean;
 }) {
+  const standard = useHskStandard();
   const [run, setRun] = useState(() => startPractice(items.map(firstShowing)));
   const [round, setRound] = useState(0);
   // Each word written gets a fresh stage.
@@ -64,14 +66,14 @@ export function WritingSession({
   const stats = runStats(run);
 
   function restart(cards: QueueItem[]) {
-    setRun(startPractice((shuffleOn ? shuffle(cards) : inGridOrder(cards)).map(firstShowing)));
+    setRun(startPractice((shuffleOn ? shuffle(cards) : inGridOrder(cards, standard)).map(firstShowing)));
     setRound((r) => r + 1);
   }
 
   function toggleShuffle() {
     const next = !shuffleOn;
     setShuffleOn(next);
-    setRun((r) => reorderUnanswered(r, next ? shuffle : inGridOrder));
+    setRun((r) => reorderUnanswered(r, next ? shuffle : (items) => inGridOrder(items, standard)));
     updateLastWriting({ shuffle: next });
     showToast(next ? "Shuffled" : "In order");
   }

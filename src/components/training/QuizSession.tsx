@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Rating } from "ts-fsrs";
 
+import { useHskStandard } from "@/components/app/HskStandard";
 import { Button } from "@/components/ui/Button";
 import { inGridOrder, shuffle } from "@/lib/training/deck";
 import {
@@ -49,6 +50,7 @@ export function QuizSession({
   /** Shuffle's starting state, from the builder. */
   shuffled: boolean;
 }) {
+  const standard = useHskStandard();
   const [run, setRun] = useState(() => startPractice(items));
   const [round, setRound] = useState(0);
   const [shuffleOn, setShuffleOn] = useState(shuffled);
@@ -66,14 +68,14 @@ export function QuizSession({
   }
 
   function restart(cards: QueueItem[]) {
-    setRun(startPractice((shuffleOn ? shuffle(cards) : inGridOrder(cards)).map(reshow)));
+    setRun(startPractice((shuffleOn ? shuffle(cards) : inGridOrder(cards, standard)).map(reshow)));
     setRound((r) => r + 1);
   }
 
   function toggleShuffle() {
     const next = !shuffleOn;
     setShuffleOn(next);
-    setRun((r) => reorderUnanswered(r, next ? shuffle : inGridOrder));
+    setRun((r) => reorderUnanswered(r, next ? shuffle : (items) => inGridOrder(items, standard)));
     saveLastQuizShuffle(kind, next);
     showToast(next ? "Shuffled" : "In order");
   }

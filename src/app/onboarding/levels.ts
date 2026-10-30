@@ -1,22 +1,44 @@
-// Level cards for onboarding step 2, stored as profiles.hsk_level_target
-// (old HSK, 1 to 6). When HSK 3.0 lands as its own column, swap this array.
+// Level cards for onboarding step 2, per HSK standard, stored as
+// profiles.hsk_standard and hsk_level_target (a level in that standard;
+// see src/lib/hsk.ts).
 //
-// Each sample word is checked against the seeded words table at that
-// level, with pinyin copied from the table. 你好 isn't an entry there
-// (only 你 and 好 are), so HSK 1 uses 谢谢. Counts are the official
-// cumulative vocabulary sizes; the seeded table has slightly fewer
-// (150 / 297 / 595 / 1,193 / 2,491 / 4,991).
-export const LEVEL_CARDS = [
-  { level: 1, word: "谢谢", pinyin: "xiè xie", count: 150 },
-  { level: 2, word: "旅游", pinyin: "lǚ yóu", count: 300 },
-  { level: 3, word: "环境", pinyin: "huán jìng", count: 600 },
-  { level: 4, word: "经济", pinyin: "jīng jì", count: 1200 },
-  { level: 5, word: "逻辑", pinyin: "luó ji", count: 2500 },
-  { level: 6, word: "谴责", pinyin: "qiǎn zé", count: 5000 },
-] as const;
+// Each sample word is in the seeded words table at that level, with
+// pinyin copied from the table. 你好 isn't an entry there (only 你 and 好
+// are), so level 1 uses 谢谢. The HSK 3.0 words are at their 2025 level by
+// the dataset's newest-* tags (scripts/seed-hsk3.ts fills
+// hsk3_2025_level), and are old HSK words, so they're in the table before
+// that seed runs too. Counts are the official cumulative vocabulary sizes
+// (CUMULATIVE_WORDS).
+import { CUMULATIVE_WORDS, type HskStandard } from "@/lib/hsk";
 
-export type HskLevel = (typeof LEVEL_CARDS)[number]["level"];
-
-export function isHskLevel(value: unknown): value is HskLevel {
-  return LEVEL_CARDS.some((card) => card.level === value);
+export interface LevelCard {
+  level: number;
+  word: string;
+  pinyin: string;
+  count: number;
 }
+
+const samples: Record<HskStandard, { word: string; pinyin: string }[]> = {
+  hsk2: [
+    { word: "谢谢", pinyin: "xiè xie" },
+    { word: "旅游", pinyin: "lǚ yóu" },
+    { word: "环境", pinyin: "huán jìng" },
+    { word: "经济", pinyin: "jīng jì" },
+    { word: "逻辑", pinyin: "luó ji" },
+    { word: "谴责", pinyin: "qiǎn zé" },
+  ],
+  hsk3: [
+    { word: "谢谢", pinyin: "xiè xie" },
+    { word: "旅游", pinyin: "lǚ yóu" },
+    { word: "环境", pinyin: "huán jìng" },
+    { word: "经济", pinyin: "jīng jì" },
+    { word: "逻辑", pinyin: "luó ji" },
+    { word: "投资", pinyin: "tóu zī" },
+    { word: "谴责", pinyin: "qiǎn zé" },
+  ],
+};
+
+export const LEVEL_CARDS: Record<HskStandard, readonly LevelCard[]> = {
+  hsk2: samples.hsk2.map((s, i) => ({ level: i + 1, ...s, count: CUMULATIVE_WORDS.hsk2[i] })),
+  hsk3: samples.hsk3.map((s, i) => ({ level: i + 1, ...s, count: CUMULATIVE_WORDS.hsk3[i] })),
+};

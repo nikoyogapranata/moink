@@ -16,6 +16,9 @@ import { usePathname } from "next/navigation";
 import { createContext, useContext, type ReactNode } from "react";
 
 import { Wordmark } from "@/components/Wordmark";
+import { levelLabel, type HskStandard } from "@/lib/hsk";
+
+import { HskStandardProvider } from "./HskStandard";
 
 // No gamification data yet. Flip to true once streaks and coins exist.
 const SHOW_GAME_STATS = false;
@@ -23,7 +26,9 @@ const SHOW_GAME_STATS = false;
 export interface AppUser {
   id: string;
   username: string;
+  /** profiles.hsk_level_target, a level in hskStandard. */
   hskLevel: number | null;
+  hskStandard: HskStandard;
   avatarUrl: string | null;
   fullName: string | null;
 }
@@ -156,8 +161,8 @@ function Sidebar({ pathname, user }: { pathname: string; user: AppUser }) {
               @{user.username}
             </p>
             {user.hskLevel !== null && (
-              <p className="font-body text-[13px] leading-5 text-bark-muted">
-                HSK {user.hskLevel}
+              <p className="whitespace-nowrap font-body text-[13px] leading-5 text-bark-muted">
+                {levelLabel(user.hskLevel, user.hskStandard)} ({user.hskStandard === "hsk3" ? "3.0" : "2.0"})
               </p>
             )}
           </div>
@@ -238,17 +243,19 @@ export function AppShell({
 
   return (
     <AppUserContext.Provider value={user}>
-      <div className="min-h-dvh bg-background">
-        <Sidebar pathname={pathname} user={user} />
-        <MobileTopBar />
-        {/* Desktop: sidebar 220px + its 16px gaps on both sides + 24px.
-            Mobile: room for the tab bar (about 66px tall, 12px off the
-            bottom edge) plus breathing space. */}
-        <main className="px-4 pb-[calc(7rem+env(safe-area-inset-bottom))] pt-4 sm:px-6 lg:pb-10 lg:pl-69 lg:pr-8 lg:pt-10">
-          <div className="mx-auto w-full max-w-275">{children}</div>
-        </main>
-        <TabBar pathname={pathname} />
-      </div>
+      <HskStandardProvider standard={user.hskStandard}>
+        <div className="min-h-dvh bg-background">
+          <Sidebar pathname={pathname} user={user} />
+          <MobileTopBar />
+          {/* Desktop: sidebar 220px + its 16px gaps on both sides + 24px.
+              Mobile: room for the tab bar (about 66px tall, 12px off the
+              bottom edge) plus breathing space. */}
+          <main className="px-4 pb-[calc(7rem+env(safe-area-inset-bottom))] pt-4 sm:px-6 lg:pb-10 lg:pl-69 lg:pr-8 lg:pt-10">
+            <div className="mx-auto w-full max-w-275">{children}</div>
+          </main>
+          <TabBar pathname={pathname} />
+        </div>
+      </HskStandardProvider>
     </AppUserContext.Provider>
   );
 }

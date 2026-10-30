@@ -7,9 +7,11 @@
 //   行: "xíng",
 //
 // Candidates are listed in scripts/output/polyphones.csv
-// (pnpm exec tsx scripts/export-polyphones.ts). An override that doesn't
-// match any of the word's readings stops seed-words.ts and
-// fix-readings.ts before they do anything.
+// (pnpm exec tsx scripts/export-polyphones.ts) and, for HSK 3.0 words not
+// in old HSK, scripts/output/polyphones-hsk3.csv (pnpm exec tsx
+// scripts/seed-hsk3.ts). An override that doesn't match any of the word's
+// readings stops seed-words.ts, seed-hsk3.ts and fix-readings.ts before
+// they do anything.
 //
 // Some words list the same pinyin more than once with different meanings,
 // told apart only by the traditional character (药 yào: 葯 "leaf of the
@@ -109,4 +111,25 @@ export const READING_OVERRIDES: Record<string, ReadingOverride> = {
   脏: "zāng",
   重点: "zhòng diǎn",
   赚: "zhuàn",
+
+  // HSK 3.0 only (not in old HSK), by 2025 syllabus level. 说 and 强 also
+  // list their pinyin as a "variant of" note; the usable reading is taken.
+  // 2025 level 1
+  说: "shuō",
+  // 2025 level 2
+  打: "dǎ",
+  跑: "pǎo",
+  // 2025 level 4
+  厂: "chǎng",
+  答: "dá",
+  待: "dāi",
+  教学: "jiào xué",
+  咳: "ké",
+  量: "liáng",
+  落: "luò",
+  强: "qiáng",
+  生意: "shēng yi",
+  说法: "shuō fa",
+  约: "yuē",
+  转: "zhuǎn",
 };

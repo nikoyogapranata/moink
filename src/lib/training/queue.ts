@@ -13,7 +13,10 @@ export interface QueueWord {
   simplified: string;
   pinyin: string;
   gloss: string | null;
-  hsk_level: number;
+  /** Old HSK level; null for a word only in HSK 3.0. */
+  hsk_level: number | null;
+  /** HSK 3.0 (2025 syllabus) level; null when the word has none. */
+  hsk3_2025_level: number | null;
   classifiers: string[] | null;
 }
 
@@ -49,6 +52,7 @@ export function toQueueItems(rows: QueueRow[]): QueueItem[] {
       pinyin: r.pinyin,
       gloss: r.gloss,
       hsk_level: r.hsk_level,
+      hsk3_2025_level: r.hsk3_2025_level,
       classifiers: r.classifiers,
     },
     card: r.has_card

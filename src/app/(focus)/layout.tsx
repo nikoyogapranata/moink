@@ -1,5 +1,6 @@
 import type { Viewport } from "next";
 
+import { HskStandardProvider } from "@/components/app/HskStandard";
 import { getAppUser } from "@/lib/supabase/app-user";
 
 // Focus mode (a session): no sidebar or tab bar, but the same guards as the
@@ -9,6 +10,10 @@ export const viewport: Viewport = {
 };
 
 export default async function FocusLayout({ children }: LayoutProps<"/">) {
-  await getAppUser();
-  return <div className="min-h-dvh bg-background">{children}</div>;
+  const user = await getAppUser();
+  return (
+    <HskStandardProvider standard={user.hskStandard}>
+      <div className="min-h-dvh bg-background">{children}</div>
+    </HskStandardProvider>
+  );
 }

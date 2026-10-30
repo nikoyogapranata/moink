@@ -3,6 +3,8 @@
 import { Check, Snail, Volume2, X } from "lucide-react";
 import { useEffect, useEffectEvent, useRef, useState, type Ref } from "react";
 
+import { levelLabel, wordLevel } from "@/lib/hsk";
+import { useHskStandard } from "@/components/app/HskStandard";
 import { AudioButton } from "@/components/dictionary/AudioButton";
 import { NORMAL_RATE, SLOW_RATE, speak, stopSpeaking, useChineseVoiceStatus, type VoiceStatus } from "@/lib/dictionary/speech";
 import { devError } from "@/lib/dev";
@@ -108,6 +110,8 @@ export function QuizQuestion({
   listen?: ListenControls;
 }) {
   const label = QUESTION_LABELS[quiz.format];
+  const standard = useHskStandard();
+  const level = wordLevel(word, standard);
   const listening = isListenFormat(quiz.format);
   const gloss = word.gloss ?? MISSING_GLOSS;
   const prompt =
@@ -145,7 +149,7 @@ export function QuizQuestion({
             {remaining > 1 && <div aria-hidden="true" className={`${shape} translate-y-2.5 scale-95`} />}
             <div className={`relative flex flex-col p-5 ${CARD_HEIGHT} ${SURFACE} ${leaving ? "quiz-leave" : "card-rise"}`}>
               <div aria-hidden="true" className="flex justify-end">
-                <span className={`${PILL} bg-highlight text-bark`}>HSK {word.hsk_level}</span>
+                {level !== null && <span className={`${PILL} bg-highlight text-bark`}>{levelLabel(level, standard)}</span>}
               </div>
               <div className="flex min-h-0 flex-1 items-center justify-center text-center">
                 {quiz.format === "meaning" ? (

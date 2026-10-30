@@ -4,6 +4,7 @@ import { LoaderCircle } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
 
+import { useHskStandard } from "@/components/app/HskStandard";
 import { Button } from "@/components/ui/Button";
 import { devError } from "@/lib/dev";
 import { fetchDeckWords } from "@/lib/training/actions";
@@ -19,6 +20,7 @@ type Loaded = { deck: Deck; items: QueueItem[] } | { deck: Deck; error: true };
 /** Loads the deck the builder handed over (sessionStorage) and runs it. */
 export function PracticeDeck({ initialDirection }: { initialDirection: Direction | null }) {
   const deck = usePracticeDeck();
+  const standard = useHskStandard();
   const [loaded, setLoaded] = useState<Loaded | null>(null);
 
   useEffect(() => {
@@ -36,13 +38,13 @@ export function PracticeDeck({ initialDirection }: { initialDirection: Direction
           setLoaded({ deck, error: true });
           return;
         }
-        const ordered = deck.shuffle ? shuffle(words) : [...words].sort(byGridOrder);
+        const ordered = deck.shuffle ? shuffle(words) : [...words].sort(byGridOrder(standard));
         setLoaded({ deck, items: ordered.map((word) => ({ word, card: null, isNew: false })) });
       });
     return () => {
       cancelled = true;
     };
-  }, [deck]);
+  }, [deck, standard]);
 
   const current = loaded?.deck === deck ? loaded : null;
 

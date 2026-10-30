@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Rating } from "ts-fsrs";
 
+import { useHskStandard } from "@/components/app/HskStandard";
 import { Button } from "@/components/ui/Button";
 import { inGridOrder, shuffle, type Direction } from "@/lib/training/deck";
 import {
@@ -39,6 +40,7 @@ export function PracticeSession({
   initialDirection: Direction | null;
 }) {
   const [direction, setDirection] = useDirection("practice", initialDirection);
+  const standard = useHskStandard();
   const [run, setRun] = useState(() => startPractice(items));
   const [round, setRound] = useState(0);
   const [shuffleOn, setShuffleOn] = useState(shuffled);
@@ -49,14 +51,14 @@ export function PracticeSession({
   const stats = runStats(run);
 
   function restart(cards: QueueItem[]) {
-    setRun(startPractice(shuffleOn ? shuffle(cards) : inGridOrder(cards)));
+    setRun(startPractice(shuffleOn ? shuffle(cards) : inGridOrder(cards, standard)));
     setRound((r) => r + 1);
   }
 
   function toggleShuffle() {
     const next = !shuffleOn;
     setShuffleOn(next);
-    setRun((r) => reorderUnanswered(r, next ? shuffle : inGridOrder));
+    setRun((r) => reorderUnanswered(r, next ? shuffle : (items) => inGridOrder(items, standard)));
     saveLastDeckShuffle(next);
     showToast(next ? "Shuffled" : "In order");
   }

@@ -5,6 +5,7 @@ import { searchFields } from "./lib/pinyin";
 import {
   assertOverridesValid,
   chooseReading,
+  extractHsk3Level,
   extractHskLevel,
   fetchDataset,
   type SourceEntry,
@@ -48,19 +49,9 @@ interface WordRow {
   classifiers: string[];
 }
 
-// HSK 3.0 tags in the dataset: "new-1" to "new-6", and "new-7" for the
-// combined bands 7-9 (stored as 7). The dataset also has "newest-1" to
-// "newest-7", which its README doesn't document; they're ignored here.
-const NEW_LEVEL_RE = /^new-([1-7])$/;
-
-function extractHsk3Level(level: string[]): number | null {
-  for (const tag of level) {
-    const match = NEW_LEVEL_RE.exec(tag);
-    if (match) return Number.parseInt(match[1], 10);
-  }
-  return null;
-}
-
+// HSK 3.0 words that aren't in old HSK are seeded by seed-hsk3.ts, along
+// with the 2025 levels.
+//
 // Optional step, run on its own with --fill-hsk3 (needs the learning_core
 // migration for the hsk3_level column). Sets hsk3_level on the existing
 // rows from the dataset's new-N tags, matched by simplified (unique in the

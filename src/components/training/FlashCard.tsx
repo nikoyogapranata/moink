@@ -3,6 +3,8 @@
 import { Check, RotateCcw } from "lucide-react";
 import { useEffect, useEffectEvent, useRef, useState, type Ref } from "react";
 
+import { levelLabel, wordLevel } from "@/lib/hsk";
+import { useHskStandard } from "@/components/app/HskStandard";
 import { AudioButton } from "@/components/dictionary/AudioButton";
 import { devError } from "@/lib/dev";
 import type { Direction } from "@/lib/training/deck";
@@ -74,6 +76,8 @@ export function FlashCard({
   onFlip: () => void;
 }) {
   const { word } = item;
+  const standard = useHskStandard();
+  const level = wordLevel(word, standard);
   const gloss = word.gloss ?? MISSING_GLOSS;
   const front = direction === "hanzi" ? word.simplified : gloss;
   const label = flipped
@@ -94,7 +98,7 @@ export function FlashCard({
         <div aria-hidden="true" inert={flipped} className={`fc-front ${face}`}>
           <div className="flex items-start justify-between gap-2">
             {item.isNew ? <span className={`${PILL} bg-good-tint text-good-ink`}>New</span> : <span />}
-            <span className={`${PILL} bg-highlight text-bark`}>HSK {word.hsk_level}</span>
+            {level !== null && <span className={`${PILL} bg-highlight text-bark`}>{levelLabel(level, standard)}</span>}
           </div>
           <div className="flex min-h-0 flex-1 items-center justify-center text-center">
             {direction === "hanzi" ? (

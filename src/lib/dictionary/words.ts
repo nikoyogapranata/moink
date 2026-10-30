@@ -6,8 +6,12 @@ export interface WordListItem {
   simplified: string;
   pinyin: string;
   gloss: string | null;
-  hsk_level: number;
+  /** Old HSK level; null for a word only in HSK 3.0. */
+  hsk_level: number | null;
+  /** HSK 3.0 in the 2021 standard (kept, not shown). */
   hsk3_level: number | null;
+  /** HSK 3.0 in the 2025 syllabus (7 = bands 7 to 9). */
+  hsk3_2025_level: number | null;
 }
 
 /** Everything the word panel shows. */
@@ -22,15 +26,17 @@ export type WordDetail = Pick<
   | "classifiers"
   | "hsk_level"
   | "hsk3_level"
+  | "hsk3_2025_level"
   | "radical"
 >;
 
 export const WORD_DETAIL_COLUMNS =
-  "id, simplified, traditional, pinyin, gloss, meanings, classifiers, hsk_level, hsk3_level, radical";
+  "id, simplified, traditional, pinyin, gloss, meanings, classifiers, hsk_level, hsk3_level, hsk3_2025_level, radical";
 
-export const WORD_LIST_COLUMNS = "id, simplified, pinyin, gloss, hsk_level, hsk3_level";
+export const WORD_LIST_COLUMNS = "id, simplified, pinyin, gloss, hsk_level, hsk3_level, hsk3_2025_level";
 
-/** Level filter: "1" to "4", "5" for 5 and above, or "all". */
+/** Level filter, in the user's standard: "1" to "4", "5" for 5 and above
+ *  (HSK 3.0's 5, 6 and 7–9 too), or "all". */
 export type LevelFilter = "1" | "2" | "3" | "4" | "5" | "all";
 
 export const LEVEL_FILTERS: { value: LevelFilter; label: string }[] = [
@@ -46,7 +52,8 @@ export function parseLevel(value: string | null | undefined): LevelFilter | null
   return LEVEL_FILTERS.some((l) => l.value === value) ? (value as LevelFilter) : null;
 }
 
-/** The filter that matches an hsk_level_target (5 and 6 both map to 5+). */
+/** The filter that matches an hsk_level_target in either standard (5 and
+ *  up all map to 5+). */
 export function levelForTarget(target: number | null): LevelFilter {
   if (!target || target < 1) return "1";
   return target >= 5 ? "5" : (String(target) as LevelFilter);

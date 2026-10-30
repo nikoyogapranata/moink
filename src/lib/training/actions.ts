@@ -2,6 +2,7 @@
 
 import { refresh } from "next/cache";
 
+import { isHskStandard } from "@/lib/hsk";
 import { createClient, signedInUserId } from "@/lib/supabase/server";
 
 import { isDailyNewWordOption, isDailyNewWritingOption } from "./daily";
@@ -100,9 +101,9 @@ export async function fetchQueue(): Promise<ReviewBatch> {
   if (!userId) return EMPTY_BATCH;
 
   const now = new Date();
-  const { days } = await loadTrainingProfile(supabase, userId, now);
   try {
-    return await loadReviewBatch(supabase, userId, days.today, now);
+    const { days, standard } = await loadTrainingProfile(supabase, userId, now);
+    return await loadReviewBatch(supabase, userId, days.today, now, standard);
   } catch (error) {
     console.error("fetchQueue failed", error);
     return EMPTY_BATCH;
@@ -114,14 +115,16 @@ export type DeckSetResult =
   | { ok: false };
 
 /**
- * A deck builder set in grid order, which of its words are in the user's
+ * A deck builder set of `standard` (the client's, so the set's level needs
+ * no profile read) in grid order, which of its words are in the user's
  * training and, when `dueSkill` is given, the ids of the user's cards of
  * that skill due today (the builder's due hint). One action, and every
  * query in it runs in parallel: the builder waits on a single round trip.
  * Reads only.
  */
-export async function fetchDeckSet(set: string, dueSkill?: string): Promise<DeckSetResult> {
-  const deckSet = parseDeckSet(set);
+export async function fetchDeckSet(set: string, standard: string, dueSkill?: string): Promise<DeckSetResult> {
+  if (!isHskStandard(standard)) return { ok: false };
+  const deckSet = parseDeckSet(set, standard);
   if (!deckSet) return { ok: false };
   const skill = dueSkill === "recognition" || dueSkill === "writing" ? dueSkill : null;
 
@@ -132,7 +135,7 @@ export async function fetchDeckSet(set: string, dueSkill?: string): Promise<Deck
   const now = new Date();
   try {
     const [words, trainingIds, dueToday] = await Promise.all([
-      loadDeck(supabase, userId, deckSet, now),
+      loadDeck(supabase, userId, deckSet, now, standard),
       // Every word in "My words" is in training already.
       deckSet === "mine" ? null : loadTrainingWordIds(supabase, userId),
       skill ? loadDueTodayIds(supabase, userId, skill, now) : null,
@@ -140,7 +143,7 @@ export async function fetchDeckSet(set: string, dueSkill?: string): Promise<Deck
     const training = trainingIds ? new Set(trainingIds) : null;
     return {
       ok: true,
-      words: words.sort(byGridOrder),
+      words: words.sort(byGridOrder(standard)),
       inTraining: training ? words.filter((w) => training.has(w.id)).map((w) => w.id) : words.map((w) => w.id),
       dueToday,
     };
@@ -167,14 +170,16 @@ export async function fetchDeckWords(ids: number[]): Promise<QueueWord[] | null>
   }
 }
 
-/** A built quiz deck's words and their questions in `formats`, for the
- *  quiz page. Reads only; null on bad input or a failed load. */
+/** A built quiz deck's words and their questions in `formats`, with
+ *  distractors from the levels of `standard` (the client's), for the quiz
+ *  page. Reads only; null on bad input or a failed load. */
 export async function fetchQuizDeck(
   ids: number[],
   formats: string[],
+  standard: string,
 ): Promise<{ words: QueueWord[]; bank: QuizBank } | null> {
   const quizFormats = parseFormats(formats, QUESTION_FORMATS);
-  if (!isIdList(ids) || !quizFormats) return null;
+  if (!isIdList(ids) || !quizFormats || !isHskStandard(standard)) return null;
 
   const supabase = await createClient();
   const userId = await signedInUserId(supabase);
@@ -184,7 +189,7 @@ export async function fetchQuizDeck(
   try {
     const [words, bank] = await Promise.all([
       loadWordsByIds(supabase, unique),
-      buildQuestions(supabase, unique, quizFormats),
+      buildQuestions(supabase, unique, quizFormats, standard),
     ]);
     return { words, bank };
   } catch (error) {

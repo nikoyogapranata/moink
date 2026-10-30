@@ -1,6 +1,7 @@
 // Flashcard directions and the deck builder's sets, shared by the hub,
 // the deck page and both sessions. Safe on server and client.
 
+import { byLevel, levelLabel, STANDARD_LEVELS, type HskStandard } from "@/lib/hsk";
 import type { Skill } from "@/lib/supabase/database.types";
 
 import type { QueueItem, QueueWord } from "./queue";
@@ -55,23 +56,43 @@ export function isReviewMode(value: unknown): value is ReviewMode {
   return REVIEW_MODES.includes(value as ReviewMode);
 }
 
-export const HSK_LEVELS = [1, 2, 3, 4, 5, 6] as const;
+/** Every level a deck set can name, in either standard (7 is HSK 3.0's
+ *  bands 7 to 9). */
+export const HSK_LEVELS = [1, 2, 3, 4, 5, 6, 7] as const;
 
 export type DeckSet = "mine" | "due" | `hsk${(typeof HSK_LEVELS)[number]}`;
 
-export const DECK_SETS: { id: DeckSet; label: string }[] = [
-  { id: "mine", label: "My words" },
-  { id: "due", label: "Due soon" },
-  ...HSK_LEVELS.map((n) => ({ id: `hsk${n}` as const, label: `HSK ${n}` })),
-];
-
-export function parseDeckSet(value: unknown): DeckSet | null {
-  return DECK_SETS.find((s) => s.id === value)?.id ?? null;
+/** The builder's sets for a standard: My words, Due soon, then each of
+ *  the standard's levels (HSK 1 to 6, plus 7–9 in HSK 3.0). */
+export function deckSets(standard: HskStandard): { id: DeckSet; label: string }[] {
+  return [
+    { id: "mine", label: "My words" },
+    { id: "due", label: "Due soon" },
+    ...STANDARD_LEVELS[standard].map((n) => ({ id: `hsk${n}` as DeckSet, label: levelLabel(n, standard) })),
+  ];
 }
 
-/** The HSK set for a profile's target level (old HSK, 1 to 6). */
-export function hskSet(level: number | null): DeckSet {
-  const n = Math.min(Math.max(Math.round(level ?? 1), 1), 6);
+/** `value` when it's one of the standard's sets, else null. */
+export function parseDeckSet(value: unknown, standard: HskStandard): DeckSet | null {
+  return deckSets(standard).find((s) => s.id === value)?.id ?? null;
+}
+
+/** `value` when it's a set in either standard (what a saved deck may
+ *  hold; the builder falls back when it isn't one of the current
+ *  standard's), else null. */
+export function parseAnyDeckSet(value: unknown): DeckSet | null {
+  return parseDeckSet(value, "hsk2") ?? parseDeckSet(value, "hsk3");
+}
+
+/** The level an "hskN" set names, or null for My words and Due soon. */
+export function deckSetLevel(set: DeckSet): number | null {
+  return set.startsWith("hsk") ? Number(set.slice(3)) : null;
+}
+
+/** The HSK set for a profile's target level in its standard. */
+export function hskSet(level: number | null, standard: HskStandard): DeckSet {
+  const levels = STANDARD_LEVELS[standard];
+  const n = Math.min(Math.max(Math.round(level ?? 1), 1), levels[levels.length - 1]);
   return `hsk${n as (typeof HSK_LEVELS)[number]}`;
 }
 
@@ -79,14 +100,15 @@ export function hskSet(level: number | null): DeckSet {
 export const DUE_SOON_MS = 3 * 24 * 60 * 60_000;
 
 /** Grid order everywhere in the builder, and a deck's order when it isn't
- *  shuffled: by old-HSK level, then id. */
-export function byGridOrder(a: QueueWord, b: QueueWord) {
-  return a.hsk_level - b.hsk_level || a.id - b.id;
+ *  shuffled: by level in the standard (words without one last), then id. */
+export function byGridOrder(standard: HskStandard): (a: QueueWord, b: QueueWord) => number {
+  return byLevel(standard);
 }
 
 /** A copy of `items` in grid order. */
-export function inGridOrder(items: readonly QueueItem[]) {
-  return [...items].sort((a, b) => byGridOrder(a.word, b.word));
+export function inGridOrder(items: readonly QueueItem[], standard: HskStandard) {
+  const order = byGridOrder(standard);
+  return [...items].sort((a, b) => order(a.word, b.word));
 }
 
 /** Most words one deck can hold (every HSK word is about 5,000). */

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { useHskStandard } from "@/components/app/HskStandard";
 import { NO_VOICE_HELP, useChineseVoiceStatus } from "@/lib/dictionary/speech";
 import { devError } from "@/lib/dev";
 import { fetchQuizDeck } from "@/lib/training/actions";
@@ -36,6 +37,7 @@ const TEXT: Record<QuestionKind, { loading: string; error: string; none: string;
  *  voice, and says so when the browser has none. */
 export function QuizDeck({ kind }: { kind: QuestionKind }) {
   const quiz = usePracticeQuiz(kind);
+  const standard = useHskStandard();
   const voice = useChineseVoiceStatus();
   const text = TEXT[kind];
   const [loaded, setLoaded] = useState<Loaded | null>(null);
@@ -43,7 +45,7 @@ export function QuizDeck({ kind }: { kind: QuestionKind }) {
   useEffect(() => {
     if (!quiz) return;
     let cancelled = false;
-    fetchQuizDeck(quiz.ids, quiz.formats)
+    fetchQuizDeck(quiz.ids, quiz.formats, standard)
       .catch((error) => {
         devError("QuizDeck: fetchQuizDeck threw.", error);
         return null;
@@ -55,7 +57,7 @@ export function QuizDeck({ kind }: { kind: QuestionKind }) {
           setLoaded({ quiz, error: true });
           return;
         }
-        const ordered = quiz.shuffle ? shuffle(deck.words) : [...deck.words].sort(byGridOrder);
+        const ordered = quiz.shuffle ? shuffle(deck.words) : [...deck.words].sort(byGridOrder(standard));
         const items = ordered.flatMap((word) => {
           const showing = pickShowing(deck.bank[word.id], quiz.formats);
           return showing ? [{ word, card: null, isNew: false, ...showingFields(showing) }] : [];
@@ -68,7 +70,7 @@ export function QuizDeck({ kind }: { kind: QuestionKind }) {
     return () => {
       cancelled = true;
     };
-  }, [quiz]);
+  }, [quiz, standard]);
 
   const current = loaded?.quiz === quiz ? loaded : null;
 

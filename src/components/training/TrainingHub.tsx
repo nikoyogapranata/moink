@@ -5,14 +5,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useId, useRef, useState, useTransition, type ReactNode, type Ref } from "react";
 
-import { PageHeader } from "@/components/app/PageHeader";
+import { useHskStandard } from "@/components/app/HskStandard";
+import { PageHeader } from "@/components/app/PageHeader";
+import { RetryButton } from "@/components/app/RetryButton";
 import { CARD } from "@/components/dictionary/SideCards";
 import { Button } from "@/components/ui/Button";
 import { NO_VOICE_HELP, useChineseVoiceStatus } from "@/lib/dictionary/speech";
 import { devError } from "@/lib/dev";
 import { setDailyLimits } from "@/lib/training/actions";
 import { DAILY_NEW_WORD_OPTIONS, DAILY_NEW_WRITING_OPTIONS } from "@/lib/training/daily";
-import { DIRECTION_LABELS, type DeckSet, type Direction } from "@/lib/training/deck";
+import { DIRECTION_LABELS, hskSet, type DeckSet, type Direction } from "@/lib/training/deck";
 import { WORD_STAT_INFO, type WordStats } from "@/lib/training/stats";
 
 import { baoImage, type BaoPose } from "./bao";
@@ -57,18 +59,8 @@ function LaterToday({ count, className = "" }: { count: number; className?: stri
   );
 }
 
-function TodayCard({
-  due,
-  soon,
-  laterToday,
-  newCount,
-  toWrite,
-  newFromDictionary,
-  dueTomorrow,
-  dailyNewWords,
-  nothingStarted,
-  onChangeLimit,
-}: {
+/** What the Today's review card shows, loaded by the Training page. */
+export interface TodayReview {
   due: number;
   /** Learning and relearning cards due within LEARNING_SOON_MS: not due
    *  yet, but Start review includes them. */
@@ -76,14 +68,45 @@ function TodayCard({
   /** Learning and relearning cards due later today (soon included). */
   laterToday: number;
   newCount: number;
+  newFromDictionary: number;
   /** Writing cards in Today's review: due and new. */
   toWrite: number;
-  newFromDictionary: number;
-  dueTomorrow: number;
-  dailyNewWords: number;
+}
+
+function TodayCard({
+  review,
+  dueTomorrow,
+  dailyNewWords,
+  nothingStarted,
+  onChangeLimit,
+}: {
+  /** Null when it couldn't be loaded: the card says so, with a retry. */
+  review: TodayReview | null;
+  /** Null when the stats couldn't be loaded. */
+  dueTomorrow: number | null;
+  /** Null when the profile couldn't be loaded. */
+  dailyNewWords: number | null;
   nothingStarted: boolean;
   onChangeLimit: () => void;
 }) {
+  if (!review) {
+    return (
+      <section aria-labelledby="today-title" className={`${CARD} flex items-center justify-between gap-4`}>
+        <div className="min-w-0">
+          <h2 id="today-title" className="font-heading text-h2 font-bold text-bark">
+            Today&apos;s review
+          </h2>
+          <p role="alert" className="mt-1 font-body text-body text-bark">
+            Couldn&apos;t load your review. Try again.
+          </p>
+          <RetryButton className="mt-4" />
+        </div>
+        <Bao pose="ready" className="h-24 sm:h-32" />
+      </section>
+    );
+  }
+
+  const { due, soon, laterToday, newCount, newFromDictionary, toWrite } = review;
   if (due === 0 && soon === 0 && newCount === 0 && toWrite === 0) {
     const limitZero = nothingStarted && dailyNewWords === 0;
     return (
@@ -104,9 +127,11 @@ function TodayCard({
               </button>
             </p>
           ) : (
-            <p className="mt-1 font-body text-body text-bark-muted">
-              {dueTomorrow === 1 ? "1 card due tomorrow" : `${dueTomorrow} due tomorrow`}
-            </p>
+            dueTomorrow !== null && (
+              <p className="mt-1 font-body text-body text-bark-muted">
+                {dueTomorrow === 1 ? "1 card due tomorrow" : `${dueTomorrow} due tomorrow`}
+              </p>
+            )
           )}
           {laterToday > 0 && <LaterToday count={laterToday} className="mt-1" />}
         </div>
@@ -635,14 +660,14 @@ const STATS = [
 
 function StatsStrip({
   stats,
-  dailyNewWords,
-  dailyNewWriting,
+  limits,
   changeRef,
   onChange,
 }: {
-  stats: WordStats;
-  dailyNewWords: number;
-  dailyNewWriting: number;
+  /** Null when the stats couldn't be loaded: dashes, and a retry. */
+  stats: WordStats | null;
+  /** Null when the profile couldn't be loaded: no limits row. */
+  limits: Limits | null;
   changeRef: Ref<HTMLButtonElement>;
   onChange: () => void;
 }) {
@@ -654,9 +679,13 @@ function StatsStrip({
         {STATS.map(({ key, align }) => {
           const { label, info } = WORD_STAT_INFO[key];
           return (
-            <div key={key} role="group" aria-label={`${stats[key]} ${label.toLowerCase()}`}>
+            <div
+              key={key}
+              role="group"
+              aria-label={stats ? `${stats[key]} ${label.toLowerCase()}` : `${label}: not loaded`}
+            >
               <p aria-hidden="true" className="font-heading text-h2 font-bold tabular-nums text-bark">
-                {stats[key]}
+                {stats ? stats[key] : "–"}
               </p>
               {/* The (i) flows after the label's last word when it wraps. */}
               <p className="font-body text-body text-bark-muted">
@@ -666,45 +695,49 @@ function StatsStrip({
           );
         })}
       </div>
-      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t-[1.5px] border-line pt-4">
-        <p className="font-body text-body text-bark">
-          <span className="font-bold tabular-nums">{dailyNewWords}</span> new words ·{" "}
-          <span className="font-bold tabular-nums">{dailyNewWriting}</span> writing / day
-        </p>
-        <Button ref={changeRef} variant="secondary" size="sm" aria-haspopup="dialog" onClick={onChange}>
-          Change<span className="sr-only"> daily limits</span>
-        </Button>
-      </div>
+      {(!stats || !limits) && (
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+          <p role="alert" className="font-body text-body text-bark">
+            Couldn&apos;t load your stats.
+          </p>
+          <RetryButton />
+        </div>
+      )}
+      {limits && (
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t-[1.5px] border-line pt-4">
+          <p className="font-body text-body text-bark">
+            <span className="font-bold tabular-nums">{limits.words}</span> new words ·{" "}
+            <span className="font-bold tabular-nums">{limits.writing}</span> writing / day
+          </p>
+          <Button ref={changeRef} variant="secondary" size="sm" aria-haspopup="dialog" onClick={onChange}>
+            Change<span className="sr-only"> daily limits</span>
+          </Button>
+        </div>
+      )}
     </section>
   );
 }
 
 /* Hub */
 
+/** Each part is null when the page couldn't load it: that part shows an
+ *  error with a retry, and the rest of the hub still works. */
 export function TrainingHub({
-  due,
-  soon,
-  laterToday,
-  newCount,
-  newFromDictionary,
-  toWrite,
+  review,
   stats,
-  dailyNewWords,
-  dailyNewWriting,
-  defaultDeckSet,
+  limits: loadedLimits,
+  defaultDeckSet: loadedDeckSet,
 }: {
-  due: number;
-  soon: number;
-  laterToday: number;
-  newCount: number;
-  newFromDictionary: number;
-  toWrite: number;
-  stats: WordStats;
-  dailyNewWords: number;
-  dailyNewWriting: number;
-  /** The builder's set when there's no last deck: the user's HSK level. */
-  defaultDeckSet: DeckSet;
+  review: TodayReview | null;
+  stats: WordStats | null;
+  /** The daily new-word and new-writing limits, from the profile. */
+  limits: Limits | null;
+  /** The builder's set when there's no last deck: the user's HSK level
+   *  (from the profile; without it, the standard's first level). */
+  defaultDeckSet: DeckSet | null;
 }) {
+  const standard = useHskStandard();
+  const defaultDeckSet = loadedDeckSet ?? hskSet(null, standard);
   const [limitsOpen, setLimitsOpen] = useState(false);
   // Focus returns here when the limits dialog closes, also when the Today
   // card's "Change the limit" opened it: that link is gone once a limit
@@ -715,24 +748,19 @@ export function TrainingHub({
   // the props are still the ones from before the save.
   const [saved, setSaved] = useState<{ limits: Limits; before: Limits } | null>(null);
   const limits =
-    saved && saved.before.words === dailyNewWords && saved.before.writing === dailyNewWriting
+    loadedLimits && saved && saved.before.words === loadedLimits.words && saved.before.writing === loadedLimits.writing
       ? saved.limits
-      : { words: dailyNewWords, writing: dailyNewWriting };
+      : loadedLimits;
 
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title="Training">Review what&apos;s due, then meet a few new words.</PageHeader>
 
       <TodayCard
-        due={due}
-        soon={soon}
-        laterToday={laterToday}
-        newCount={newCount}
-        toWrite={toWrite}
-        newFromDictionary={newFromDictionary}
-        dueTomorrow={stats.dueTomorrow}
-        dailyNewWords={limits.words}
-        nothingStarted={stats.started === 0}
+        review={review}
+        dueTomorrow={stats?.dueTomorrow ?? null}
+        dailyNewWords={limits?.words ?? null}
+        nothingStarted={stats?.started === 0}
         onChangeLimit={() => setLimitsOpen(true)}
       />
 
@@ -752,17 +780,16 @@ export function TrainingHub({
 
       <StatsStrip
         stats={stats}
-        dailyNewWords={limits.words}
-        dailyNewWriting={limits.writing}
+        limits={limits}
         changeRef={changeRef}
         onChange={() => setLimitsOpen(true)}
       />
 
-      {limitsOpen && (
+      {limitsOpen && limits && loadedLimits && (
         <DailyLimitsDialog
           words={limits.words}
           writing={limits.writing}
-          onSaved={(next) => setSaved({ limits: next, before: { words: dailyNewWords, writing: dailyNewWriting } })}
+          onSaved={(next) => setSaved({ limits: next, before: loadedLimits })}
           onClose={() => {
             setLimitsOpen(false);
             changeRef.current?.focus();

@@ -62,7 +62,6 @@ export interface QuizWord {
   pinyin: string;
   pinyin_plain: string | null;
   gloss: string | null;
-  hsk_level: number;
 }
 
 /** One option: the word it stands for and the text on the button.
@@ -219,7 +218,7 @@ export function levelPool(byLevel: ReadonlyMap<number, readonly QuizWord[]>, lev
   return pool;
 }
 
-/** Listening's sound-alike pool: every word at old-HSK `level` + 1 or
+/** Listening's sound-alike pool: every word at `level` + 1 or
  *  below, so tone pairs turn up more often. */
 export function soundPool(byLevel: ReadonlyMap<number, readonly QuizWord[]>, level: number): QuizWord[] {
   return [...byLevel.entries()].filter(([l]) => l <= level + 1).flatMap(([, words]) => words);

@@ -1,6 +1,6 @@
 // The raw dataset (drkameleon/complete-hsk-vocabulary) and the choice of
-// which reading of a word to store. Shared by seed-words.ts and
-// fix-readings.ts so a fresh seed and a repaired table agree.
+// which reading of a word to store. Shared by seed-words.ts, seed-hsk3.ts
+// and fix-readings.ts so a fresh seed and a repaired table agree.
 //
 // A dataset entry can have several readings ("forms"), and the first is
 // often not the everyday one: 白 lists Bái "surname Bai" before bái
@@ -49,6 +49,41 @@ export function extractHskLevel(level: string[] | undefined): number | null {
   }
   return null;
 }
+
+// HSK 3.0 tags. "new-1" to "new-6", and "new-7" for the combined bands 7
+// to 9, are the 2021 standard (GF0025-2021), stored in words.hsk3_level.
+// "newest-1" to "newest-7" are the 2025 exam syllabus (added to the dataset
+// in February 2026, "matching 2026 syllabus"; its README doesn't document
+// them), stored in words.hsk3_2025_level. Both are per level, not
+// cumulative: a word has at most one tag of each.
+//
+// The newest-* lists are incomplete at the top: against the syllabus's
+// 300, 200, 500, 1,000, 1,600, 1,800 and 5,600 words, the dataset has 294,
+// 197, 487, 972, 1,547, 1,684 and 4,876. Levels 1 to 5 are within about
+// 3% (homographs the syllabus lists twice, like 好 hǎo / hào, account for
+// most of that); level 6 is 6% short and bands 7 to 9 about 13% short.
+const HSK3_2021_RE = /^new-([1-7])$/;
+const HSK3_2025_RE = /^newest-([1-7])$/;
+
+function levelFrom(level: string[] | undefined, re: RegExp): number | null {
+  for (const tag of level ?? []) {
+    const match = re.exec(tag);
+    if (match) return Number.parseInt(match[1], 10);
+  }
+  return null;
+}
+
+/** HSK 3.0 level in the 2021 standard (7 = bands 7 to 9), or null. */
+export const extractHsk3Level = (level: string[] | undefined) => levelFrom(level, HSK3_2021_RE);
+
+/** HSK 3.0 level in the 2025 syllabus (7 = bands 7 to 9), or null. */
+export const extractHsk3_2025Level = (level: string[] | undefined) => levelFrom(level, HSK3_2025_RE);
+
+/** True for a word moink seeds: any old HSK, 2021 or 2025 level. */
+export const isSeededEntry = (entry: SourceEntry) =>
+  extractHskLevel(entry.level) !== null ||
+  extractHsk3Level(entry.level) !== null ||
+  extractHsk3_2025Level(entry.level) !== null;
 
 /** The fields a word takes from its chosen reading. */
 export interface Reading {
@@ -145,18 +180,17 @@ export function chooseReading(entry: SourceEntry): ReadingChoice | null {
 
 /**
  * Check every override against the dataset before a script changes
- * anything: each must name an old-HSK word and match one of its readings.
- * Prints every problem and exits, so a typo can't slip through.
+ * anything: each must name a seeded word (old HSK, or an HSK 3.0 level in
+ * either standard; isSeededEntry) and match one of its readings. Prints
+ * every problem and exits, so a typo can't slip through.
  */
 export function assertOverridesValid(entries: SourceEntry[]) {
-  const oldHsk = new Map(
-    entries.filter((e) => extractHskLevel(e.level) !== null).map((e) => [e.simplified, e]),
-  );
+  const seeded = new Map(entries.filter(isSeededEntry).map((e) => [e.simplified, e]));
   const problems: string[] = [];
   for (const hanzi of Object.keys(READING_OVERRIDES)) {
-    const entry = oldHsk.get(hanzi);
+    const entry = seeded.get(hanzi);
     if (!entry) {
-      problems.push(`${hanzi}: not an old-HSK word in the dataset`);
+      problems.push(`${hanzi}: not an old HSK or HSK 3.0 word in the dataset`);
       continue;
     }
     try {

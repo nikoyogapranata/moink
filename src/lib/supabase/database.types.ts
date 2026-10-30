@@ -26,7 +26,12 @@ export type Database = {
           username: string | null;
           display_name: string | null;
           avatar_url: string | null;
+          /** A level in hsk_standard: 1 to 6 for hsk2, 1 to 7 for hsk3
+           *  (7 = bands 7 to 9). */
           hsk_level_target: number | null;
+          /** Which HSK the user studies: old HSK 2.0, or the HSK 3.0 2025
+           *  syllabus. */
+          hsk_standard: "hsk2" | "hsk3";
           xp: number;
           coins: number;
           current_streak: number;
@@ -45,6 +50,7 @@ export type Database = {
           display_name?: string | null;
           avatar_url?: string | null;
           hsk_level_target?: number | null;
+          hsk_standard?: "hsk2" | "hsk3";
           xp?: number;
           coins?: number;
           current_streak?: number;
@@ -62,6 +68,7 @@ export type Database = {
           display_name?: string | null;
           avatar_url?: string | null;
           hsk_level_target?: number | null;
+          hsk_standard?: "hsk2" | "hsk3";
           xp?: number;
           coins?: number;
           current_streak?: number;
@@ -81,12 +88,19 @@ export type Database = {
           simplified: string;
           traditional: string | null;
           radical: string | null;
-          /** Old HSK level, 1 to 6. */
-          hsk_level: number;
-          /** HSK 3.0 level, 1 to 9. Not filled yet. */
+          /** Old HSK level, 1 to 6; null for a word only in HSK 3.0. */
+          hsk_level: number | null;
+          /** HSK 3.0 level in the 2021 standard (GF0025-2021), 1 to 7
+           *  (7 = bands 7 to 9). */
           hsk3_level: number | null;
+          /** HSK 3.0 level in the 2025 syllabus, 1 to 7 (7 = bands 7 to
+           *  9). From 20261116120000_hsk3_2025.sql. */
+          hsk3_2025_level: number | null;
           frequency: number | null;
+          /** Order within the old HSK level. */
           sort_order: number | null;
+          /** Order within hsk3_2025_level (rank_words_2025). */
+          sort_order_2025: number | null;
           pinyin: string;
           pinyin_numeric: string | null;
           /** Search form: "zhǔn bèi" -> "zhunbei" (ü as v). */
@@ -105,10 +119,12 @@ export type Database = {
           simplified: string;
           traditional?: string | null;
           radical?: string | null;
-          hsk_level: number;
+          hsk_level?: number | null;
           hsk3_level?: number | null;
+          hsk3_2025_level?: number | null;
           frequency?: number | null;
           sort_order?: number | null;
+          sort_order_2025?: number | null;
           pinyin: string;
           pinyin_numeric?: string | null;
           pinyin_plain?: string | null;
@@ -125,10 +141,12 @@ export type Database = {
           simplified?: string;
           traditional?: string | null;
           radical?: string | null;
-          hsk_level?: number;
+          hsk_level?: number | null;
           hsk3_level?: number | null;
+          hsk3_2025_level?: number | null;
           frequency?: number | null;
           sort_order?: number | null;
+          sort_order_2025?: number | null;
           pinyin?: string;
           pinyin_numeric?: string | null;
           pinyin_plain?: string | null;
@@ -307,6 +325,10 @@ export type Database = {
         Args: { p_limit?: number };
         Returns: Database["public"]["Tables"]["words"]["Row"][];
       };
+      rank_words_2025: {
+        Args: Record<string, never>;
+        Returns: number;
+      };
       pinyin_num: {
         Args: { p_text: string };
         Returns: string | null;
@@ -327,8 +349,9 @@ export type Database = {
           simplified: string;
           pinyin: string;
           gloss: string | null;
-          hsk_level: number;
+          hsk_level: number | null;
           hsk3_level: number | null;
+          hsk3_2025_level: number | null;
           total_count: number;
         }[];
       };
@@ -358,7 +381,8 @@ export type Database = {
           simplified: string;
           pinyin: string;
           gloss: string | null;
-          hsk_level: number;
+          hsk_level: number | null;
+          hsk3_2025_level: number | null;
           classifiers: string[] | null;
           /** Card fields: null when has_card is false. */
           due: string | null;
@@ -387,7 +411,8 @@ export type Database = {
           simplified: string;
           pinyin: string;
           gloss: string | null;
-          hsk_level: number;
+          hsk_level: number | null;
+          hsk3_2025_level: number | null;
           classifiers: string[] | null;
           /** Card fields: null when has_card is false. */
           due: string | null;
