@@ -112,7 +112,9 @@ async function fetchPage(
     return { items: data ?? [], total: data?.[0]?.total_count ?? (from === 0 ? 0 : null) };
   }
   const column = LEVEL_COLUMN[standard];
-  let query = supabase.from("words").select(WORD_LIST_COLUMNS, { count: "exact" });
+  // The total is shown from the first page, so only it counts; later
+  // pages (and jumps, which keep the total they have) don't pay for one.
+  let query = supabase.from("words").select(WORD_LIST_COLUMNS, from === 0 ? { count: "exact" } : undefined);
   if (level === "5") query = query.gte(column, 5);
   else if (level !== "all") query = query.eq(column, Number(level));
   query =
