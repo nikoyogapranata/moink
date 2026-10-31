@@ -6,7 +6,7 @@
 // often not the everyday one: 白 lists Bái "surname Bai" before bái
 // "white", 听 lists yǐn "smile (archaic)" before tīng "to listen".
 import { isJunkSense } from "./gloss";
-import { READING_OVERRIDES } from "./reading-overrides";
+import { MEANINGS_OVERRIDES, READING_OVERRIDES } from "./reading-overrides";
 
 export const SOURCE_URL =
   "https://raw.githubusercontent.com/drkameleon/complete-hsk-vocabulary/main/complete.json";
@@ -103,6 +103,8 @@ export interface ReadingChoice {
   usable: boolean;
   /** True when READING_OVERRIDES picked it. */
   overridden: boolean;
+  /** True when MEANINGS_OVERRIDES replaced its meanings. */
+  meaningsOverridden: boolean;
 }
 
 function toReading(form: SourceForm): Reading {
@@ -144,9 +146,18 @@ export class ReadingOverrideError extends Error {}
  * preferring lowercase pinyin over capitalized. Readings without pinyin or
  * meanings are never chosen. Returns null when the entry has no reading
  * with pinyin and meanings at all. Throws ReadingOverrideError when an
- * override matches none of the word's readings.
+ * override matches none of the word's readings. MEANINGS_OVERRIDES then
+ * replaces the chosen reading's meanings, for a word whose dataset
+ * readings all lack its HSK sense.
  */
 export function chooseReading(entry: SourceEntry): ReadingChoice | null {
+  const choice = chooseDatasetReading(entry);
+  const meanings = MEANINGS_OVERRIDES[entry.simplified];
+  if (!choice || !meanings) return choice;
+  return { ...choice, reading: { ...choice.reading, meanings }, usable: true, meaningsOverridden: true };
+}
+
+function chooseDatasetReading(entry: SourceEntry): ReadingChoice | null {
   const forms = readingsOf(entry);
 
   const override = READING_OVERRIDES[entry.simplified];
@@ -166,7 +177,7 @@ export function chooseReading(entry: SourceEntry): ReadingChoice | null {
         `${entry.simplified}: override "${label}" matches none of its readings (${forms.map(({ reading }) => `${reading.pinyin} [${reading.traditional ?? "-"}]`).join(", ") || "none"})`,
       );
     }
-    return { ...pick, usable: true, overridden: true };
+    return { ...pick, usable: true, overridden: true, meaningsOverridden: false };
   }
 
   if (forms.length === 0) return null;
@@ -174,8 +185,8 @@ export function chooseReading(entry: SourceEntry): ReadingChoice | null {
   const pick = usable.find(({ reading }) => !isCapitalized(reading.pinyin)) ?? usable[0];
 
   return pick
-    ? { ...pick, usable: true, overridden: false }
-    : { ...forms[0], usable: false, overridden: false };
+    ? { ...pick, usable: true, overridden: false, meaningsOverridden: false }
+    : { ...forms[0], usable: false, overridden: false, meaningsOverridden: false };
 }
 
 /**
@@ -187,6 +198,10 @@ export function chooseReading(entry: SourceEntry): ReadingChoice | null {
 export function assertOverridesValid(entries: SourceEntry[]) {
   const seeded = new Map(entries.filter(isSeededEntry).map((e) => [e.simplified, e]));
   const problems: string[] = [];
+  for (const hanzi of Object.keys(MEANINGS_OVERRIDES)) {
+    if (!seeded.has(hanzi)) problems.push(`${hanzi}: meanings override for a word that's not an old HSK or HSK 3.0 word in the dataset`);
+    else if (MEANINGS_OVERRIDES[hanzi].length === 0) problems.push(`${hanzi}: meanings override is empty`);
+  }
   for (const hanzi of Object.keys(READING_OVERRIDES)) {
     const entry = seeded.get(hanzi);
     if (!entry) {
@@ -201,11 +216,13 @@ export function assertOverridesValid(entries: SourceEntry[]) {
     }
   }
   if (problems.length > 0) {
-    console.error(`\nREADING_OVERRIDES has ${problems.length} problem(s), nothing was done:`);
+    console.error(`\nThe overrides have ${problems.length} problem(s), nothing was done:`);
     for (const p of problems) console.error(`  ${p}`);
     console.error("Fix scripts/lib/reading-overrides.ts and run again.");
     process.exit(1);
   }
   const count = Object.keys(READING_OVERRIDES).length;
   if (count > 0) console.log(`Reading overrides: ${count}, all match a dataset reading.`);
+  const meaningsCount = Object.keys(MEANINGS_OVERRIDES).length;
+  if (meaningsCount > 0) console.log(`Meanings overrides: ${meaningsCount}, all for seeded words.`);
 }

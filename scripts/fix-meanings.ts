@@ -30,6 +30,11 @@
 //   背 bēi   "to carry on the back"           should be bèi "the back; to memorize"
 //   嗯 ēn    "(a groaning sound)"             should be èn "OK, yeah; what?"
 //
+// And one with no dataset reading that has its HSK sense, fixed by
+// MEANINGS_OVERRIDES (the same file):
+//
+//   一块儿   stored "a piece; one yuan"  should be "together; in the same place"
+//
 //   pnpm exec tsx scripts/fix-meanings.ts           dry run
 //   pnpm exec tsx scripts/fix-meanings.ts --write   update the database
 //
@@ -72,6 +77,7 @@ const TARGETS: { id: number; hanzi: string; pinyinChange?: true }[] = [
   { id: 4780, hanzi: "重", pinyinChange: true },
   { id: 146, hanzi: "背", pinyinChange: true },
   { id: 2588, hanzi: "嗯", pinyinChange: true },
+  { id: 10538, hanzi: "一块儿" },
 ];
 
 const PINYIN_FIELDS = ["pinyin", "pinyin_numeric", "pinyin_plain", "pinyin_num"] as const;
@@ -114,8 +120,8 @@ async function main() {
       problems++;
       continue;
     }
-    if (!choice?.overridden) {
-      console.error(`${target.hanzi}: no reading override applies; add one to reading-overrides.ts`);
+    if (!choice?.overridden && !choice?.meaningsOverridden) {
+      console.error(`${target.hanzi}: no reading or meanings override applies; add one to reading-overrides.ts`);
       problems++;
       continue;
     }

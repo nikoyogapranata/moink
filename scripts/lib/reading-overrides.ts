@@ -156,3 +156,16 @@ export const READING_OVERRIDES: Record<string, ReadingOverride> = {
   约: "yuē",
   转: "zhuǎn",
 };
+
+/**
+ * Meanings to store in place of the chosen reading's, for a word none of
+ * whose dataset readings has its HSK sense. The pinyin, traditional and
+ * classifiers still come from the reading (READING_OVERRIDES applies
+ * first). Keep these short and in the dataset's style: the gloss is built
+ * from them like any other word's.
+ */
+export const MEANINGS_OVERRIDES: Record<string, string[]> = {
+  // 2025 level 3. The dataset's only reading is the erhua of 一块: "a
+  // piece; a chunk", "(coll.) one yuan".
+  一块儿: ["together", "in the same place", "a piece (erhua of 一块)"],
+};
