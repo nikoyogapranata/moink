@@ -23,6 +23,7 @@ export type ReadingOverride = string | { pinyin: string; traditional: string };
 
 export const READING_OVERRIDES: Record<string, ReadingOverride> = {
   // HSK 1
+  岁: { pinyin: "suì", traditional: "歲" }, // not 嵗 "variant of 岁"
   大: "dà",
   的: "de",
   东西: "dōng xi",
@@ -65,6 +66,7 @@ export const READING_OVERRIDES: Record<string, ReadingOverride> = {
   着: "zhe",
 
   // HSK 3
+  裤子: { pinyin: "kù zi", traditional: "褲子" }, // not 袴子 "variant of 裤子"
   啊: "a",
   把: "bǎ",
   差: "chà",
@@ -91,6 +93,8 @@ export const READING_OVERRIDES: Record<string, ReadingOverride> = {
   弹: "tán",
   当: { pinyin: "dāng", traditional: "當" }, // not 噹 "(onom.) dong"
   咸: { pinyin: "xián", traditional: "鹹" }, // not 咸 "all; everyone"
+  困: { pinyin: "kùn", traditional: "睏" }, // not 困 "to trap; to surround"
+  台: { pinyin: "tái", traditional: "臺" }, // not 檯 "desk; table"
   当时: "dāng shí",
   底: "dǐ",
   发: "fā",
@@ -112,15 +116,33 @@ export const READING_OVERRIDES: Record<string, ReadingOverride> = {
   重点: "zhòng diǎn",
   赚: "zhuàn",
 
+  // HSK 5 (found reviewing HSK 3.0 2025 levels 2 to 4)
+  背: "bèi", // not bēi "to carry on the back"
+  节: "jié", // not jiē "see 节骨眼"
+  片: "piàn", // not piān "disk; sheet"
+  正: "zhèng", // not zhēng "first month of the lunar year"
+  重: "zhòng", // not chóng "to repeat"
+
+  // HSK 6 (found reviewing HSK 3.0 2025 level 4)
+  嗯: "èn", // the interjection "OK, yeah; what?", not ēn "(a groaning sound)"
+
   // HSK 3.0 only (not in old HSK), by 2025 syllabus level. 说 and 强 also
   // list their pinyin as a "variant of" note; the usable reading is taken.
   // 2025 level 1
   后: { pinyin: "hòu", traditional: "後" }, // not 后 "empress; queen"
   说: "shuō",
   // 2025 level 2
+  考: { pinyin: "kǎo", traditional: "考" }, // not 攷 "to beat; to hit; variant of 考"
+  周: { pinyin: "zhōu", traditional: "週" }, // not 周 "to make a circuit"
   打: "dǎ",
   跑: "pǎo",
+  // 2025 level 3
+  照: { pinyin: "zhào", traditional: "照" }, // not 炤 "variant of 照"
   // 2025 level 4
+  期: { pinyin: "qī", traditional: "期" }, // not 朞 "variant of 期"
+  证: { pinyin: "zhèng", traditional: "證" }, // not 証 "to admonish; variant of 证"
+  表: { pinyin: "biǎo", traditional: "錶" }, // watch, not 表 "exterior surface"
+  准: { pinyin: "zhǔn", traditional: "準" }, // not 准 "to allow; to grant"
   厂: "chǎng",
   答: "dá",
   待: "dāi",
