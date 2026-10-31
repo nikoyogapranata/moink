@@ -6,6 +6,7 @@
 // often not the everyday one: 白 lists Bái "surname Bai" before bái
 // "white", 听 lists yǐn "smile (archaic)" before tīng "to listen".
 import { isJunkSense } from "./gloss";
+import { storedNumeric, storedToned } from "./pinyin";
 import { MEANINGS_OVERRIDES, READING_OVERRIDES } from "./reading-overrides";
 
 export const SOURCE_URL =
@@ -107,10 +108,12 @@ export interface ReadingChoice {
   meaningsOverridden: boolean;
 }
 
+// A few readings keep CC-CEDICT's spelling (略 lu:è, 闺女 guī ˙nu:); they're
+// stored the way every other word is (lüè, guī nü; scripts/lib/pinyin.ts).
 function toReading(form: SourceForm): Reading {
   return {
-    pinyin: form.transcriptions?.pinyin ?? "",
-    pinyin_numeric: form.transcriptions?.numeric ?? null,
+    pinyin: storedToned(form.transcriptions?.pinyin ?? ""),
+    pinyin_numeric: storedNumeric(form.transcriptions?.numeric ?? null),
     traditional: form.traditional ?? null,
     meanings: form.meanings ?? [],
     classifiers: form.classifiers ?? [],

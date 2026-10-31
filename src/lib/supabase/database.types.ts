@@ -107,6 +107,9 @@ export type Database = {
           pinyin_plain: string | null;
           /** Search form: "zhun3 bei4" -> "zhun3bei4". */
           pinyin_num: string | null;
+          /** A to Z key, generated (20261130120000_dictionary_sort.sql):
+           *  "ma 1 01 妈". */
+          sort_az: string | null;
           pos: string[] | null;
           meanings: string[];
           classifiers: string[] | null;
@@ -129,6 +132,7 @@ export type Database = {
           pinyin_numeric?: string | null;
           pinyin_plain?: string | null;
           pinyin_num?: string | null;
+          sort_az?: never;
           pos?: string[] | null;
           meanings: string[];
           classifiers?: string[] | null;
@@ -151,6 +155,7 @@ export type Database = {
           pinyin_numeric?: string | null;
           pinyin_plain?: string | null;
           pinyin_num?: string | null;
+          sort_az?: never;
           pos?: string[] | null;
           meanings?: string[];
           classifiers?: string[] | null;
@@ -354,6 +359,10 @@ export type Database = {
           hsk3_2025_level: number | null;
           total_count: number;
         }[];
+      };
+      word_letter_counts: {
+        Args: { p_standard: string; p_level?: number | null };
+        Returns: { letter: string; word_count: number }[];
       };
       word_of_the_day: {
         Args: { p_date: string };

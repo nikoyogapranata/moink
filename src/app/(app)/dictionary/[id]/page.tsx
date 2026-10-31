@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { cache, Suspense } from "react";
 
 import { RetryButton } from "@/components/app/RetryButton";
-import { WORD_DETAIL_COLUMNS, listQuery, parseLevel } from "@/lib/dictionary/words";
+import { WORD_DETAIL_COLUMNS, listQuery, parseLevel, parseSort } from "@/lib/dictionary/words";
 import { createClient } from "@/lib/supabase/server";
 
 import { WordStandalone } from "./WordStandalone";
@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: PageProps<"/dictionary/[id]">
 }
 
 /** One word on its own page: where the list goes on mobile, and a link
- *  to share. ?q= and ?level= are the list state "back" returns to. */
+ *  to share. ?q=, ?level= and ?sort= are the list state "back" returns to. */
 export default async function WordPage({ params, searchParams }: PageProps<"/dictionary/[id]">) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
   const word = await getWord(id);
@@ -51,10 +51,11 @@ export default async function WordPage({ params, searchParams }: PageProps<"/dic
 
   const q = typeof query.q === "string" ? query.q : "";
   const level = parseLevel(typeof query.level === "string" ? query.level : null);
+  const sort = parseSort(typeof query.sort === "string" ? query.sort : null);
 
   return (
     <Suspense>
-      <WordStandalone word={word} backHref={`/dictionary${listQuery(q, level)}`} />
+      <WordStandalone word={word} backHref={`/dictionary${listQuery(q, level, sort)}`} />
     </Suspense>
   );
 }

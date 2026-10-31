@@ -73,11 +73,20 @@ export function hanziOf(word: string) {
   return [...word].filter((c) => HANZI.test(c));
 }
 
+/** Browse order: by level and frequency ("common", the default), or
+ *  A to Z by pinyin (words.sort_az). Search results ignore it. */
+export type ListSort = "common" | "az";
+
+export function parseSort(value: string | null | undefined): ListSort | null {
+  return value === "az" || value === "common" ? value : null;
+}
+
 /** Links to /dictionary/[id] carry the list state so "back" restores it. */
-export function listQuery(q: string, level: LevelFilter | null) {
+export function listQuery(q: string, level: LevelFilter | null, sort: ListSort | null = null) {
   const params = new URLSearchParams();
   if (q) params.set("q", q);
   if (level) params.set("level", level);
+  if (sort === "az") params.set("sort", "az");
   const s = params.toString();
   return s ? `?${s}` : "";
 }
