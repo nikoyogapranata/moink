@@ -21,12 +21,16 @@ function isAppRoute(pathname: string) {
 }
 
 export async function proxy(request: NextRequest) {
-  const { supabase, userId, response } = await updateSession(request);
+  const { supabase, userId, authUnavailable, response } = await updateSession(request);
   const { pathname } = request.nextUrl;
 
   const isOnboarding = pathname === "/onboarding";
   if (!isOnboarding && !isAppRoute(pathname)) return response;
 
+  // Never redirect on an error: when Auth or the profile can't be read,
+  // the request goes through and the page's own load shows the error and
+  // a retry (AccountError).
+  if (authUnavailable) return response;
   if (!userId) return redirectWithSession(request, response, "/login");
 
   // Server actions (POSTs with a Next-Action header) check the user
@@ -36,6 +40,7 @@ export async function proxy(request: NextRequest) {
 
   // Only these routes pay for the profile lookup.
   const home = await getHomePath(supabase, userId);
+  if (home === null) return response;
   if (isOnboarding && home === "/dashboard") {
     return redirectWithSession(request, response, "/dashboard");
   }

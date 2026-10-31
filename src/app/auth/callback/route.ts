@@ -11,7 +11,10 @@ export async function GET(request: NextRequest) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
       // New accounts have no username yet, so they land on onboarding.
-      const home = await getHomePath(supabase, data.user.id);
+      // When the profile can't be read, the dashboard: its layout shows
+      // the error and a retry, and sends a new account on to onboarding
+      // once the read works.
+      const home = (await getHomePath(supabase, data.user.id)) ?? "/dashboard";
       return NextResponse.redirect(`${origin}${home}`);
     }
     console.error("exchangeCodeForSession failed:", error);

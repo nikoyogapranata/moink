@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { isTransientAuthError } from "./auth-errors";
 import type { Database } from "./database.types";
 
 export async function updateSession(request: NextRequest) {
@@ -33,10 +34,14 @@ export async function updateSession(request: NextRequest) {
   // on every request, which getUser() cost (about 280 ms each). Do not run
   // code between createServerClient and getClaims(); it can make the
   // session hard to debug.
-  const { data } = await supabase.auth.getClaims();
+  const { data, error } = await supabase.auth.getClaims();
   const userId = data?.claims.sub ?? null;
+  // Auth couldn't be reached (say, refreshing an expired token): not the
+  // same as signed out.
+  const authUnavailable = error !== null && isTransientAuthError(error);
+  if (authUnavailable) console.error("updateSession: couldn't reach Supabase Auth.", error);
 
-  return { supabase, userId, response: supabaseResponse };
+  return { supabase, userId, authUnavailable, response: supabaseResponse };
 }
 
 /** Redirect while keeping any auth cookies the session refresh just set. */

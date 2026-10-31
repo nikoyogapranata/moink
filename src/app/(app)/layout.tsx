@@ -1,5 +1,6 @@
 import type { Viewport } from "next";
 
+import { AccountError } from "@/components/app/AccountError";
 import { AppShell } from "@/components/app/AppShell";
 import { getAppUser } from "@/lib/supabase/app-user";
 
@@ -10,5 +11,7 @@ export const viewport: Viewport = {
 };
 
 export default async function AppLayout({ children }: LayoutProps<"/">) {
-  return <AppShell user={await getAppUser()}>{children}</AppShell>;
+  const user = await getAppUser();
+  if (!user) return <AccountError />;
+  return <AppShell user={user}>{children}</AppShell>;
 }

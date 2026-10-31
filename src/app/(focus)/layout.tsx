@@ -1,5 +1,6 @@
 import type { Viewport } from "next";
 
+import { AccountError } from "@/components/app/AccountError";
 import { HskStandardProvider } from "@/components/app/HskStandard";
 import { getAppUser } from "@/lib/supabase/app-user";
 
@@ -11,6 +12,7 @@ export const viewport: Viewport = {
 
 export default async function FocusLayout({ children }: LayoutProps<"/">) {
   const user = await getAppUser();
+  if (!user) return <AccountError />;
   return (
     <HskStandardProvider standard={user.hskStandard}>
       <div className="min-h-dvh bg-background">{children}</div>

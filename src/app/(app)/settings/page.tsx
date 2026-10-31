@@ -11,7 +11,9 @@ export const metadata: Metadata = {
 };
 
 export default async function SettingsPage() {
+  // Shares the layout's read; when it failed, the layout shows the error.
   const user = await getAppUser();
+  if (!user) return null;
   return (
     <>
       <PageHeader title="Settings">Your study plan and account.</PageHeader>

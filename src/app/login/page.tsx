@@ -24,7 +24,9 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   } = await supabase.auth.getUser();
 
   if (user) {
-    redirect(await getHomePath(supabase, user.id));
+    // Signed in. When the profile can't be read, the dashboard: its layout
+    // shows the error and a retry (onboarding would offer a new username).
+    redirect((await getHomePath(supabase, user.id)) ?? "/dashboard");
   }
 
   const { error } = await searchParams;
