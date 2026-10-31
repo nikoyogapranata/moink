@@ -115,6 +115,7 @@ export const READING_OVERRIDES: Record<string, ReadingOverride> = {
   // HSK 3.0 only (not in old HSK), by 2025 syllabus level. 说 and 强 also
   // list their pinyin as a "variant of" note; the usable reading is taken.
   // 2025 level 1
+  后: { pinyin: "hòu", traditional: "後" }, // not 后 "empress; queen"
   说: "shuō",
   // 2025 level 2
   打: "dǎ",

@@ -1,10 +1,12 @@
-// Replaces the stored reading data of three words whose rows came from the
+// Replaces the stored reading data of words whose rows came from the
 // wrong dataset reading. Each lists the same pinyin more than once, told
 // apart only by the traditional character:
 //
 //   药 yào   stored 葯 "leaf of the iris"   should be 藥 "medicine"
 //   当 dāng  stored 噹 "(onom.) dong"       should be 當 "to act as; when; should"
 //   咸 xián  stored 咸 "all; everyone"      should be 鹹 "salted; salty"
+//   后 hòu   stored 后 "empress; queen"     should be 後 "after; behind; later"
+//            (an HSK 3.0 word, seeded by seed-hsk3.ts)
 //
 //   pnpm exec tsx scripts/fix-meanings.ts           dry run
 //   pnpm exec tsx scripts/fix-meanings.ts --write   update the database
@@ -19,14 +21,15 @@ import { createAdminClient, hasFlag } from "./lib/admin";
 import {
   assertOverridesValid,
   chooseReading,
-  extractHskLevel,
   fetchDataset,
+  isSeededEntry,
 } from "./lib/readings";
 
 const TARGETS: { id: number; hanzi: string }[] = [
   { id: 4220, hanzi: "药" },
   { id: 733, hanzi: "当" },
   { id: 3900, hanzi: "咸" },
+  { id: 6911, hanzi: "后" },
 ];
 
 const WRITE = hasFlag("--write");
@@ -48,9 +51,8 @@ async function main() {
 
   for (const target of TARGETS) {
     const row = rows?.find((r) => r.id === target.id);
-    const entry = entries.find(
-      (e) => e.simplified === target.hanzi && extractHskLevel(e.level) !== null,
-    );
+    // Any seeded word: old HSK, or HSK 3.0 only (后).
+    const entry = entries.find((e) => e.simplified === target.hanzi && isSeededEntry(e));
     const choice = entry && chooseReading(entry);
 
     if (!row || row.simplified !== target.hanzi) {
