@@ -13,10 +13,13 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, type ReactNode } from "react";
 
 import { Wordmark } from "@/components/Wordmark";
+import { devError } from "@/lib/dev";
 import { levelLabel, type HskStandard } from "@/lib/hsk";
+import { browserTimeZone, FALLBACK_TIME_ZONE } from "@/lib/time";
+import { adoptBrowserTimeZone } from "@/lib/time-actions";
 
 import { HskStandardProvider } from "./HskStandard";
 
@@ -29,6 +32,10 @@ export interface AppUser {
   /** profiles.hsk_level_target, a level in hskStandard. */
   hskLevel: number | null;
   hskStandard: HskStandard;
+  /** profiles.timezone: where "today" starts and ends for the user. */
+  timeZone: string;
+  /** False until the zone came from the browser or Settings. */
+  timeZoneConfirmed: boolean;
   avatarUrl: string | null;
   fullName: string | null;
 }
@@ -232,6 +239,24 @@ function TabBar({ pathname }: { pathname: string }) {
 
 /* Shell */
 
+/** For accounts from before onboarding saved the time zone: while it's
+ *  unconfirmed and still the default, the browser's zone replaces it, once
+ *  (adoptBrowserTimeZone confirms it either way). */
+function useAdoptBrowserTimeZone(user: AppUser) {
+  const tried = useRef(false);
+  useEffect(() => {
+    if (tried.current || user.timeZoneConfirmed || user.timeZone !== FALLBACK_TIME_ZONE) return;
+    const zone = browserTimeZone();
+    if (!zone) return;
+    tried.current = true;
+    adoptBrowserTimeZone(zone)
+      .then((result) => {
+        if (!result.ok) devError("AppShell: couldn't save the browser's time zone (see the server log).");
+      })
+      .catch((error) => devError("AppShell: adoptBrowserTimeZone threw.", error));
+  }, [user.timeZoneConfirmed, user.timeZone]);
+}
+
 export function AppShell({
   user,
   children,
@@ -240,6 +265,7 @@ export function AppShell({
   children: ReactNode;
 }) {
   const pathname = usePathname();
+  useAdoptBrowserTimeZone(user);
 
   return (
     <AppUserContext.Provider value={user}>

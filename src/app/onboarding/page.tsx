@@ -27,8 +27,8 @@ export default async function OnboardingPage() {
 
   const googleName =
     profile?.display_name ??
-    user.user_metadata?.full_name ??
-    user.user_metadata?.name ??
+    user.metadata.full_name ??
+    user.metadata.name ??
     null;
 
   return <OnboardingFlow suggestedUsername={suggestUsername(googleName)} />;

@@ -8,24 +8,36 @@ import { Button } from "@/components/ui/Button";
 import { closestLevel, levelLabel, STANDARD_INFO, STANDARD_LEVELS, type HskStandard } from "@/lib/hsk";
 
 import { saveStudySettings } from "./actions";
+import { TimeZonePicker } from "./TimeZonePicker";
 
 const FOCUS_RING = "has-focus-visible:ring-2 has-focus-visible:ring-rust/40 has-focus-visible:ring-offset-2 has-focus-visible:ring-offset-background";
 
 /**
- * Study: the HSK standard and the target level in it. Switching the
- * standard asks for the level again, with the closest one to the saved
- * level picked as a suggestion. Nothing changes until Save.
+ * Study: the HSK standard and the target level in it, and the time zone
+ * that decides when the day starts. Switching the standard asks for the
+ * level again, with the closest one to the saved level picked as a
+ * suggestion. Nothing changes until Save.
  */
-export function StudySettings({ standard: savedStandard, level: savedLevel }: { standard: HskStandard; level: number | null }) {
+export function StudySettings({
+  standard: savedStandard,
+  level: savedLevel,
+  timeZone: savedTimeZone,
+}: {
+  standard: HskStandard;
+  level: number | null;
+  timeZone: string;
+}) {
   const [standard, setStandard] = useState(savedStandard);
   const [level, setLevel] = useState<number | null>(savedLevel);
+  const [timeZone, setTimeZone] = useState(savedTimeZone);
   const [status, setStatus] = useState<"idle" | "saved" | "error">("idle");
   const [pending, startTransition] = useTransition();
   const titleId = useId();
   const levelLabelId = useId();
+  const timeZoneLabelId = useId();
 
   const switched = standard !== savedStandard;
-  const changed = switched || level !== savedLevel;
+  const changed = switched || level !== savedLevel || timeZone !== savedTimeZone;
   const suggested = switched ? closestLevel(savedLevel, savedStandard, standard) : null;
 
   function chooseStandard(next: HskStandard) {
@@ -39,7 +51,7 @@ export function StudySettings({ standard: savedStandard, level: savedLevel }: { 
     if (level === null || !changed) return;
     setStatus("idle");
     startTransition(async () => {
-      const result = await saveStudySettings(standard, level).catch(() => ({ ok: false }));
+      const result = await saveStudySettings(standard, level, timeZone).catch(() => ({ ok: false }));
       // Updates after an await need their own transition; this one shows
       // "Saved." together with the refreshed page (the sidebar's level).
       startTransition(() => setStatus(result.ok ? "saved" : "error"));
@@ -103,6 +115,24 @@ export function StudySettings({ standard: savedStandard, level: savedLevel }: { 
             );
           })}
         </fieldset>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <div>
+          <h3 id={timeZoneLabelId} className="font-heading text-h3 font-bold text-bark">
+            Time zone
+          </h3>
+          <p className="font-body text-body-sm text-bark-muted">When your day starts and ends, for reviews and your streak.</p>
+        </div>
+        <TimeZonePicker
+          value={timeZone}
+          onChange={(zone) => {
+            setStatus("idle");
+            setTimeZone(zone);
+          }}
+          disabled={pending}
+          labelledBy={timeZoneLabelId}
+        />
       </div>
 
       <div className="flex flex-wrap items-center gap-3">

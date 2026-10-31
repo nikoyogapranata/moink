@@ -18,7 +18,7 @@ import {
 
 import { saveLastDeckShuffle } from "./deckStore";
 import { CardStage } from "./FlashCard";
-import { useDirection, useToast } from "./hooks";
+import { useDirection, useMarkPracticed, useToast } from "./hooks";
 import { AddToTraining, DoneScreen, SessionFrame, SessionHeader, Toast, useAddToTraining } from "./SessionParts";
 
 /**
@@ -45,6 +45,7 @@ export function PracticeSession({
   const [round, setRound] = useState(0);
   const [shuffleOn, setShuffleOn] = useState(shuffled);
   const [toast, showToast] = useToast();
+  const markPracticed = useMarkPracticed();
   const training = useAddToTraining(items);
 
   const current = run.queue[0];
@@ -65,6 +66,7 @@ export function PracticeSession({
 
   // Applied to the latest run, so a toggle during the throw isn't lost.
   async function answer(gotIt: boolean) {
+    markPracticed();
     return () => setRun((r) => afterPractice(r, gotIt ? Rating.Good : Rating.Again));
   }
 

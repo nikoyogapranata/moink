@@ -44,6 +44,42 @@ export const WORD_STAT_INFO: Record<keyof WordStats, { label: string; info: stri
   },
 };
 
+/** One level's words in the user's standard, and how many they've started
+ *  and learned (the WordStats definitions). */
+export interface LevelProgress {
+  level: number;
+  total: number;
+  started: number;
+  learned: number;
+}
+
+/** Every level of the user's standard, in order (get_level_progress, given
+ *  the learned thresholds above so the SQL counts the same). */
+export async function loadLevelProgress(supabase: Client): Promise<LevelProgress[]> {
+  const { data, error } = await supabase.rpc("get_level_progress", {
+    p_learned_stability: LEARNED_STABILITY_DAYS,
+    p_learned_min_reps: LEARNED_MIN_REPS,
+  });
+  if (error) throw error;
+  return (data ?? []).map((row) => ({
+    level: row.level,
+    total: Number(row.total),
+    started: Number(row.started),
+    learned: Number(row.learned),
+  }));
+}
+
+export const FORECAST_DAYS = 7;
+
+/** Recognition and writing reviews due on each of the next FORECAST_DAYS
+ *  days in the user's zone, today (overdue included) first
+ *  (get_due_forecast). */
+export async function loadDueForecast(supabase: Client): Promise<{ day: string; due: number }[]> {
+  const { data, error } = await supabase.rpc("get_due_forecast", { p_days: FORECAST_DAYS });
+  if (error) throw error;
+  return (data ?? []).map((row) => ({ day: row.day, due: Number(row.due) }));
+}
+
 /** The user's WordStats; `days` are their day boundaries (dayStarts). Each
  *  is a head-only count, all three in parallel. */
 export async function loadWordStats(

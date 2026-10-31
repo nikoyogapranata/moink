@@ -1,4 +1,4 @@
-import type { User } from "@supabase/supabase-js";
+import type { UserMetadata } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 
@@ -8,12 +8,33 @@ import { isTransientAuthError } from "./auth-errors";
 import type { Profile } from "./profile";
 import { createClient } from "./server";
 
-type AccountProfile = Pick<Profile, "username" | "display_name" | "hsk_level_target" | "hsk_standard">;
+// The profile fields any app page may need, read once with the account so
+// a page (the Dashboard's limits and day boundaries) needs no second read.
+export type AccountProfile = Pick<
+  Profile,
+  | "username"
+  | "display_name"
+  | "hsk_level_target"
+  | "hsk_standard"
+  | "daily_new_words"
+  | "daily_new_writing"
+  | "timezone"
+  | "timezone_confirmed"
+>;
+
+/** The signed-in user as the session's JWT describes them. */
+export interface AccountUser {
+  id: string;
+  metadata: UserMetadata;
+}
 
 /**
  * The signed-in user and their profile row, read once per request (the
- * layout and its page share it). Three outcomes, kept apart so a failed
- * read never looks like a missing account:
+ * layout and its page share it). The user comes from the session's JWT,
+ * verified locally (getClaims; the project signs with asymmetric keys),
+ * so this costs one database read and no round trip to Supabase Auth.
+ * Three outcomes, kept apart so a failed read never looks like a missing
+ * account:
  *
  *   signed-out  no session (or an expired or revoked one)
  *   error       Auth or the profile couldn't be read; logged here
@@ -21,22 +42,25 @@ type AccountProfile = Pick<Profile, "username" | "display_name" | "hsk_level_tar
  */
 export const loadAccount = cache(
   async (): Promise<
-    { status: "signed-out" } | { status: "error" } | { status: "ok"; user: User; profile: AccountProfile | null }
+    | { status: "signed-out" }
+    | { status: "error" }
+    | { status: "ok"; user: AccountUser; profile: AccountProfile | null }
   > => {
     const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+    const { data, error: authError } = await supabase.auth.getClaims();
     if (authError && isTransientAuthError(authError)) {
       console.error("loadAccount: couldn't reach Supabase Auth.", authError);
       return { status: "error" };
     }
-    if (!user) return { status: "signed-out" };
+    const claims = data?.claims;
+    if (!claims?.sub) return { status: "signed-out" };
+    const user: AccountUser = { id: claims.sub, metadata: claims.user_metadata ?? {} };
 
     const { data: profile, error } = await supabase
       .from("profiles")
-      .select("username, display_name, hsk_level_target, hsk_standard")
+      .select(
+        "username, display_name, hsk_level_target, hsk_standard, daily_new_words, daily_new_writing, timezone, timezone_confirmed",
+      )
       .eq("id", user.id)
       .maybeSingle<AccountProfile>();
     if (error) {
@@ -61,12 +85,14 @@ export async function getAppUser(): Promise<AppUser | null> {
   const { user, profile } = account;
   if (!profile?.username) redirect("/onboarding");
 
-  const meta = user.user_metadata ?? {};
+  const meta = user.metadata;
   return {
     id: user.id,
     username: profile.username,
     hskLevel: profile.hsk_level_target,
     hskStandard: profile.hsk_standard,
+    timeZone: profile.timezone,
+    timeZoneConfirmed: profile.timezone_confirmed,
     avatarUrl:
       typeof meta.avatar_url === "string"
         ? meta.avatar_url

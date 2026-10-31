@@ -244,6 +244,22 @@ export async function addToTraining(ids: number[]): Promise<{ ok: boolean }> {
   return { ok: true };
 }
 
+/** Marks today practiced (mark_practiced): a practice session calls it
+ *  once, on its first answer. It never completes the day; only Today's
+ *  review does. */
+export async function markPracticed(): Promise<{ ok: boolean }> {
+  const supabase = await createClient();
+  const userId = await signedInUserId(supabase);
+  if (!userId) return { ok: false };
+
+  const { error } = await supabase.rpc("mark_practiced");
+  if (error) {
+    console.error("markPracticed failed", error);
+    return { ok: false };
+  }
+  return { ok: true };
+}
+
 /** Saves both daily limits at once: the limits dialog's Save. */
 export async function setDailyLimits(words: number, writing: number): Promise<{ ok: boolean }> {
   if (!isDailyNewWordOption(words) || !isDailyNewWritingOption(writing)) return { ok: false };

@@ -1,12 +1,11 @@
 "use client";
 
-import { ArrowLeftRight, Headphones, Info, Layers, ListChecks, PenLine, Play, type LucideIcon } from "lucide-react";
-import Image from "next/image";
+import { ArrowLeftRight, Headphones, Layers, ListChecks, PenLine, Play, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useId, useRef, useState, useTransition, type ReactNode, type Ref } from "react";
 
 import { useHskStandard } from "@/components/app/HskStandard";
-import { PageHeader } from "@/components/app/PageHeader";
+import { PageHeader } from "@/components/app/PageHeader";
 import { RetryButton } from "@/components/app/RetryButton";
 import { CARD } from "@/components/dictionary/SideCards";
 import { Button } from "@/components/ui/Button";
@@ -16,180 +15,14 @@ import { setDailyLimits } from "@/lib/training/actions";
 import { DAILY_NEW_WORD_OPTIONS, DAILY_NEW_WRITING_OPTIONS } from "@/lib/training/daily";
 import { DIRECTION_LABELS, hskSet, type DeckSet, type Direction } from "@/lib/training/deck";
 import { WORD_STAT_INFO, type WordStats } from "@/lib/training/stats";
+import type { TodayReview } from "@/lib/training/today";
 
-import { baoImage, type BaoPose } from "./bao";
 import { DeckBuilder } from "./DeckBuilder";
 import { practiceDeckHref, practiceQuizHref, practiceWritingHref, useLastDeck, useLastQuiz, useLastWriting } from "./deckStore";
-
-const REVIEW_HREF = "/training/review";
-
-// Rough time per card for the estimate on the review card.
-const SECONDS_PER_DUE = 25;
-const SECONDS_PER_NEW = 40;
-const SECONDS_PER_WRITE = 60;
+import { InfoTip } from "./InfoTip";
+import { TodayCard } from "./TodayCard";
 
 const FOCUS_RING = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rust";
-
-function Bao({ pose, className }: { pose: BaoPose; className: string }) {
-  const img = baoImage(pose);
-  return (
-    <Image
-      src={img.src}
-      alt=""
-      width={img.width}
-      height={img.height}
-      sizes="160px"
-      priority
-      className={`w-auto shrink-0 select-none ${className}`}
-    />
-  );
-}
-
-/* Today's review */
-
-const LATER_TODAY_INFO = "Words you just learned come back once more today to help them stick.";
-
-/** "{n} later today": cards in a learning or relearning step due later
- *  today, with why. */
-function LaterToday({ count, className = "" }: { count: number; className?: string }) {
-  return (
-    <p className={`whitespace-nowrap font-body text-body-sm text-bark-muted ${className}`}>
-      {count} later today <InfoTip label="later today" info={LATER_TODAY_INFO} align="start" />
-    </p>
-  );
-}
-
-/** What the Today's review card shows, loaded by the Training page. */
-export interface TodayReview {
-  due: number;
-  /** Learning and relearning cards due within LEARNING_SOON_MS: not due
-   *  yet, but Start review includes them. */
-  soon: number;
-  /** Learning and relearning cards due later today (soon included). */
-  laterToday: number;
-  newCount: number;
-  newFromDictionary: number;
-  /** Writing cards in Today's review: due and new. */
-  toWrite: number;
-}
-
-function TodayCard({
-  review,
-  dueTomorrow,
-  dailyNewWords,
-  nothingStarted,
-  onChangeLimit,
-}: {
-  /** Null when it couldn't be loaded: the card says so, with a retry. */
-  review: TodayReview | null;
-  /** Null when the stats couldn't be loaded. */
-  dueTomorrow: number | null;
-  /** Null when the profile couldn't be loaded. */
-  dailyNewWords: number | null;
-  nothingStarted: boolean;
-  onChangeLimit: () => void;
-}) {
-  if (!review) {
-    return (
-      <section aria-labelledby="today-title" className={`${CARD} flex items-center justify-between gap-4`}>
-        <div className="min-w-0">
-          <h2 id="today-title" className="font-heading text-h2 font-bold text-bark">
-            Today&apos;s review
-          </h2>
-          <p role="alert" className="mt-1 font-body text-body text-bark">
-            Couldn&apos;t load your review. Try again.
-          </p>
-          <RetryButton className="mt-4" />
-        </div>
-        <Bao pose="ready" className="h-24 sm:h-32" />
-      </section>
-    );
-  }
-
-  const { due, soon, laterToday, newCount, newFromDictionary, toWrite } = review;
-  if (due === 0 && soon === 0 && newCount === 0 && toWrite === 0) {
-    const limitZero = nothingStarted && dailyNewWords === 0;
-    return (
-      <section aria-labelledby="today-title" className={`${CARD} flex items-center justify-between gap-4`}>
-        <div className="min-w-0">
-          <h2 id="today-title" className="font-heading text-h2 font-bold text-bark">
-            {limitZero ? "No new words today" : "All done for today"}
-          </h2>
-          {limitZero ? (
-            <p className="mt-1 font-body text-body text-bark">
-              Your new-words limit is 0 a day, so there&apos;s nothing to learn yet.{" "}
-              <button
-                type="button"
-                onClick={onChangeLimit}
-                className={`rounded-sm font-medium text-rust-dark underline underline-offset-4 ${FOCUS_RING}`}
-              >
-                Change the limit
-              </button>
-            </p>
-          ) : (
-            dueTomorrow !== null && (
-              <p className="mt-1 font-body text-body text-bark-muted">
-                {dueTomorrow === 1 ? "1 card due tomorrow" : `${dueTomorrow} due tomorrow`}
-              </p>
-            )
-          )}
-          {laterToday > 0 && <LaterToday count={laterToday} className="mt-1" />}
-        </div>
-        <Bao pose={limitZero ? "ready" : "happy"} className="h-24 sm:h-32" />
-      </section>
-    );
-  }
-
-  const minutes = Math.max(
-    1,
-    Math.round(((due + soon) * SECONDS_PER_DUE + newCount * SECONDS_PER_NEW + toWrite * SECONDS_PER_WRITE) / 60),
-  );
-
-  return (
-    <section aria-labelledby="today-title" className={`${CARD} flex items-end justify-between gap-4`}>
-      <div className="min-w-0">
-        <h2 id="today-title" className="font-heading text-h2 font-bold text-bark">
-          Today&apos;s review
-        </h2>
-        <dl className="mt-3 flex gap-6 sm:gap-8">
-          <div>
-            <dt className="sr-only">Due</dt>
-            <dd className="font-heading text-[40px] font-bold leading-[44px] text-rust-dark">{due}</dd>
-            <dd aria-hidden="true" className="font-body text-body text-bark-muted">
-              due
-            </dd>
-          </div>
-          <div>
-            <dt className="sr-only">New</dt>
-            <dd className="font-heading text-[40px] font-bold leading-[44px] text-deep-grass">{newCount}</dd>
-            <dd aria-hidden="true" className="font-body text-body text-bark-muted">
-              new
-            </dd>
-          </div>
-          <div>
-            <dt className="sr-only">To write</dt>
-            <dd className="font-heading text-[40px] font-bold leading-[44px] text-bamboo-gold-dark">{toWrite}</dd>
-            <dd aria-hidden="true" className="font-body text-body text-bark-muted">
-              to write
-            </dd>
-          </div>
-        </dl>
-        {/* Below the counts, so it doesn't widen the due column. */}
-        {laterToday > 0 && <LaterToday count={laterToday} className="mt-1" />}
-        <Button asChild className="mt-4">
-          <Link href={REVIEW_HREF}>Start review</Link>
-        </Button>
-        <p className="mt-2 font-body text-body-sm text-bark-muted">Saves your progress and keeps your streak</p>
-        <p className="mt-2 font-body text-body text-bark-muted">
-          About {minutes} min
-          {newFromDictionary > 0 &&
-            ` · ${newFromDictionary} of your new words ${newFromDictionary === 1 ? "is" : "are"} from the Dictionary`}
-        </p>
-      </div>
-      <Bao pose="ready" className="h-28 sm:h-36" />
-    </section>
-  );
-}
 
 /* Practice by mode */
 
@@ -613,42 +446,6 @@ function DailyLimitsDialog({
 }
 
 /* Stats */
-
-/** An (i) button with a one-sentence tooltip: shown on hover and keyboard
- *  focus, and toggled by a tap. Screen readers get it as the button's
- *  description. */
-function InfoTip({ label, info, align }: { label: string; info: string; align: "start" | "center" | "end" }) {
-  const [open, setOpen] = useState(false);
-  const tipId = useId();
-  return (
-    <span className="group relative inline-flex align-middle">
-      <button
-        type="button"
-        aria-label={`About ${label}`}
-        aria-describedby={tipId}
-        onClick={() => setOpen((o) => !o)}
-        onBlur={() => setOpen(false)}
-        onKeyDown={(e) => {
-          if (e.key === "Escape") setOpen(false);
-        }}
-        className={`-m-1.5 flex h-8 w-8 items-center justify-center rounded-full text-bark-muted transition-colors hover:text-bark ${FOCUS_RING}`}
-      >
-        <Info size={16} aria-hidden="true" />
-      </button>
-      <span
-        id={tipId}
-        role="tooltip"
-        className={`pointer-events-none absolute top-full z-20 mt-1.5 w-52 whitespace-normal max-w-[calc(100vw-48px)] rounded-md bg-bark px-2.5 py-1.5 text-left font-body text-[13px] font-medium leading-5 text-background group-hover:block group-has-[:focus-visible]:block ${TIP_ALIGN[align]} ${
-          open ? "block" : "hidden"
-        }`}
-      >
-        {info}
-      </span>
-    </span>
-  );
-}
-
-const TIP_ALIGN = { start: "left-0", center: "left-1/2 -translate-x-1/2", end: "right-0" };
 
 /** The three stats in columns, each tooltip kept on screen by aligning it
  *  with its column. */

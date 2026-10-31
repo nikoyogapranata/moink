@@ -19,7 +19,7 @@ import {
 import { WRITING_STYLE_SHORT, type WritingStyle } from "@/lib/training/writing";
 
 import { updateLastWriting } from "./deckStore";
-import { useToast } from "./hooks";
+import { useMarkPracticed, useToast } from "./hooks";
 import { AddToTraining, DoneScreen, MissedWords, SegmentedControl, SessionFrame, SessionHeader, Toast, useAddToTraining } from "./SessionParts";
 import { WritingStage } from "./WritingStage";
 
@@ -60,6 +60,7 @@ export function WritingSession({
   const [style, setStyle] = useState(initialStyle);
   const [shuffleOn, setShuffleOn] = useState(shuffled);
   const [toast, showToast] = useToast();
+  const markPracticed = useMarkPracticed();
   const training = useAddToTraining(items);
 
   const current = run.queue[0];
@@ -88,6 +89,7 @@ export function WritingSession({
   // Applied to the latest run, so a toggle while the result shows isn't
   // lost.
   async function answer(gotIt: boolean) {
+    markPracticed();
     return () => {
       setRun((r) => afterRetryPractice(r, gotIt ? Rating.Good : Rating.Again, recallOnly(r.queue[0])));
       setWritten((n) => n + 1);

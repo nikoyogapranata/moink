@@ -2,6 +2,7 @@
 
 import { isHskStandard, isLevelOf } from "@/lib/hsk";
 import { createClient } from "@/lib/supabase/server";
+import { isTimeZone } from "@/lib/time";
 import { isValidUsername } from "@/lib/username";
 
 export type UsernameCheck = "available" | "taken" | "invalid" | "error";
@@ -22,10 +23,14 @@ export type CompleteOnboardingResult =
   | { ok: true }
   | { ok: false; error: "username_taken" | "invalid" | "signed_out" | "unknown" };
 
+/** Saves the profile. `timeZone` is the browser's (Intl), so "today"
+ *  follows the user from the start; when it's missing or not a zone this
+ *  runtime knows, the default stays and the app checks again on load. */
 export async function completeOnboarding(
   username: string,
   standard: string,
   level: number,
+  timeZone?: string | null,
 ): Promise<CompleteOnboardingResult> {
   if (
     typeof username !== "string" ||
@@ -47,7 +52,12 @@ export async function completeOnboarding(
   // failure instead of a silent success.
   const { data, error } = await supabase
     .from("profiles")
-    .update({ username, hsk_standard: standard, hsk_level_target: level })
+    .update({
+      username,
+      hsk_standard: standard,
+      hsk_level_target: level,
+      ...(isTimeZone(timeZone) ? { timezone: timeZone, timezone_confirmed: true } : {}),
+    })
     .eq("id", user.id)
     .select("id");
 

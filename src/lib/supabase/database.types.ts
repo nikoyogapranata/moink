@@ -2,7 +2,8 @@
 // typescript` produces. Written by hand from the live schema plus
 // supabase/migrations/20261025120000_learning_core.sql,
 // 20261101120000_dictionary_search.sql, 20261102120000_training.sql and
-// 20261109120000_writing.sql;
+// 20261109120000_writing.sql, and the later migrations up to
+// 20261214120000_rest_days_timezone.sql;
 // regenerate with the
 // CLI once it's set up, and keep this file's name so imports don't change.
 
@@ -41,6 +42,9 @@ export type Database = {
           /** New writing cards a day, 0 to 20. */
           daily_new_writing: number;
           timezone: string;
+          /** The time zone came from the browser or was picked in Settings;
+           *  until then the app may replace the default once. */
+          timezone_confirmed: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -59,6 +63,7 @@ export type Database = {
           daily_new_words?: number;
           daily_new_writing?: number;
           timezone?: string;
+          timezone_confirmed?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -77,6 +82,7 @@ export type Database = {
           daily_new_words?: number;
           daily_new_writing?: number;
           timezone?: string;
+          timezone_confirmed?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -317,11 +323,58 @@ export type Database = {
           },
         ];
       };
+      /** One row per user and day in their zone (20261207120000_streaks.sql).
+       *  Written only by the streak functions; read-only for users. */
+      daily_activity: {
+        Row: {
+          user_id: string;
+          day: string;
+          reviews_done: number;
+          due_at_start: number;
+          completed: boolean;
+          practiced: boolean;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [
+          {
+            foreignKeyName: "daily_activity_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
     };
     Functions: {
+      mark_practiced: {
+        Args: Record<string, never>;
+        Returns: undefined;
+      };
+      get_streak: {
+        Args: Record<string, never>;
+        Returns: {
+          current_streak: number;
+          best_streak: number;
+          /** YYYY-MM-DD, in the user's zone. */
+          today: string;
+          last_active: string | null;
+          /** The last 7 days, oldest first. */
+          days: { day: string; completed: boolean; practiced: boolean; rest: boolean }[];
+        }[];
+      };
+      get_level_progress: {
+        Args: { p_learned_stability: number; p_learned_min_reps: number };
+        Returns: { level: number; total: number; started: number; learned: number }[];
+      };
+      get_due_forecast: {
+        Args: { p_days?: number };
+        Returns: { day: string; due: number }[];
+      };
       is_username_available: {
         Args: { name: string };
         Returns: boolean;

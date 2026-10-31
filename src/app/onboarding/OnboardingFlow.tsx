@@ -16,6 +16,7 @@ import { HillScene, MOUND_PEAK_X, hillSurfaceAt } from "@/components/HillScene";
 import { Button } from "@/components/ui/Button";
 import { Wordmark } from "@/components/Wordmark";
 import { closestLevel, levelLabel, type HskStandard } from "@/lib/hsk";
+import { browserTimeZone } from "@/lib/time";
 import { normalizeUsernameInput, usernameProblem } from "@/lib/username";
 
 import { checkUsername, completeOnboarding } from "./actions";
@@ -555,7 +556,7 @@ export function OnboardingFlow({
     setSaving(true);
     setSaveError(null);
 
-    const result = await completeOnboarding(username, standard, level).catch(
+    const result = await completeOnboarding(username, standard, level, browserTimeZone()).catch(
       () => ({ ok: false, error: "unknown" }) as const,
     );
 

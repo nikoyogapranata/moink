@@ -18,7 +18,7 @@ export default async function SettingsPage() {
     <>
       <PageHeader title="Settings">Your study plan and account.</PageHeader>
       <div className="mt-6 flex flex-col gap-6">
-        <StudySettings standard={user.hskStandard} level={user.hskLevel} />
+        <StudySettings standard={user.hskStandard} level={user.hskLevel} timeZone={user.timeZone} />
         <div>
           <SignOutButton />
         </div>

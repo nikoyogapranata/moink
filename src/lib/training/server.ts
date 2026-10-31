@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { closestLevel, LEVEL_COLUMN, STANDARD_LEVELS, type HskStandard } from "@/lib/hsk";
-import type { Database, Skill } from "@/lib/supabase/database.types";
+import type { Database, Skill, Tables } from "@/lib/supabase/database.types";
 import { dayStarts, FALLBACK_TIME_ZONE } from "@/lib/time";
 
 import { deckSetLevel, DUE_SOON_MS, type DeckSet } from "./deck";
@@ -19,17 +19,16 @@ import {
 
 type Client = SupabaseClient<Database>;
 
+/** The profile fields trainingProfile reads. */
+export type TrainingProfileRow = Pick<
+  Tables<"profiles">,
+  "daily_new_words" | "daily_new_writing" | "hsk_level_target" | "hsk_standard" | "timezone"
+>;
+
 /** The user's daily new-word and new-writing limits, HSK standard and
- *  target level in it, and day boundaries in their zone. Throws when the
- *  profile can't be read: guessing defaults would show wrong limits and
- *  day boundaries. */
-export async function loadTrainingProfile(supabase: Client, userId: string, now = new Date()) {
-  const { data: profile, error } = await supabase
-    .from("profiles")
-    .select("daily_new_words, daily_new_writing, hsk_level_target, hsk_standard, timezone")
-    .eq("id", userId)
-    .maybeSingle();
-  if (error) throw error;
+ *  target level in it, and day boundaries in their zone, from their
+ *  profile row (null: none, so the defaults). */
+export function trainingProfile(profile: TrainingProfileRow | null, now = new Date()) {
   return {
     dailyNewWords: profile?.daily_new_words ?? 0,
     dailyNewWriting: profile?.daily_new_writing ?? 0,
@@ -37,6 +36,18 @@ export async function loadTrainingProfile(supabase: Client, userId: string, now 
     standard: (profile?.hsk_standard ?? "hsk3") as HskStandard,
     days: dayStarts(profile?.timezone || FALLBACK_TIME_ZONE, now),
   };
+}
+
+/** trainingProfile, reading the profile. Throws when it can't be read:
+ *  guessing defaults would show wrong limits and day boundaries. */
+export async function loadTrainingProfile(supabase: Client, userId: string, now = new Date()) {
+  const { data: profile, error } = await supabase
+    .from("profiles")
+    .select("daily_new_words, daily_new_writing, hsk_level_target, hsk_standard, timezone")
+    .eq("id", userId)
+    .maybeSingle();
+  if (error) throw error;
+  return trainingProfile(profile, now);
 }
 
 /** The session queue from get_review_queue, as of `now`. */

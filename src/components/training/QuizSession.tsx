@@ -18,7 +18,7 @@ import {
 import { pickShowing, showingFields, type QuestionFormat, type QuizBank } from "@/lib/training/quiz";
 
 import { saveLastQuizShuffle, type QuestionKind } from "./deckStore";
-import { useToast } from "./hooks";
+import { useMarkPracticed, useToast } from "./hooks";
 import { ListenStage, QuizStage } from "./QuizStage";
 import { AddToTraining, DoneScreen, MissedWords, SessionFrame, SessionHeader, Toast, useAddToTraining } from "./SessionParts";
 
@@ -55,6 +55,7 @@ export function QuizSession({
   const [round, setRound] = useState(0);
   const [shuffleOn, setShuffleOn] = useState(shuffled);
   const [toast, showToast] = useToast();
+  const markPracticed = useMarkPracticed();
   const training = useAddToTraining(items);
   // Questions play on their own after the session's first tap.
   const [audioUnlocked, setAudioUnlocked] = useState(false);
@@ -83,6 +84,7 @@ export function QuizSession({
   // Applied to the latest run, so a toggle while the result shows isn't
   // lost.
   async function answer(gotIt: boolean) {
+    markPracticed();
     return () =>
       setRun((r) => afterRetryPractice(r, gotIt ? Rating.Good : Rating.Again, reshow(r.queue[0])));
   }

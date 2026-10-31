@@ -690,7 +690,7 @@ export function DictionaryView({
               <WordOfTheDayCard
                 word={wordOfTheDay}
                 dateLabel={dateLabel}
-                onDetails={() => openWord(wordOfTheDay.id)}
+                details={{ onClick: () => openWord(wordOfTheDay.id) }}
               />
             </div>
           )}
@@ -885,7 +885,7 @@ export function DictionaryView({
                   <WordOfTheDayCard
                     word={wordOfTheDay}
                     dateLabel={dateLabel}
-                    onDetails={() => openWord(wordOfTheDay.id)}
+                    details={{ onClick: () => openWord(wordOfTheDay.id) }}
                   />
                 )}
                 {wordOfTheDayFailed && <WordOfTheDayError />}

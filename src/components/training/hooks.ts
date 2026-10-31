@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
-import { devErrorOnce } from "@/lib/dev";
+import { devError, devErrorOnce } from "@/lib/dev";
+import { markPracticed } from "@/lib/training/actions";
 import { parseDirection, type Direction } from "@/lib/training/deck";
 
 const motionQuery = "(prefers-reduced-motion: reduce)";
@@ -65,6 +66,22 @@ export function useDirection(mode: SessionMode, initial: Direction | null) {
     storeDirection(mode, next);
   }
   return [direction, setDirection] as const;
+}
+
+/** Marks today practiced for the streak strip, once per practice session:
+ *  call it on every answer; only the first reaches the server. Practice
+ *  works without it, so a failure is only logged. */
+export function useMarkPracticed() {
+  const marked = useRef(false);
+  return () => {
+    if (marked.current) return;
+    marked.current = true;
+    markPracticed()
+      .then((result) => {
+        if (!result.ok) devError("useMarkPracticed: markPracticed failed; today isn't marked practiced (see the server log).");
+      })
+      .catch((error) => devError("useMarkPracticed: markPracticed threw.", error));
+  };
 }
 
 /** How long a toast stays up. */

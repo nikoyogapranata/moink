@@ -1,7 +1,9 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 
+import { CARD } from "@/components/app/card";
 import { useRecentWords, type RecentWord } from "@/lib/dictionary/recent";
 import type { WordDetail } from "@/lib/dictionary/words";
 
@@ -16,17 +18,25 @@ export const WOTD_BAO = {
   height: 1363,
 };
 
-export const CARD =
-  "rounded-[22px] border-[1.5px] border-line bg-surface-raised p-5";
+export { CARD };
 
+const DETAILS =
+  "inline-flex h-11 items-center rounded-pill border-[1.5px] border-line px-5 font-heading text-body font-medium text-bark transition-colors hover:bg-highlight/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rust";
+
+/** The word of the day: on the Dictionary (Details opens it in the panel)
+ *  and, compact, on the Dashboard (a link opens it in the Dictionary). */
 export function WordOfTheDayCard({
   word,
   dateLabel,
-  onDetails,
+  details,
+  compact = false,
 }: {
   word: WordDetail;
   dateLabel: string;
-  onDetails: () => void;
+  /** Details as a button (the Dictionary's panel) or a link to the word. */
+  details: { onClick: () => void } | { href: string };
+  /** Smaller hanzi and Bao, for the Dashboard. */
+  compact?: boolean;
 }) {
   return (
     <section aria-labelledby="wotd-title" className={`${CARD} relative overflow-hidden`}>
@@ -39,7 +49,10 @@ export function WordOfTheDayCard({
 
       <div className="mt-3 flex items-end justify-between gap-3">
         <div className="min-w-0">
-          <h2 id="wotd-title" className="font-hanzi text-[52px] font-medium leading-[60px] text-bark">
+          <h2
+            id="wotd-title"
+            className={`font-hanzi font-medium text-bark ${compact ? "text-[40px] leading-12" : "text-[52px] leading-[60px]"}`}
+          >
             {word.simplified}
           </h2>
           <div className="mt-1 flex items-center gap-1">
@@ -54,19 +67,21 @@ export function WordOfTheDayCard({
           width={WOTD_BAO.width}
           height={WOTD_BAO.height}
           sizes="96px"
-          className="h-24 w-auto shrink-0 select-none"
+          className={`${compact ? "h-20" : "h-24"} w-auto shrink-0 select-none`}
         />
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-3">
         <TrainingButton key={word.id} wordId={word.id} simplified={word.simplified} />
-        <button
-          type="button"
-          onClick={onDetails}
-          className="inline-flex h-11 items-center rounded-pill border-[1.5px] border-line px-5 font-heading text-body font-medium text-bark transition-colors hover:bg-highlight/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rust"
-        >
-          Details
-        </button>
+        {"href" in details ? (
+          <Link href={details.href} className={DETAILS}>
+            Open in Dictionary
+          </Link>
+        ) : (
+          <button type="button" onClick={details.onClick} className={DETAILS}>
+            Details
+          </button>
+        )}
       </div>
     </section>
   );
