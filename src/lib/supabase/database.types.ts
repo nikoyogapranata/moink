@@ -3,7 +3,8 @@
 // supabase/migrations/20261025120000_learning_core.sql,
 // 20261101120000_dictionary_search.sql, 20261102120000_training.sql and
 // 20261109120000_writing.sql, and the later migrations up to
-// 20261214120000_rest_days_timezone.sql;
+// 20261214120000_rest_days_timezone.sql, and the grammar tables of
+// 20261228120000_grammar.sql (checked against the live schema);
 // regenerate with the
 // CLI once it's set up, and keep this file's name so imports don't change.
 
@@ -17,6 +18,46 @@ export type Json =
 
 /** Which card of a word: one user_words row per user, word and skill. */
 export type Skill = "recognition" | "writing";
+
+/** A grammar point's role in the syllabus: a list of function words, or a
+ *  pattern that gets a lesson. */
+export type GrammarKind = "words" | "structure";
+
+export type GrammarStatus = "draft" | "reviewed";
+
+/** What a block of a pattern is; picks its color. */
+export type GrammarRole =
+  | "subject"
+  | "object"
+  | "marker"
+  | "verb"
+  | "adjective"
+  | "number"
+  | "time"
+  | "place"
+  | "other";
+
+/** One block of grammar_lessons.pattern_parts: "比" labelled "compare
+ *  marker", role "marker". */
+export type GrammarPatternPart = { text: string; label: string; role: GrammarRole };
+
+export type GrammarSectionKind =
+  | "build"
+  | "variations"
+  | "negative"
+  | "questions"
+  | "mistakes"
+  | "compare"
+  | "notes";
+
+/** One section of grammar_lessons.sections; only a 'mistakes' section has
+ *  items. */
+export type GrammarSection = {
+  kind: GrammarSectionKind;
+  title: string;
+  body: string;
+  items?: { wrong: string; right: string; reason: string }[];
+};
 
 export type Database = {
   public: {
@@ -342,6 +383,274 @@ export type Database = {
             columns: ["user_id"];
             isOneToOne: false;
             referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      /** The HSK 3.0 2025 syllabus grammar list (20261228120000_grammar.sql),
+       *  seeded by scripts/seed-grammar.ts. Read-only for users. */
+      grammar_points: {
+        Row: {
+          id: number;
+          standard: "hsk3_2025";
+          /** 1 to 7 (7 = bands 7 to 9). */
+          level: number;
+          /** Position in the syllabus within the level, from 1. */
+          sort_order: number;
+          /** The syllabus text (类别, 类别名称, 细目, 语法内容), for tracing
+           *  back; not shown to users. */
+          category: string | null;
+          subcategory: string | null;
+          detail: string | null;
+          source_text: string;
+          kind: GrammarKind;
+          name_zh: string;
+          name_en: string | null;
+          slug: string | null;
+          /** Display pattern, e.g. "A比B+形容词". */
+          pattern: string | null;
+          /** The 2021 standard's matching point, where the match is
+           *  confident. */
+          level_2021: number | null;
+          code_2021: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: never;
+          standard?: "hsk3_2025";
+          level: number;
+          sort_order: number;
+          category?: string | null;
+          subcategory?: string | null;
+          detail?: string | null;
+          source_text: string;
+          kind: GrammarKind;
+          name_zh: string;
+          name_en?: string | null;
+          slug?: string | null;
+          pattern?: string | null;
+          level_2021?: number | null;
+          code_2021?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: never;
+          standard?: "hsk3_2025";
+          level?: number;
+          sort_order?: number;
+          category?: string | null;
+          subcategory?: string | null;
+          detail?: string | null;
+          source_text?: string;
+          kind?: GrammarKind;
+          name_zh?: string;
+          name_en?: string | null;
+          slug?: string | null;
+          pattern?: string | null;
+          level_2021?: number | null;
+          code_2021?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      /** The words a 'words' grammar point lists, in syllabus order. */
+      grammar_point_words: {
+        Row: {
+          point_id: number;
+          word_id: number;
+          sort_order: number;
+        };
+        Insert: {
+          point_id: number;
+          word_id: number;
+          sort_order: number;
+        };
+        Update: {
+          point_id?: number;
+          word_id?: number;
+          sort_order?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "grammar_point_words_point_id_fkey";
+            columns: ["point_id"];
+            isOneToOne: false;
+            referencedRelation: "grammar_points";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "grammar_point_words_word_id_fkey";
+            columns: ["word_id"];
+            isOneToOne: false;
+            referencedRelation: "words";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      /** One lesson per 'structure' point, from scripts/import-grammar.ts. */
+      grammar_lessons: {
+        Row: {
+          point_id: number;
+          summary: string;
+          pattern_parts: GrammarPatternPart[];
+          sections: GrammarSection[];
+          /** grammar_points ids (not foreign keys). */
+          related_point_ids: number[];
+          status: GrammarStatus;
+          reviewed_at: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          point_id: number;
+          summary?: string;
+          pattern_parts?: GrammarPatternPart[];
+          sections?: GrammarSection[];
+          related_point_ids?: number[];
+          status?: GrammarStatus;
+          reviewed_at?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          point_id?: number;
+          summary?: string;
+          pattern_parts?: GrammarPatternPart[];
+          sections?: GrammarSection[];
+          related_point_ids?: number[];
+          status?: GrammarStatus;
+          reviewed_at?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "grammar_lessons_point_id_fkey";
+            columns: ["point_id"];
+            isOneToOne: true;
+            referencedRelation: "grammar_points";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      grammar_examples: {
+        Row: {
+          id: number;
+          point_id: number;
+          sort_order: number;
+          hanzi: string;
+          pinyin: string;
+          translation: string;
+          /** The part of hanzi that shows the pattern. */
+          highlight: string;
+          /** 1 to 3. */
+          difficulty: number;
+          status: GrammarStatus;
+          /** Highest 2025 level of the words in hanzi
+           *  (scripts/check-grammar-examples.ts). */
+          max_word_level: number | null;
+          updated_at: string;
+        };
+        Insert: {
+          id?: never;
+          point_id: number;
+          sort_order: number;
+          hanzi: string;
+          pinyin: string;
+          translation: string;
+          highlight: string;
+          difficulty?: number;
+          status?: GrammarStatus;
+          max_word_level?: number | null;
+          updated_at?: string;
+        };
+        Update: {
+          id?: never;
+          point_id?: number;
+          sort_order?: number;
+          hanzi?: string;
+          pinyin?: string;
+          translation?: string;
+          highlight?: string;
+          difficulty?: number;
+          status?: GrammarStatus;
+          max_word_level?: number | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "grammar_examples_point_id_fkey";
+            columns: ["point_id"];
+            isOneToOne: false;
+            referencedRelation: "grammar_points";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      /** One FSRS card per user and grammar point; not used yet. */
+      user_grammar: {
+        Row: {
+          user_id: string;
+          point_id: number;
+          due: string;
+          stability: number;
+          difficulty: number;
+          elapsed_days: number;
+          scheduled_days: number;
+          learning_steps: number;
+          reps: number;
+          lapses: number;
+          /** ts-fsrs State: 0 New, 1 Learning, 2 Review, 3 Relearning. */
+          state: number;
+          last_review: string | null;
+          introduced_at: string;
+          suspended: boolean;
+        };
+        Insert: {
+          user_id: string;
+          point_id: number;
+          due?: string;
+          stability?: number;
+          difficulty?: number;
+          elapsed_days?: number;
+          scheduled_days?: number;
+          learning_steps?: number;
+          reps?: number;
+          lapses?: number;
+          state?: number;
+          last_review?: string | null;
+          introduced_at?: string;
+          suspended?: boolean;
+        };
+        Update: {
+          user_id?: string;
+          point_id?: number;
+          due?: string;
+          stability?: number;
+          difficulty?: number;
+          elapsed_days?: number;
+          scheduled_days?: number;
+          learning_steps?: number;
+          reps?: number;
+          lapses?: number;
+          state?: number;
+          last_review?: string | null;
+          introduced_at?: string;
+          suspended?: boolean;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "user_grammar_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "user_grammar_point_id_fkey";
+            columns: ["point_id"];
+            isOneToOne: false;
+            referencedRelation: "grammar_points";
             referencedColumns: ["id"];
           },
         ];
