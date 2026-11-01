@@ -54,6 +54,15 @@
   --color-on-rust: #ffffff;
   --color-listen-tint: #dde9f7;
   --color-listen-ink: #1f4f8a;
+  /* Grammar pattern blocks (with the highlight, good and learning ramps):
+     blue for subject and object (6.7:1), purple for time and place
+     (7.0:1), gray for the rest (7.5:1), ink on tint. */
+  --color-role-blue-tint: #dde9f7;
+  --color-role-blue-ink: #1f4f8a;
+  --color-role-purple-tint: #ece4f7;
+  --color-role-purple-ink: #5b3a8c;
+  --color-role-gray-tint: #ececea;
+  --color-role-gray-ink: #4a4a46;
 
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -137,6 +146,13 @@
   --color-on-rust: #18181a;
   --color-listen-tint: #1e2c3d;
   --color-listen-ink: #b9d4f5;
+  /* Pattern blocks: deep tint, light ink, at least 9.1:1. */
+  --color-role-blue-tint: #1e2c3d;
+  --color-role-blue-ink: #b9d4f5;
+  --color-role-purple-tint: #2f2640;
+  --color-role-purple-ink: #d9c8f5;
+  --color-role-gray-tint: #2e2e30;
+  --color-role-gray-ink: #d6d4ce;
 }
 
 body {

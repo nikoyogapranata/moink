@@ -1,6 +1,7 @@
 import { config } from "dotenv";
 import { createClient } from "@supabase/supabase-js";
 
+import { retryingFetch } from "./lib/admin";
 import { searchFields } from "./lib/pinyin";
 import {
   assertOverridesValid,
@@ -59,6 +60,7 @@ interface WordRow {
 async function fillHsk3(entries: SourceEntry[]) {
   const supabase = createClient(SUPABASE_URL!, SUPABASE_SECRET_KEY!, {
     auth: { persistSession: false, autoRefreshToken: false },
+    global: { fetch: retryingFetch },
   });
 
   const byLevel = new Map<number, string[]>();
@@ -131,6 +133,7 @@ async function main() {
 
   const supabase = createClient(SUPABASE_URL!, SUPABASE_SECRET_KEY!, {
     auth: { persistSession: false, autoRefreshToken: false },
+    global: { fetch: retryingFetch },
   });
 
   let inserted = 0;

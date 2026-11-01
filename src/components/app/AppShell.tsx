@@ -5,6 +5,7 @@ import {
   Coins,
   Flame,
   House,
+  NotebookPen,
   Settings,
   SquareStack,
   User,
@@ -53,6 +54,7 @@ const NAV: { href: string; label: string; short: string; icon: LucideIcon }[] = 
   { href: "/dashboard", label: "Dashboard", short: "Home", icon: House },
   { href: "/training", label: "Training", short: "Train", icon: SquareStack },
   { href: "/dictionary", label: "Dictionary", short: "Words", icon: BookOpen },
+  { href: "/grammar", label: "Grammar", short: "Grammar", icon: NotebookPen },
   { href: "/profile", label: "Profile", short: "Profile", icon: User },
 ];
 
@@ -206,7 +208,9 @@ function TabBar({ pathname }: { pathname: string }) {
       aria-label="Main"
       className={`fixed inset-x-3 bottom-[calc(12px+env(safe-area-inset-bottom))] z-30 rounded-[22px] p-1.5 lg:hidden ${PANEL}`}
     >
-      <ul className="grid grid-cols-4 gap-1">
+      {/* Five tabs: at 375px each is about 64px wide, room for "Grammar" at
+          12px, and 52px tall. */}
+      <ul className="grid grid-cols-5 gap-1">
         {NAV.map(({ href, short, icon: Icon }) => {
           const active = isActive(pathname, href);
           return (

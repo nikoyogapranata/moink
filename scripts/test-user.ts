@@ -24,6 +24,7 @@ import { config } from "dotenv";
 import { createClient } from "@supabase/supabase-js";
 
 import type { Database } from "../src/lib/supabase/database.types";
+import { retryingFetch } from "./lib/admin";
 
 const ENV_FILE = ".env.local";
 const DEFAULT_EMAIL = "moink-test@example.com";
@@ -43,6 +44,7 @@ if (!SUPABASE_URL || !SUPABASE_SECRET_KEY) {
 
 const admin = createClient<Database>(SUPABASE_URL, SUPABASE_SECRET_KEY, {
   auth: { autoRefreshToken: false, persistSession: false },
+  global: { fetch: retryingFetch },
 });
 
 /** Sets (or replaces) KEY=value lines in .env.local, leaving the rest. */

@@ -23,6 +23,7 @@ import { config } from "dotenv";
 import { createClient } from "@supabase/supabase-js";
 
 import type { Database } from "../src/lib/supabase/database.types";
+import { retryingFetch } from "./lib/admin";
 import { extractHsk3_2025Level, extractHsk3Level, fetchDataset } from "./lib/readings";
 
 config({ path: ".env.local" });
@@ -59,7 +60,9 @@ async function hasStrokes(char: string): Promise<boolean> {
 }
 
 async function main() {
-  const supabase = createClient<Database>(SUPABASE_URL!, SUPABASE_SECRET_KEY!);
+  const supabase = createClient<Database>(SUPABASE_URL!, SUPABASE_SECRET_KEY!, {
+    global: { fetch: retryingFetch },
+  });
 
   // Every word in the table has a level in some standard.
   const seeded: { simplified: string }[] = [];
