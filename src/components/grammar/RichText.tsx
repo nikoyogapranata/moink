@@ -1,7 +1,8 @@
 import { hanziRuns } from "./HanziText";
 
 /** A lesson body: paragraphs split on blank lines, single line breaks
- *  kept, and lines starting with "•" as a bullet list. */
+ *  kept, and lines starting with "•" as a bullet list. Text stops at 72ch
+ *  so long lines stay readable in a wide card. */
 export function RichText({ text }: { text: string }) {
   const blocks = text.split(/\n\s*\n/).filter((b) => b.trim());
   return (
@@ -11,7 +12,7 @@ export function RichText({ text }: { text: string }) {
         const bullets = lines.filter((l) => l.trimStart().startsWith("•"));
         if (bullets.length === lines.length) {
           return (
-            <ul key={i} className="flex list-disc flex-col gap-1 pl-5 marker:text-bark-muted">
+            <ul key={i} className="flex max-w-[72ch] list-disc flex-col gap-1 pl-5 marker:text-bark-muted">
               {lines.map((l, j) => (
                 <li key={j}>{hanziRuns(l.trimStart().replace(/^•\s*/, ""))}</li>
               ))}
@@ -19,7 +20,7 @@ export function RichText({ text }: { text: string }) {
           );
         }
         return (
-          <p key={i}>
+          <p key={i} className="max-w-[72ch]">
             {lines.map((l, j) => (
               <span key={j}>
                 {j > 0 && <br />}
