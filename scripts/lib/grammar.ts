@@ -36,6 +36,9 @@ export const SECTION_KINDS: readonly GrammarSectionKind[] = [
   "mistakes",
   "compare",
   "notes",
+  "how",
+  "when",
+  "recap",
 ];
 export const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
@@ -504,6 +507,7 @@ export const EXAMPLE_COLUMNS = [
   "hanzi",
   "pinyin",
   "translation",
+  "literal",
   "highlight",
   "difficulty",
   "status",

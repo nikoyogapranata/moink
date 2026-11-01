@@ -86,7 +86,14 @@ async function fromDatabase(level: number) {
         related: (lesson?.related_point_ids ?? []).map((id) => slugOf.get(id) ?? id),
         examples: examples
           .filter((e) => e.point_id === p.id)
-          .map(({ hanzi, pinyin, translation, highlight, difficulty }): FileExample => ({ hanzi, pinyin, translation, highlight, difficulty })),
+          .map(({ hanzi, pinyin, translation, literal, highlight, difficulty }): FileExample => ({
+            hanzi,
+            pinyin,
+            translation,
+            ...(literal ? { literal } : {}),
+            highlight,
+            difficulty,
+          })),
       };
     });
   const wordLists = points.filter((p) => p.kind === "words").map((p) => ({ sort_order: p.sort_order, name_zh: p.name_zh, source_text: p.source_text }));
@@ -136,11 +143,12 @@ async function main() {
       "Points with no name_en, summary or examples are skipped on import.",
       'Set "reviewed": true only on points you have checked; the rest import as draft.',
       "related: slugs (or ids) of other points. Every example's highlight must appear in its hanzi.",
-      "pattern_parts: [{ text, label, role }]. sections: [{ kind, title, body }]; a mistakes section also has items: [{ wrong, right, reason }].",
+      "pattern_parts: [{ text, label, role }]. sections: [{ kind, title, body }]; a mistakes section also has items: [{ wrong, right, reason }]. A recap section (in short) shows as a card after the other sections.",
+      "Each example may have literal: a word-by-word translation (optional).",
     ],
     roles: [...ROLES],
     section_kinds: [...SECTION_KINDS],
-    example_template: { hanzi: "", pinyin: "", translation: "", highlight: "", difficulty: 1 },
+    example_template: { hanzi: "", pinyin: "", translation: "", literal: "", highlight: "", difficulty: 1 },
     word_lists: wordLists,
     points: structure,
   };

@@ -189,9 +189,14 @@ export function LessonView({ lesson }: { lesson: Lesson }) {
   const closeWord = useCallback(() => setOpenWord(null), []);
   const reveal = useCallback((id: string) => setRevealed((r) => (r.has(id) ? r : new Set(r).add(id))), []);
 
+  // Recaps (in short) go after the other sections, just before the
+  // examples; ids keep each section's place in the lesson.
+  const sections = lesson.sections.map((section, i) => ({ section, id: `section-${i + 1}` }));
+  const ordered = [...sections.filter((s) => s.section.kind !== "recap"), ...sections.filter((s) => s.section.kind === "recap")];
+
   const toc: TocItem[] = [
     { id: "overview", title: "Overview" },
-    ...lesson.sections.map((s, i) => ({ id: `section-${i + 1}`, title: s.title })),
+    ...ordered.map(({ section, id }) => ({ id, title: section.title })),
     ...(lesson.examples.length ? [{ id: "examples", title: "Examples" }] : []),
   ];
   const active = useActiveSection(toc.map((t) => t.id));
@@ -204,6 +209,7 @@ export function LessonView({ lesson }: { lesson: Lesson }) {
       highlight={e.highlight}
       pinyin={e.pinyin}
       translation={e.translation}
+      literal={e.literal}
       showPinyin={showPinyin}
       showEnglish={showEnglish}
       revealed={revealed.has(key)}
@@ -296,20 +302,35 @@ export function LessonView({ lesson }: { lesson: Lesson }) {
             )}
           </section>
 
-          {lesson.sections.map((section, i) => (
-            <section
-              key={i}
-              id={`section-${i + 1}`}
-              aria-labelledby={`section-${i + 1}-title`}
-              className={`${CARD} ${ANCHOR_OFFSET} flex flex-col gap-3`}
-            >
-              <h2 id={`section-${i + 1}-title`} className={SECTION_TITLE}>
-                {hanziRuns(section.title)}
-              </h2>
-              {section.body.trim() && <RichText text={section.body} />}
-              {section.kind === "mistakes" && section.items?.length ? <MistakeItems items={section.items} /> : null}
-            </section>
-          ))}
+          {ordered.map(({ section, id }) =>
+            section.kind === "recap" ? (
+              // A small highlighted card: the lesson in short.
+              <section
+                key={id}
+                id={id}
+                aria-labelledby={`${id}-title`}
+                className={`${ANCHOR_OFFSET} flex flex-col gap-2 rounded-[22px] border-[1.5px] border-rust/25 bg-highlight px-5 py-4`}
+              >
+                <h2 id={`${id}-title`} className="font-heading text-h3 font-bold text-bark">
+                  {hanziRuns(section.title)}
+                </h2>
+                {section.body.trim() && <RichText text={section.body} />}
+              </section>
+            ) : (
+              <section
+                key={id}
+                id={id}
+                aria-labelledby={`${id}-title`}
+                className={`${CARD} ${ANCHOR_OFFSET} flex flex-col gap-3`}
+              >
+                <h2 id={`${id}-title`} className={SECTION_TITLE}>
+                  {hanziRuns(section.title)}
+                </h2>
+                {section.body.trim() && <RichText text={section.body} />}
+                {section.kind === "mistakes" && section.items?.length ? <MistakeItems items={section.items} /> : null}
+              </section>
+            ),
+          )}
 
           {lesson.examples.length > 0 && (
             <section id="examples" aria-labelledby="examples-title" className={`${CARD} ${ANCHOR_OFFSET} flex flex-col gap-1`}>

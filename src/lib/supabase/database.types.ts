@@ -4,7 +4,8 @@
 // 20261101120000_dictionary_search.sql, 20261102120000_training.sql and
 // 20261109120000_writing.sql, and the later migrations up to
 // 20261214120000_rest_days_timezone.sql, and the grammar tables of
-// 20261228120000_grammar.sql (checked against the live schema);
+// 20261228120000_grammar.sql (checked against the live schema) and
+// 20270104120000_grammar_literal.sql;
 // regenerate with the
 // CLI once it's set up, and keep this file's name so imports don't change.
 
@@ -48,7 +49,10 @@ export type GrammarSectionKind =
   | "questions"
   | "mistakes"
   | "compare"
-  | "notes";
+  | "notes"
+  | "how"
+  | "when"
+  | "recap";
 
 /** One section of grammar_lessons.sections; only a 'mistakes' section has
  *  items. */
@@ -541,6 +545,8 @@ export type Database = {
           hanzi: string;
           pinyin: string;
           translation: string;
+          /** Word-by-word translation; optional. */
+          literal: string | null;
           /** The part of hanzi that shows the pattern. */
           highlight: string;
           /** 1 to 3. */
@@ -558,6 +564,7 @@ export type Database = {
           hanzi: string;
           pinyin: string;
           translation: string;
+          literal?: string | null;
           highlight: string;
           difficulty?: number;
           status?: GrammarStatus;
@@ -571,6 +578,7 @@ export type Database = {
           hanzi?: string;
           pinyin?: string;
           translation?: string;
+          literal?: string | null;
           highlight?: string;
           difficulty?: number;
           status?: GrammarStatus;

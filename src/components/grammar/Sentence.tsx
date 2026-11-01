@@ -8,6 +8,8 @@ import { AudioButton } from "@/components/dictionary/AudioButton";
 import { levelLabel } from "@/lib/hsk";
 import type { PopoverWord, SentencePart } from "@/lib/grammar/load";
 
+import { hanziRuns } from "./HanziText";
+
 const FOCUS_RING = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rust";
 const POPOVER_WIDTH = 256;
 /** Gap between the word and the popover. */
@@ -131,7 +133,7 @@ function WordPopover({ word, open, onClose }: { word: PopoverWord; open: OpenWor
 /**
  * A Chinese sentence: each word of the table is a button that opens its
  * popover, the highlight in rust on a light rust background, then the
- * pinyin and the translation. With pinyin hidden, tapping the sentence (or
+ * pinyin, the word-by-word line and the translation. With pinyin hidden, tapping the sentence (or
  * a word in it) shows its pinyin.
  */
 export function Sentence({
@@ -141,6 +143,7 @@ export function Sentence({
   highlight,
   pinyin,
   translation,
+  literal,
   showPinyin,
   showEnglish,
   revealed,
@@ -156,6 +159,8 @@ export function Sentence({
   highlight: string;
   pinyin: string;
   translation: string;
+  /** Word by word; shown with the translation. */
+  literal: string | null;
   showPinyin: boolean;
   showEnglish: boolean;
   revealed: boolean;
@@ -220,6 +225,11 @@ export function Sentence({
         </p>
         {pinyinShown && <p className="font-body text-body text-rust-dark">{pinyin}</p>}
       </div>
+      {showEnglish && literal && (
+        <p className="font-body text-body italic text-bark-muted">
+          Word by word: {hanziRuns(literal)}
+        </p>
+      )}
       {showEnglish && <p className="font-body text-body text-bark-muted">{translation}</p>}
       {popoverWord && openWord && <WordPopover word={popoverWord} open={openWord} onClose={onCloseWord} />}
     </div>

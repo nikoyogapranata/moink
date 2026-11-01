@@ -6,6 +6,8 @@ export interface FileExample {
   hanzi: string;
   pinyin: string;
   translation: string;
+  /** Word-by-word translation; optional. */
+  literal?: string;
   /** The part of hanzi that shows the pattern. */
   highlight: string;
   /** 1 to 3. */
@@ -128,6 +130,9 @@ export function validatePoint(p: FilePoint): string[] {
       }
       if (isText(e.hanzi) && isText(e.highlight) && !e.hanzi.includes(e.highlight)) {
         errors.push(`${at}: highlight "${e.highlight}" isn't in "${e.hanzi}"`);
+      }
+      if (e.literal !== undefined && e.literal !== null && typeof e.literal !== "string") {
+        errors.push(`${at}.literal must be a string`);
       }
       if (!Number.isInteger(e.difficulty) || (e.difficulty as number) < 1 || (e.difficulty as number) > 3) {
         errors.push(`${at}.difficulty must be 1, 2 or 3`);

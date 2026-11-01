@@ -83,7 +83,7 @@ export type SentencePart = { text: string; wordId: number | null };
 
 export type LessonExample = Pick<
   Tables<"grammar_examples">,
-  "id" | "sort_order" | "hanzi" | "pinyin" | "translation" | "highlight" | "difficulty"
+  "id" | "sort_order" | "hanzi" | "pinyin" | "translation" | "literal" | "highlight" | "difficulty"
 > & { parts: SentencePart[] };
 
 export interface PointLink {
@@ -119,14 +119,29 @@ const linkOf = (p: { slug: string | null; name_en: string | null; name_zh: strin
 /** One lesson by its point's slug, or null when there's no such point or
  *  it has no lesson yet. */
 export async function loadLesson(supabase: Supabase, slug: string): Promise<Lesson | null> {
-  const { data: point, error } = await supabase
+  const columns = (examples: string) =>
+    `id, level, sort_order, category, name_zh, name_en, pattern, grammar_lessons(summary, pattern_parts, sections, related_point_ids, status), grammar_examples(${examples}), grammar_point_words(sort_order, words(id, simplified, pinyin))`;
+  let { data: point, error } = await supabase
     .from("grammar_points")
     .select(
-      "id, level, sort_order, category, name_zh, name_en, pattern, grammar_lessons(summary, pattern_parts, sections, related_point_ids, status), grammar_examples(id, sort_order, hanzi, pinyin, translation, highlight, difficulty), grammar_point_words(sort_order, words(id, simplified, pinyin))",
+      "id, level, sort_order, category, name_zh, name_en, pattern, grammar_lessons(summary, pattern_parts, sections, related_point_ids, status), grammar_examples(id, sort_order, hanzi, pinyin, translation, literal, highlight, difficulty), grammar_point_words(sort_order, words(id, simplified, pinyin))",
     )
     .eq("standard", STANDARD)
     .eq("slug", slug)
     .maybeSingle();
+  // 42703: undefined column, before 20270104120000_grammar_literal.sql:
+  // read without literal.
+  if (error?.code === "42703") {
+    const fallback = await supabase
+      .from("grammar_points")
+      .select(columns("id, sort_order, hanzi, pinyin, translation, highlight, difficulty"))
+      .eq("standard", STANDARD)
+      .eq("slug", slug)
+      .maybeSingle();
+    error = fallback.error;
+    point = fallback.data as unknown as typeof point;
+    for (const e of point?.grammar_examples ?? []) e.literal ??= null;
+  }
   if (error) throw error;
   const lesson = point?.grammar_lessons;
   if (!point || !lesson || !point.name_en) return null;

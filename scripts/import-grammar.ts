@@ -204,6 +204,7 @@ async function main() {
         hanzi: e.hanzi.trim(),
         pinyin: e.pinyin.trim(),
         translation: e.translation.trim(),
+        literal: e.literal?.trim() || null,
         highlight: e.highlight,
         difficulty: e.difficulty,
         status,
