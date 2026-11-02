@@ -6,11 +6,7 @@ import { useHskStandard } from "@/components/app/HskStandard";
 import { CARD } from "@/components/app/card";
 import { levelLabel } from "@/lib/hsk";
 import { numberFormat } from "@/lib/dictionary/words";
-import { WORD_STAT_INFO, type LevelProgress } from "@/lib/training/stats";
-
-/** Levels shown before "Show all levels": up to this many above the
- *  target. */
-const LEVELS_ABOVE_TARGET = 2;
+import { LEVELS_ABOVE_TARGET, WORD_STAT_INFO, type LevelProgress } from "@/lib/training/stats";
 
 const pct = (n: number, total: number) => (total > 0 ? `${(n / total) * 100}%` : "0%");
 

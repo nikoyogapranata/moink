@@ -69,6 +69,10 @@ export async function loadLevelProgress(supabase: Client): Promise<LevelProgress
   }));
 }
 
+/** Levels the Dashboard shows before "Show all levels": up to this many
+ *  above the target. */
+export const LEVELS_ABOVE_TARGET = 2;
+
 export const FORECAST_DAYS = 7;
 
 /** Recognition and writing reviews due on each of the next FORECAST_DAYS

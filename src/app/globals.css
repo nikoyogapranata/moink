@@ -63,6 +63,8 @@
   --color-role-purple-ink: #5b3a8c;
   --color-role-gray-tint: #ececea;
   --color-role-gray-ink: #4a4a46;
+  /* Loading placeholders (ui/Skeleton). */
+  --color-skeleton: #f1e9dc;
 
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -153,6 +155,14 @@
   --color-role-purple-ink: #d9c8f5;
   --color-role-gray-tint: #2e2e30;
   --color-role-gray-ink: #d6d4ce;
+  /* A step up from the #232325 card surface. */
+  --color-skeleton: #2e2e31;
+}
+
+/* Keep the scrollbar's room when a page is short (a skeleton, say), so classic
+   scrollbars don't narrow the content the moment it grows. */
+html {
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -356,6 +366,64 @@ body {
   animation: spin-turn 1s linear infinite;
 }
 
+/* Loading placeholders (ui/Skeleton): a soft pulse, no shimmer. */
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.skeleton {
+  background-color: var(--color-skeleton);
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+/* Top progress bar (app/NavProgress): quickly to 80%, where it waits, then to
+   100% and out. On transform, so it keeps moving while the main thread is busy
+   with the navigation. The finish's length is DONE_MS in lib/nav-progress. */
+@keyframes nav-progress-run {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(0.8);
+  }
+}
+
+@keyframes nav-progress-done {
+  0% {
+    transform: scaleX(0.8);
+    opacity: 1;
+  }
+  55% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 0;
+  }
+}
+
+.nav-progress {
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.nav-progress[data-phase="running"] {
+  opacity: 1;
+  animation: nav-progress-run 700ms cubic-bezier(0.1, 0.7, 0.2, 1) forwards;
+}
+
+.nav-progress[data-phase="done"] {
+  animation: nav-progress-done 350ms ease-out forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .bao-bob,
   .peek-bob,
@@ -367,7 +435,16 @@ body {
   .card-float,
   .step-in,
   .bubble-text-in,
-  .spin {
+  .spin,
+  .skeleton {
+    animation: none;
+  }
+
+  /* No movement: the full bar shows, then hides. */
+  .nav-progress[data-phase="running"],
+  .nav-progress[data-phase="done"] {
+    opacity: 1;
+    transform: none;
     animation: none;
   }
 

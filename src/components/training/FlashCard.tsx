@@ -15,7 +15,7 @@ import { useReducedMotion } from "./hooks";
 export const PILL = "inline-flex items-center rounded-pill px-2.5 py-0.5 font-body text-[13px] font-medium leading-5";
 export const HINT = "hidden text-center font-body text-[13px] leading-5 text-bark-muted lg:block";
 export const SURFACE = "rounded-[22px] border-[1.5px] border-line bg-surface-raised";
-const CARD_HEIGHT = "h-[clamp(300px,50dvh,440px)]";
+export const CARD_HEIGHT = "h-[clamp(300px,50dvh,440px)]";
 
 /** Throw and rise, and the input lock around them. Matches globals.css. */
 export const TRANSITION_MS = 380;

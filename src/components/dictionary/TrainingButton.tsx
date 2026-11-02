@@ -5,6 +5,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { useAppUser } from "@/components/app/AppShell";
 import { Button } from "@/components/ui/Button";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { dueLabel, useTrainingIds } from "@/lib/dictionary/training";
 import { createClient } from "@/lib/supabase/client";
 import { isWritable } from "@/lib/training/writing";
@@ -155,7 +156,7 @@ export function TrainingButton({ wordId, simplified }: { wordId: number; simplif
   return (
     <div className="flex min-h-11 flex-col justify-center gap-1.5">
       {state.kind === "loading" && (
-        <span aria-hidden="true" className="h-11 w-44 rounded-pill bg-highlight/60 motion-safe:animate-pulse" />
+        <Skeleton variant="rounded-full" className="h-11 w-44" />
       )}
 
       {state.kind === "none" && (

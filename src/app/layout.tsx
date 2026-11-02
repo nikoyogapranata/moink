@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Baloo_2, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
+import { NavProgress } from "@/components/app/NavProgress";
+
 const fontHeading = Baloo_2({
   variable: "--font-heading",
   subsets: ["latin"],
@@ -29,7 +31,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       data-scroll-behavior="smooth"
       className={`${fontHeading.variable} ${fontBody.variable} h-full antialiased motion-safe:scroll-smooth`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <NavProgress />
+        {children}
+      </body>
     </html>
   );
 }

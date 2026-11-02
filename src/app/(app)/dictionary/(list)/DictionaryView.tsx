@@ -19,6 +19,7 @@ import { useAppUser } from "@/components/app/AppShell";
 import { useHskStandard } from "@/components/app/HskStandard";
 import { RetryButton } from "@/components/app/RetryButton";
 import { CARD, RecentlyViewedCard, WordOfTheDayCard } from "@/components/dictionary/SideCards";
+import { SkeletonRows } from "@/components/dictionary/SkeletonRows";
 import { WordPanel, type WordTab } from "@/components/dictionary/WordPanel";
 import { devError } from "@/lib/dev";
 import { storeSort, useStoredSort } from "@/lib/dictionary/sort";
@@ -165,22 +166,6 @@ function groupByLetter(items: WordListItem[]) {
     else groups.push({ letter, from: i, items: [w] });
   });
   return groups;
-}
-
-function SkeletonRows({ count = 6 }: { count?: number }) {
-  return (
-    <ul aria-hidden="true" className="flex flex-col gap-1">
-      {Array.from({ length: count }, (_, i) => (
-        <li key={i} className="flex items-center gap-3 px-3 py-2.5">
-          <span className="h-8 w-12 rounded-md bg-highlight/60 motion-safe:animate-pulse" />
-          <span className="flex flex-1 flex-col gap-1.5">
-            <span className="h-4 w-24 rounded bg-highlight/60 motion-safe:animate-pulse" />
-            <span className="h-4 w-40 rounded bg-highlight/40 motion-safe:animate-pulse" />
-          </span>
-        </li>
-      ))}
-    </ul>
-  );
 }
 
 /** In place of the word of the day when the page couldn't load it. */

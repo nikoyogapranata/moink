@@ -1,6 +1,5 @@
 "use client";
 
-import { LoaderCircle } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
 
@@ -14,6 +13,7 @@ import type { QueueItem } from "@/lib/training/queue";
 import { usePracticeDeck, type PracticeDeck as Deck } from "./deckStore";
 import { PracticeSession } from "./PracticeSession";
 import { DoneScreen } from "./SessionParts";
+import { SessionSkeleton } from "./SessionSkeleton";
 
 type Loaded = { deck: Deck; items: QueueItem[] } | { deck: Deck; error: true };
 
@@ -61,10 +61,10 @@ export function PracticeDeck({ initialDirection }: { initialDirection: Direction
 
 export function DeckLoading({ children }: { children: ReactNode }) {
   return (
-    <main className="flex min-h-dvh items-center justify-center gap-2 font-body text-body text-bark-muted">
-      <LoaderCircle size={20} aria-hidden="true" className="spin" />
-      {children}
-    </main>
+    <>
+      <p className="sr-only">{children}</p>
+      <SessionSkeleton />
+    </>
   );
 }
 
