@@ -14,7 +14,8 @@
 //     kinds, mistakes items, 6 to 8 examples, each highlight in its hanzi,
 //     a unique slug, related points that exist
 //   - each example (lib/grammar-check.ts): no word above the point's level
-//     (names and numbers aside), which also gives max_word_level; pinyin
+//     (names, numbers and the point's allow_words aside; allow_words is
+//     only read here, never stored), which also gives max_word_level; pinyin
 //     whose syllables don't fit the hanzi is flagged, and blocks a point
 //     marked reviewed
 // A point is written as 'reviewed' (lesson and examples) only when the
@@ -116,9 +117,10 @@ async function main() {
     }
     if (row && relatedIds.includes(row.id)) errors.push("related lists the point itself");
 
+    const allowWords = Array.isArray(fp.allow_words) ? fp.allow_words : [];
     const checks = (Array.isArray(fp.examples) ? fp.examples : []).map((e) =>
       typeof e?.hanzi === "string" && typeof e?.pinyin === "string"
-        ? checkExample(e, fp.level, lex)
+        ? checkExample(e, fp.level, lex, allowWords)
         : { maxWordLevel: null, failures: [], warnings: [], pinyinFlags: [] },
     );
     checks.forEach((c, i) => {

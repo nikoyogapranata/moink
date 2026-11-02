@@ -13,7 +13,8 @@
 //
 // A number followed by 点, 分 or 个 is a number (十点, 一个: not 个人),
 // before any matching, unless together they are in a word with a 2025
-// level (十分 "very") and don't follow another such number (十点十分).
+// level (十分 "very") and don't follow another such number (十点十分). 分
+// before 钟 isn't a measure here: 十分钟 is left to matching, for 分钟.
 
 const NUMERALS = new Set([..."零〇一二三四五六七八九十百千万亿两"]);
 /** Measures that make a number with the numerals before them. */
@@ -70,6 +71,7 @@ function numberUnits(chars: string[], lex: Lexicon) {
     let j = i;
     while (NUMERALS.has(chars[j])) j++;
     if (!NUMBER_MEASURES.has(chars[j])) continue;
+    if (chars[j] === "分" && chars[j + 1] === "钟") continue;
     // A leveled word over the number and its measure (十分, 有一点儿) keeps
     // it, unless a number comes just before (十点十分).
     let inWord = false;

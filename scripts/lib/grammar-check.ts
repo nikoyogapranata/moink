@@ -11,11 +11,15 @@
 //
 // An example fails when it uses a word above the point's level, or a
 // character that's in no word of the table; names (src/lib/grammar/
-// names.ts) and numbers (一 二 ... 万 亿, 两) are exempt. A word in the
-// table with no 2025 level is a warning, not a failure: the 2025 lists
-// leave out some everyday words.
+// names.ts) and numbers (一 二 ... 万 亿, 两) are exempt, and so are a
+// point's allow_words. A word in the table with no 2025 level is a warning,
+// not a failure: the 2025 lists leave out some everyday words.
+//
+// Some compounds are often two words side by side (他才能去 is 才+能, not
+// 才能 "talent"). Above the point's level, one of these counts as its
+// characters when every one of them is a word within the level.
 import { NAMES } from "../../src/lib/grammar/names";
-import { segment, type Lexicon } from "../../src/lib/grammar/segment";
+import { segment, type Lexicon, type Token } from "../../src/lib/grammar/segment";
 import { readSource } from "./grammar";
 import { toPinyinPlain } from "./pinyin";
 import type { WordRow } from "./words";
@@ -23,6 +27,20 @@ import type { WordRow } from "./words";
 export type { Lexicon };
 
 const HAN = /\p{Script=Han}/u;
+
+const AMBIGUOUS_COMPOUNDS = new Set(
+  "才能 再说 要点 本地 难得 个人 他人 好学 要好 学会 别看 穿着 都会 好说 别说 书写 天才 得了 把手 机关".split(" "),
+);
+
+/** `tokens` with each ambiguous compound above `maxLevel` split into its
+ *  characters, when all of them are words within it. */
+function splitAmbiguous(tokens: Token[], maxLevel: number, lex: Lexicon): Token[] {
+  return tokens.flatMap((t) => {
+    if (t.kind !== "word" || t.level! <= maxLevel || !AMBIGUOUS_COMPOUNDS.has(t.text)) return [t];
+    const parts = [...t.text].map((text): Token => ({ text, kind: "word", level: lex.level.get(text) ?? null }));
+    return parts.every((p) => p.level != null && p.level <= maxLevel) ? parts : [t];
+  });
+}
 
 export function buildLexicon(words: Pick<WordRow, "simplified" | "hsk3_2025_level">[]): Lexicon {
   const level = new Map<string, number | null>();
@@ -69,9 +87,34 @@ const SYLLABLES = (() => {
 })();
 const LONGEST_SYLLABLE = Math.max(...[...SYLLABLES].map((s) => s.length));
 
-/** Syllables in the pinyin: each chunk of letters split greedily, longest
- *  syllable first, "r" after a syllable counted as erhua ("yìdiǎnr" -> 2
- *  syllables, 1 erhua). `bad` lists chunks that don't split. */
+/** Splits a chunk of letters into syllables, longest first, backtracking
+ *  when the rest won't split (jinguan: jing+uan fails, so jin+guan). An "r"
+ *  after a syllable that starts no syllable that fits is erhua. Null when
+ *  the chunk doesn't split. */
+function splitChunk(chunk: string) {
+  // Positions the rest of the chunk is known not to split from.
+  const dead = new Set<number>();
+  const from = (i: number): { syllables: number; erhua: number } | null => {
+    if (i === chunk.length) return { syllables: 0, erhua: 0 };
+    if (dead.has(i)) return null;
+    for (let n = Math.min(LONGEST_SYLLABLE, chunk.length - i); n >= 1; n--) {
+      if (!SYLLABLES.has(chunk.slice(i, i + n))) continue;
+      const rest = from(i + n);
+      if (rest) return { ...rest, syllables: rest.syllables + 1 };
+    }
+    if (chunk[i] === "r" && i > 0) {
+      const rest = from(i + 1);
+      if (rest) return { ...rest, erhua: rest.erhua + 1 };
+    }
+    dead.add(i);
+    return null;
+  };
+  return from(0);
+}
+
+/** Syllables in the pinyin, from splitChunk on each chunk of letters
+ *  ("yìdiǎnr" -> 2 syllables, 1 erhua). `bad` lists chunks that don't
+ *  split. */
 export function countSyllables(pinyin: string) {
   const plain = pinyin
     .normalize("NFC")
@@ -82,26 +125,13 @@ export function countSyllables(pinyin: string) {
   let erhua = 0;
   const bad: string[] = [];
   for (const chunk of chunks) {
-    let found = 0;
-    let r = 0;
-    let i = 0;
-    while (i < chunk.length) {
-      let n = Math.min(LONGEST_SYLLABLE, chunk.length - i);
-      for (; n >= 1; n--) if (SYLLABLES.has(chunk.slice(i, i + n))) break;
-      if (n) {
-        found++;
-        i += n;
-      } else if (chunk[i] === "r" && found) {
-        r++;
-        i++;
-      } else break;
-    }
-    if (i < chunk.length) {
+    const split = splitChunk(chunk);
+    if (!split) {
       bad.push(chunk);
       continue;
     }
-    syllables += found;
-    erhua += r;
+    syllables += split.syllables;
+    erhua += split.erhua;
   }
   return { syllables, erhua, bad };
 }
@@ -129,13 +159,17 @@ export interface CheckResult {
   pinyinFlags: string[];
 }
 
-export function checkExample(example: ExampleInput, pointLevel: number, lex: Lexicon): CheckResult {
-  const tokens = segment(example.hanzi, lex);
+/** `allowWords` are the point's allow_words: they can't fail the check, but
+ *  still count towards maxWordLevel, the words' real level. */
+export function checkExample(example: ExampleInput, pointLevel: number, lex: Lexicon, allowWords: string[] = []): CheckResult {
+  const tokens = splitAmbiguous(segment(example.hanzi, lex), pointLevel, lex);
+  // Erhua joins its token (玩儿), which 玩 in the list also covers.
+  const allowed = (t: Token) => allowWords.includes(t.text) || (t.text.endsWith("儿") && allowWords.includes(t.text.slice(0, -1)));
   const leveled = tokens.filter((t) => t.kind === "word");
   const maxWordLevel = leveled.length ? Math.max(...leveled.map((t) => t.level!)) : null;
   const failures = [
-    ...leveled.filter((t) => t.level! > pointLevel).map((t) => `${t.text} (level ${t.level === 7 ? "7-9" : t.level})`),
-    ...tokens.filter((t) => t.kind === "unknown").map((t) => `${t.text} (not in words)`),
+    ...leveled.filter((t) => t.level! > pointLevel && !allowed(t)).map((t) => `${t.text} (level ${t.level === 7 ? "7-9" : t.level})`),
+    ...tokens.filter((t) => t.kind === "unknown" && !allowed(t)).map((t) => `${t.text} (not in words)`),
   ];
   const warnings = tokens.filter((t) => t.kind === "unleveled").map((t) => `${t.text} (no 2025 level)`);
 

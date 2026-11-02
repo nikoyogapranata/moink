@@ -34,6 +34,8 @@ export interface FilePoint {
   /** Other points, by slug or id. */
   related: (string | number)[];
   examples: FileExample[];
+  /** Words exempt from the level check for this point. Not stored. */
+  allow_words?: string[];
 }
 
 export interface GrammarFile {
@@ -113,6 +115,10 @@ export function validatePoint(p: FilePoint): string[] {
 
   if (!Array.isArray(p.related) || p.related.some((r) => typeof r !== "string" && typeof r !== "number")) {
     errors.push("related must be a list of slugs or ids");
+  }
+
+  if (p.allow_words !== undefined && (!Array.isArray(p.allow_words) || !p.allow_words.every(isText))) {
+    errors.push("allow_words must be a list of words");
   }
 
   if (!Array.isArray(p.examples)) {
