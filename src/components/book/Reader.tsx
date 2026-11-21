@@ -2,7 +2,7 @@
 
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useRef, useState, useTransition, type ReactNode } from "react";
+import { Fragment, useEffect, useRef, useState, useTransition, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/Button";
 import { saveBookPosition, saveBookPref, setBookLessonDone } from "@/lib/book/actions";
@@ -278,7 +278,10 @@ export function Reader({
         data-en={prefs.english ? "on" : "off"}
         data-extras={prefs.extras ? "on" : "off"}
       >
-        {header}
+        {/* header and children come from the server page and can arrive
+            lazily (streamed). Each gets its own keyed slot, so React never
+            sees one as an unkeyed child among these siblings. */}
+        <Fragment key="header">{header}</Fragment>
         <LessonNote />
 
         {/* Its background bleeds into the page gutters (AppShell's
@@ -315,7 +318,7 @@ export function Reader({
         </div>
 
         <div>
-          {children}
+          <Fragment key="lesson">{children}</Fragment>
 
           <div className="mt-12 flex flex-col items-center gap-4 border-t-[1.5px] border-line pt-8">
             <Button
