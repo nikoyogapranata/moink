@@ -1,14 +1,25 @@
 "use client";
 
 import { ArrowDownRight, NotebookPen, X } from "lucide-react";
-import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+  type Ref,
+  type RefObject,
+} from "react";
 import { createPortal } from "react-dom";
 
 import { useBookStore, useNote, useNotes, type SaveStatus } from "./store";
 
 // Notes: one per block (block_key) and one for the whole lesson (block_key
 // null), plain text, autosaved. Each block gets a small notes button
-// (hover-only on desktop, always there on touch screens); the Lesson notes
+// (hover-only on desktop, always there on touch screens) and shows its
+// note under it; the lesson's note shows under the title. The Lesson notes
 // panel lists them all in book order.
 
 const FOCUS_RING = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rust";
@@ -100,34 +111,82 @@ export function NoteEditor({
   );
 }
 
-/**
- * A block with its notes button and, when open, the note editor under it.
- * The button sits in the right margin where there's room (xl), else on
- * the block's top-right corner.
- */
-export function BlockNotes({ blockKey, label, children }: { blockKey: string; label: string; children: ReactNode }) {
+/** A saved note, shown as is: a click (or Enter) opens its editor in its
+ *  place. */
+function NoteCard({
+  body,
+  label,
+  onOpen,
+  ref,
+}: {
+  body: string;
+  label: string;
+  onOpen: () => void;
+  ref?: Ref<HTMLButtonElement>;
+}) {
+  return (
+    <button
+      ref={ref}
+      type="button"
+      onClick={onOpen}
+      className={`flex w-full flex-col gap-0.5 rounded-md border-l-[3px] border-bamboo-gold bg-highlight/60 py-2 pl-3 pr-4 text-left transition-colors hover:bg-highlight ${FOCUS_RING}`}
+    >
+      <span className="inline-flex items-center gap-1 font-body text-[12px] font-medium leading-4 text-bamboo-gold-dark">
+        <NotebookPen size={12} aria-hidden="true" />
+        My note
+        <span className="sr-only"> ({label}, select to edit):</span>
+      </span>
+      <span className="whitespace-pre-wrap wrap-break-word font-body text-[15px] leading-[1.6] text-bark">{body}</span>
+    </button>
+  );
+}
+
+/** A note shown in place: its card while it has text and isn't being
+ *  edited, its editor while it is. When the editor closes, focus goes back
+ *  to the card, or to `focusWhenEmpty` if the note is now empty. */
+function useNoteInPlace(blockKey: string | null, focusWhenEmpty?: RefObject<HTMLElement | null>) {
   const note = useNote(blockKey);
   const [open, setOpen] = useState(false);
   const [focusEditor, setFocusEditor] = useState(false);
-  const button = useRef<HTMLButtonElement>(null);
+  const card = useRef<HTMLButtonElement>(null);
+  const returnFocus = useRef(false);
   const hasNote = Boolean(note?.body.trim());
+
+  useEffect(() => {
+    if (open || !returnFocus.current) return;
+    returnFocus.current = false;
+    (card.current ?? focusWhenEmpty?.current)?.focus();
+  }, [open, focusWhenEmpty]);
+
+  const openEditor = useCallback(() => {
+    setOpen(true);
+    setFocusEditor(true);
+  }, []);
+  const close = useCallback(() => {
+    returnFocus.current = true;
+    setOpen(false);
+    setFocusEditor(false);
+  }, []);
+
+  return { note, hasNote, open, focusEditor, card, openEditor, close };
+}
+
+/**
+ * A block with its notes button on its top-right corner and, under it, its
+ * note: the card while it has one, the editor while it's being written.
+ */
+export function BlockNotes({ blockKey, label, children }: { blockKey: string; label: string; children: ReactNode }) {
+  const button = useRef<HTMLButtonElement>(null);
+  const { note, hasNote, open, focusEditor, card, openEditor, close } = useNoteInPlace(blockKey, button);
   const editorId = useId();
 
   useEffect(() => {
     const onOpen = (e: Event) => {
-      if ((e as CustomEvent<string>).detail !== blockKey) return;
-      setOpen(true);
-      setFocusEditor(true);
+      if ((e as CustomEvent<string>).detail === blockKey) openEditor();
     };
     window.addEventListener(OPEN_EVENT, onOpen);
     return () => window.removeEventListener(OPEN_EVENT, onOpen);
-  }, [blockKey]);
-
-  const close = () => {
-    setOpen(false);
-    setFocusEditor(false);
-    button.current?.focus();
-  };
+  }, [blockKey, openEditor]);
 
   return (
     <div className="group/note relative">
@@ -136,16 +195,10 @@ export function BlockNotes({ blockKey, label, children }: { blockKey: string; la
         type="button"
         aria-expanded={open}
         aria-controls={open ? editorId : undefined}
-        aria-label={hasNote ? `Note on ${label} (has a note)` : `Add a note on ${label}`}
-        title={hasNote ? "Your note" : "Add a note"}
-        onClick={() => {
-          if (open) close();
-          else {
-            setOpen(true);
-            setFocusEditor(true);
-          }
-        }}
-        className={`absolute -right-2 -top-3 z-10 flex h-7 w-7 items-center justify-center rounded-full border-[1.5px] border-line bg-surface-raised text-bark-muted shadow-float transition-opacity hover:text-bark xl:-right-12 xl:top-0 xl:border-transparent xl:bg-transparent xl:shadow-none ${FOCUS_RING} ${
+        aria-label={hasNote ? `Edit the note on ${label}` : `Add a note on ${label}`}
+        title={hasNote ? "Edit your note" : "Add a note"}
+        onClick={() => (open ? close() : openEditor())}
+        className={`absolute -right-2 -top-3 z-10 flex h-7 w-7 items-center justify-center rounded-full border-[1.5px] border-line bg-surface-raised text-bark-muted shadow-float transition-opacity hover:text-bark ${FOCUS_RING} ${
           open || hasNote
             ? "opacity-100"
             : "[@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/note:opacity-100 [@media(hover:hover)]:focus-visible:opacity-100"
@@ -155,10 +208,33 @@ export function BlockNotes({ blockKey, label, children }: { blockKey: string; la
         {hasNote && <span aria-hidden="true" className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full border-2 border-background bg-bamboo-gold" />}
       </button>
       {children}
-      {open && (
+      {open ? (
         <div id={editorId} className="mt-3">
           <NoteEditor blockKey={blockKey} label={`Note on ${label}`} autoFocus={focusEditor} onClose={close} />
         </div>
+      ) : (
+        hasNote && (
+          <div className="mt-3">
+            <NoteCard ref={card} body={note!.body} label={`on ${label}`} onOpen={openEditor} />
+          </div>
+        )
+      )}
+    </div>
+  );
+}
+
+/** The note for the whole lesson, under the lesson's title: shown only
+ *  while it has text (it's written in the Lesson notes panel), edited in
+ *  place like a block's. */
+export function LessonNote() {
+  const { note, hasNote, open, focusEditor, card, openEditor, close } = useNoteInPlace(null);
+  if (!open && !hasNote) return null;
+  return (
+    <div className="mt-3">
+      {open ? (
+        <NoteEditor blockKey={null} label="Note for the whole lesson" autoFocus={focusEditor} onClose={close} />
+      ) : (
+        <NoteCard ref={card} body={note!.body} label="for the whole lesson" onOpen={openEditor} />
       )}
     </div>
   );

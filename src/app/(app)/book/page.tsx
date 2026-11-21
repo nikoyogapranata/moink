@@ -121,7 +121,7 @@ export default async function BookShelfPage({ searchParams }: PageProps<"/book">
   const open = books.find((b) => b.slug === wanted) ?? books[0];
 
   return (
-    <div className="mx-auto flex max-w-[760px] flex-col gap-6">
+    <div className="flex flex-col gap-6">
       <PageHeader title="HSK Book">The textbook, lesson by lesson, in the book&apos;s own order.</PageHeader>
       {books.length === 0 ? (
         <p className="font-body text-body text-bark-muted">No books yet.</p>

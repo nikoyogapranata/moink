@@ -111,7 +111,7 @@ export default async function BookLessonPage({ params }: PageProps<"/book/[book]
         </span>
       </p>
       <h1>
-        <ZhText text={lesson.title} className="text-[28px] font-bold leading-[2.4] text-bark lg:text-[32px]" />
+        <ZhText text={lesson.title} className="text-[28px] font-bold leading-(--lh) text-bark lg:text-[32px]" />
       </h1>
       <p className="font-body text-h3 text-bark-muted">{lesson.title_en}</p>
     </header>

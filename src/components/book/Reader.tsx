@@ -10,7 +10,7 @@ import type { AutoItem } from "@/lib/book/answers";
 import type { BookNote, SavedAnswer } from "@/lib/book/load";
 import type { BookPrefs } from "@/lib/book/types";
 
-import { LessonNotes } from "./Notes";
+import { LessonNote, LessonNotes } from "./Notes";
 import { BookStoreProvider, useSaveFailed } from "./store";
 
 const FOCUS_RING = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rust";
@@ -195,7 +195,7 @@ function SaveFailed() {
   const failed = useSaveFailed();
   if (!failed) return null;
   return (
-    <p role="alert" className="mx-auto max-w-[760px] pb-2 font-body text-body-sm text-danger">
+    <p role="alert" className="pb-2 font-body text-body-sm text-danger">
       Some of your answers or notes didn&apos;t save. Check your connection; they&apos;ll save with your next change.
     </p>
   );
@@ -275,11 +275,14 @@ export function Reader({
         data-en={prefs.english ? "on" : "off"}
         data-extras={prefs.extras ? "on" : "off"}
       >
-        <div className="mx-auto max-w-[760px]">{header}</div>
+        {header}
+        <LessonNote />
 
-        {/* Full width of the page area, so content scrolls under it cleanly. */}
-        <div className="sticky top-0 z-20 -mx-4 mt-4 border-b-[1.5px] border-line bg-background/95 px-4 backdrop-blur sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-          <div className="mx-auto flex max-w-[760px] items-center gap-2 py-2">
+        {/* Its background bleeds into the page gutters (AppShell's
+            --page-gutter), so content scrolls under it cleanly; its content
+            keeps the page's edges. */}
+        <div className="sticky top-0 z-20 -mx-(--page-gutter) mt-4 border-b-[1.5px] border-line bg-background/95 px-(--page-gutter) backdrop-blur">
+          <div className="flex items-center gap-2 py-2">
             <Chips sections={sections} active={active} />
             <LessonNotes blocks={blocks} />
             <div role="group" aria-label="Show" className="flex h-9 shrink-0 items-center rounded-pill border-[1.5px] border-line bg-surface-raised p-0.5">
@@ -301,14 +304,14 @@ export function Reader({
             </div>
           </div>
           {error && (
-            <p role="alert" className="mx-auto max-w-[760px] pb-2 font-body text-body-sm text-danger">
+            <p role="alert" className="pb-2 font-body text-body-sm text-danger">
               {error}
             </p>
           )}
           <SaveFailed />
         </div>
 
-        <div className="mx-auto max-w-[760px]">
+        <div>
           {children}
 
           <div className="mt-12 flex flex-col items-center gap-4 border-t-[1.5px] border-line pt-8">

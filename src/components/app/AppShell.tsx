@@ -294,8 +294,10 @@ export function AppShell({
           <MobileTopBar />
           {/* Desktop: sidebar 220px + its 16px gaps on both sides + 24px.
               Mobile: room for the tab bar (about 66px tall, 12px off the
-              bottom edge) plus breathing space. */}
-          <main className="px-4 pb-[calc(7rem+env(safe-area-inset-bottom))] pt-4 sm:px-6 lg:pb-10 lg:pl-69 lg:pr-8 lg:pt-10">
+              bottom edge) plus breathing space. --page-gutter is the side
+              padding (the right one from lg), for anything that bleeds to
+              the page area's edges (the HSK Book's sticky bar). */}
+          <main className="px-(--page-gutter) pb-[calc(7rem+env(safe-area-inset-bottom))] pt-4 [--page-gutter:--spacing(4)] sm:[--page-gutter:--spacing(6)] lg:pb-10 lg:pl-69 lg:pr-(--page-gutter) lg:pt-10 lg:[--page-gutter:--spacing(8)]">
             <div className="mx-auto w-full max-w-275">{children}</div>
           </main>
           <TabBar pathname={pathname} nav={nav} />

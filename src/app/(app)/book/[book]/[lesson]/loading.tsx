@@ -15,7 +15,7 @@ function Lines({ widths }: { widths: string[] }) {
 export default function BookLessonLoading() {
   return (
     <SkeletonPage>
-      <div className="mx-auto flex max-w-[760px] flex-col gap-1">
+      <div className="flex flex-col gap-1">
         <Skeleton variant="rounded-full" className="mb-3 h-11 w-36" />
         <div className="flex items-center gap-2">
           <Skeleton variant="rounded-full" className="h-6 w-20" />
@@ -26,8 +26,8 @@ export default function BookLessonLoading() {
       </div>
 
       {/* The sticky bar: chips and the three switches. */}
-      <div className="-mx-4 mt-4 border-b-[1.5px] border-line px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-        <div className="mx-auto flex max-w-[760px] items-center gap-2 py-2">
+      <div className="-mx-(--page-gutter) mt-4 border-b-[1.5px] border-line px-(--page-gutter)">
+        <div className="flex items-center gap-2 py-2">
           <div className="flex min-w-0 flex-1 gap-1.5 overflow-hidden py-1">
             {[0, 1, 2, 3, 4].map((i) => (
               <Skeleton key={i} variant="rounded-full" className="h-8 w-16 shrink-0" />
@@ -37,7 +37,7 @@ export default function BookLessonLoading() {
         </div>
       </div>
 
-      <div className="mx-auto flex max-w-[760px] flex-col gap-6 pt-12">
+      <div className="flex flex-col gap-6 pt-12">
         <div className="flex items-end gap-3 border-b-[1.5px] border-line pb-2">
           <SkeletonLine line="h-9" className="h-6 w-24" />
           <Skeleton variant="rounded-full" className="ml-auto h-6 w-12" />

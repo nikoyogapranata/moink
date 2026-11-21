@@ -3,7 +3,7 @@ import { Skeleton, SkeletonLine, SkeletonPage, SkeletonPageTitle } from "@/compo
 
 export default function BookShelfLoading() {
   return (
-    <SkeletonPage className="mx-auto flex max-w-[760px] flex-col gap-6">
+    <SkeletonPage className="flex flex-col gap-6">
       <header>
         <SkeletonPageTitle className="w-36" />
         <SkeletonLine line="mt-1 h-6" className="h-4 w-72 max-w-full" />

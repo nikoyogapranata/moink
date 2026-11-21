@@ -8,7 +8,9 @@
 /* ---------------------------------------------------------------------------
    Type scale. Phones first (under 640px), then sm and up.
    --zh / --zh-lg: the two Chinese sizes; --lh: line height of any text with
-   ruby (lower when 拼音 is off, the only layout change of that switch).
+   ruby: with 拼音 on, tall enough that a line's pinyin keeps well clear of
+   the characters of the line above; with 拼音 off, the normal 1.8 (the
+   only layout change of that switch).
    Things that sit beside the first line of Chinese (speaker names, item
    numbers, markers) use .book-line / .book-line-lg: one line tall.
    --------------------------------------------------------------------------- */
@@ -16,7 +18,7 @@
 .book-reader {
   --zh: 18px;
   --zh-lg: 20px;
-  --lh: 2.4;
+  --lh: 2.8;
 }
 
 .book-reader[data-pinyin="off"] {
@@ -81,8 +83,8 @@
 }
 
 .book-reader[data-pinyin="off"] {
-  --py-shift: calc(var(--zh) * 0.22);
-  --py-shift-lg: calc(var(--zh-lg) * 0.22);
+  --py-shift: calc(var(--zh) * 0.17);
+  --py-shift-lg: calc(var(--zh-lg) * 0.17);
 }
 
 /* Headings. */
@@ -159,8 +161,8 @@
 
 .zh rt {
   font-family: var(--font-body), sans-serif;
-  /* Half the Chinese size (11px on 22px), never below 10px. */
-  font-size: max(10px, 0.5em);
+  /* 0.62 of the Chinese size (13.6px on 22px), never below 12px. */
+  font-size: max(12px, 0.62em);
   font-weight: 400;
   font-style: normal;
   line-height: 1;
@@ -168,16 +170,23 @@
   color: var(--color-bark-muted);
   user-select: none;
   /* Sides: just enough that neighbouring syllables never touch (the ruby
-     widens its character to fit). Bottom: room between the pinyin and its
-     character. Padding is part of the annotation box in Chrome, Safari and
-     Firefox alike, unlike a transform, which inline boxes ignore. */
-  padding: 0 0.1em 0.2em;
+     widens its character to fit). Bottom: the gap between the pinyin and
+     its character, about 0.3em of the Chinese (0.5 of the pinyin's 0.62em).
+     Padding is part of the annotation box in Chrome, Safari and Firefox
+     alike, unlike a transform, which inline boxes ignore. */
+  padding: 0 0.1em 0.5em;
 }
 
-/* Hidden but kept: only the line height changes (--lh), nothing else. */
+/* Hidden but kept, so no character moves sideways: only the line height
+   changes (--lh). Without its gap the hidden pinyin fits in the shorter
+   line; with it, Chrome would stretch the line to make room. */
 .book-reader[data-pinyin="off"] .zh rt,
 .book-reader[data-pinyin="off"] .book-vpy {
   visibility: hidden;
+}
+
+.book-reader[data-pinyin="off"] .zh rt {
+  padding-bottom: 0;
 }
 
 /* With pinyin off, a tapped (or Enter/Space) vocab row shows its own until
