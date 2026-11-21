@@ -39,7 +39,7 @@ All Chinese is a Text object:
 { "key": "4a-01-t1", "kind": "text", "label_zh": "课文 1", "label_en": "Text 1", "page": 2, "blocks": [Block, ...] }
 ```
 
-`kind`: `objectives` · `warmup` · `text` · `grammar` · `exercises` · `task` · `summary`.
+`kind`: `objectives` · `warmup` · `text` · `grammar` · `exercises` · `task` · `bonus` · `summary`. (`bonus` = 小语的彩蛋 Xiaoyu's Bonus Content.)
 Sections become the chips at the top of the lesson. `key` is stable.
 
 ## Block
@@ -76,8 +76,9 @@ Sections become the chips at the top of the lesson. `key` is stable.
 | `passage_fill` | `options: [{label, text}]`, `text` (with several `{_}`), `answers: ["C","B",...]`, `answer_source`, `answer_key` | pick a label per blank |
 | `image_match` | `images: [{key, src, alt, answer}]`, `options: [{label, text}]`, `answer_source` | pick a label per image |
 | `picture_write` | `items: [{key, num, image, word: Text, sample?, sample_source}]` | textarea per item |
-| `task` | `title`, `title_en`, `text`, `en`, `answer_mode` (`text` / `notes`), `min_chars?`, `answer_key`, optional `tips: {label, label_en, items: [{label, label_en, text}]}` shown under the task text (e.g. 提示 Tips: 正方 Pro side / 反方 Con side) | textarea (show live character count vs `min_chars`) |
+| `task` | `title`, `title_en`, `text`, `en`, `answer_mode` (`text` / `notes` / `table`), `min_chars?`, `answer_key`, optional `tips: {label, label_en, items: [{label, label_en, text}]}` shown under the task text (e.g. 提示 Tips: 正方 Pro side / 反方 Con side); optional `table: {columns: [{text, en}], rows, numbered}` for a survey table the user fills in (answer_mode `table`, answer saved as a 2D array of strings) | textarea (show live character count vs `min_chars`) |
 | `tip` | `text`, `en`. A 小语助力 Xiaoyu's Tip box: a small callout with the label "小语助力 Xiaoyu's Tip" | none |
+| `video` | `label` ("4-1", the book's video number), `title`, `title_en`, `image` (a still from the book). The video itself is not available: show the still with a play-icon overlay that does nothing, plus the title and a small "Video not included" note | none |
 | `self_check` | `intro`, `intro_en`, `scale: [{zh, en}]`, `rows: [{key, text, en}]` | one choice of the scale per row |
 
 ## Checking answers

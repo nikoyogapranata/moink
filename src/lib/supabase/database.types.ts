@@ -73,6 +73,7 @@ export type BookSectionKind =
   | "grammar"
   | "exercises"
   | "task"
+  | "bonus"
   | "summary";
 
 export type Database = {

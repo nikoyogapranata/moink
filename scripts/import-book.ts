@@ -5,7 +5,8 @@
 //   pnpm import:book scripts/output/book/book-4a-lesson-01.json           dry run
 //   pnpm import:book scripts/output/book/book-4a-lesson-01.json --write   write
 //
-// --write needs supabase/migrations/20270111120000_book.sql applied.
+// --write needs supabase/migrations/20270111120000_book.sql applied (and
+// 20270118120000_book_kinds_types.sql for bonus, tip and video).
 //
 // The file is checked first, and nothing is written if anything fails:
 //   - every Text ({zh, py}): one py syllable per Han character in zh
@@ -18,6 +19,9 @@
 //   - vocab with proper: true has no audio, empty pos and nums 1, 2, 3...;
 //     task tips have a Text label, label_en and Text items; a tip has a
 //     Text text
+//   - a task's answer_mode is text, notes or table; a table task has
+//     table: {columns: [{text, en}], rows, numbered}
+//   - a video has a label, a Text title, a title_en and an image
 //
 // --write uploads the images (upsert, same path as src), then replaces the
 // lesson in one call to import_book_lesson (one transaction: a failed
@@ -32,11 +36,11 @@ const WRITE = hasFlag("--write");
 const ASSETS_DIR = "scripts/output/book/assets";
 const BUCKET = "book-assets";
 
-const SECTION_KINDS = new Set(["objectives", "warmup", "text", "grammar", "exercises", "task", "summary"]);
+const SECTION_KINDS = new Set(["objectives", "warmup", "text", "grammar", "exercises", "task", "bonus", "summary"]);
 const BLOCK_TYPES = new Set([
   "objectives", "instruction", "scene", "choice", "dialogue", "passage", "vocab", "prompts", "retell",
   "grammar", "dialogue_fill", "sentence_fill", "word_bank", "passage_fill", "image_match",
-  "picture_write", "task", "tip", "self_check",
+  "picture_write", "task", "tip", "video", "self_check",
 ]);
 const CONTENT_TYPES: Record<string, string> = {
   ".webp": "image/webp",
@@ -153,19 +157,40 @@ function check(file: BookFile) {
             if (String(it.num) !== String(i + 1)) problems.push(`${at} ${it.key}: num ${it.num}, expected ${i + 1} (numbering restarts at 1)`);
           });
         }
-      } else if (b.type === "task" && d.tips !== undefined) {
-        const t = d.tips;
-        if (!isObj(t)) problems.push(`${at}: tips must be {label, label_en, items}`);
-        else {
-          if (!isText(t.label) || typeof t.label_en !== "string") problems.push(`${at}: tips need a Text label and a label_en`);
-          const items = Array.isArray(t.items) ? t.items : [];
-          if (!items.length) problems.push(`${at}: tips have no items`);
-          items.forEach((it, i) => {
-            if (!isObj(it) || !isText(it.label) || typeof it.label_en !== "string" || !isText(it.text)) {
-              problems.push(`${at} tips.items[${i}]: needs a Text label, a label_en and a Text text`);
-            }
-          });
+      } else if (b.type === "task") {
+        if (!["text", "notes", "table"].includes(d.answer_mode as string)) problems.push(`${at}: unknown answer_mode ${d.answer_mode}`);
+        if (d.answer_mode === "table" || d.table !== undefined) {
+          const t = d.table;
+          if (d.answer_mode !== "table") problems.push(`${at}: a table needs answer_mode table`);
+          if (!isObj(t)) problems.push(`${at}: answer_mode table needs table: {columns, rows, numbered}`);
+          else {
+            const cols = Array.isArray(t.columns) ? t.columns : [];
+            if (!cols.length) problems.push(`${at}: the table has no columns`);
+            cols.forEach((c, i) => {
+              if (!isObj(c) || !isText(c.text) || typeof c.en !== "string") problems.push(`${at} table.columns[${i}]: needs a Text text and an en`);
+            });
+            if (typeof t.rows !== "number" || !Number.isInteger(t.rows) || t.rows < 1) problems.push(`${at}: table.rows must be a whole number from 1`);
+            if (typeof t.numbered !== "boolean") problems.push(`${at}: table.numbered must be true or false`);
+          }
         }
+        if (d.tips !== undefined) {
+          const t = d.tips;
+          if (!isObj(t)) problems.push(`${at}: tips must be {label, label_en, items}`);
+          else {
+            if (!isText(t.label) || typeof t.label_en !== "string") problems.push(`${at}: tips need a Text label and a label_en`);
+            const items = Array.isArray(t.items) ? t.items : [];
+            if (!items.length) problems.push(`${at}: tips have no items`);
+            items.forEach((it, i) => {
+              if (!isObj(it) || !isText(it.label) || typeof it.label_en !== "string" || !isText(it.text)) {
+                problems.push(`${at} tips.items[${i}]: needs a Text label, a label_en and a Text text`);
+              }
+            });
+          }
+        }
+      } else if (b.type === "video") {
+        if (typeof d.label !== "string" || !d.label) problems.push(`${at}: a video needs a label ("4-1")`);
+        if (!isText(d.title) || typeof d.title_en !== "string") problems.push(`${at}: a video needs a Text title and a title_en`);
+        if (!isObj(d.image) || typeof d.image.src !== "string" || typeof d.image.alt !== "string") problems.push(`${at}: a video needs an image {src, alt}`);
       } else if (b.type === "tip") {
         if (!isText(d.text)) problems.push(`${at}: a tip needs a Text text`);
         if (d.en !== undefined && typeof d.en !== "string") problems.push(`${at}: en must be a string`);

@@ -1,4 +1,4 @@
-import { BookOpenText, Headphones, MapPin, MessageCircle } from "lucide-react";
+import { BookOpenText, Headphones, MapPin, MessageCircle, Play } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -19,6 +19,7 @@ import {
   ResetAnswers,
   SampleReveal,
   SelfCheckRadio,
+  TableAnswer,
 } from "./Inputs";
 import { SpeakButton } from "./SpeakButton";
 import { speakable, ZhText } from "./ZhText";
@@ -589,12 +590,16 @@ function Task({ data }: { data: BlockData["task"] }) {
         <p className="book-body mt-2 font-body">At least {data.min_chars} characters</p>
       ) : null}
       <div className="mt-3">
-        <AnswerBox
-          answerKey={data.answer_key}
-          label={data.answer_mode === "notes" ? "Your notes for this task" : "Your answer"}
-          placeholder={data.answer_mode === "notes" ? "Notes for the activity" : "Write your answer"}
-          minChars={data.min_chars}
-        />
+        {data.answer_mode === "table" && data.table ? (
+          <TableAnswer answerKey={data.answer_key} table={data.table} />
+        ) : (
+          <AnswerBox
+            answerKey={data.answer_key}
+            label={data.answer_mode === "notes" ? "Your notes for this task" : "Your answer"}
+            placeholder={data.answer_mode === "notes" ? "Notes for the activity" : "Write your answer"}
+            minChars={data.min_chars}
+          />
+        )}
       </div>
     </div>
   );
@@ -618,6 +623,36 @@ function Tip({ data }: { data: BlockData["tip"] }) {
       <ZhText text={data.text} className={`${ZH} mt-1 block`} />
       <En>{data.en}</En>
     </aside>
+  );
+}
+
+/** The book's video: moink doesn't have it, so its still with a play icon
+ *  that does nothing, and a note saying so. Capped at the dialogue
+ *  picture's 220px height, kept 16:9 (so at most 391px wide). */
+function Video({ data, ctx }: { data: BlockData["video"]; ctx: BlockContext }) {
+  return (
+    <div className={`${BOOK_CARD} flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5`}>
+      <div className="relative w-full shrink-0 sm:max-w-[391px] sm:basis-1/2">
+        <BookImage image={data.image} ctx={ctx} className="aspect-video w-full rounded-lg border-[1.5px] border-line object-cover" />
+        <span aria-hidden="true" className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-black/50 text-white">
+            <Play size={26} fill="currentColor" className="ml-1" />
+          </span>
+        </span>
+      </div>
+      <div className="flex min-w-0 flex-col items-start gap-1">
+        <span className="inline-flex items-center rounded-pill border-[1.5px] border-line px-2 font-body text-[12px] font-medium leading-5 text-bark-muted">
+          <span aria-hidden="true">▶&nbsp;</span>
+          <span className="sr-only">Video </span>
+          {data.label}
+        </span>
+        <h3>
+          <ZhText text={data.title} className={`${ZH} font-bold`} />
+        </h3>
+        <En className="-mt-1">{data.title_en}</En>
+        <p className="font-body text-[13px] text-bark-muted">Video not included</p>
+      </div>
+    </div>
   );
 }
 
@@ -706,6 +741,8 @@ export function BlockView({ block, ctx }: { block: Block; ctx: BlockContext }) {
       return <Task data={block.data} />;
     case "tip":
       return <Tip data={block.data} />;
+    case "video":
+      return <Video data={block.data} ctx={ctx} />;
     case "self_check":
       return <SelfCheck data={block.data} />;
     default:

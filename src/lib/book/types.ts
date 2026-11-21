@@ -12,6 +12,7 @@ export interface Image { src: string; alt: string }
  *  stage note. */
 export interface DialogueLine { key: string; speaker: string[] | null; text: BookText; en?: string; en_source?: string }
 export interface FillLine { speaker: string | null; text: BookText }
+export interface TaskTable { columns: { text: BookText; en: string }[]; rows: number; numbered: boolean }
 export interface Translated { text: BookText; en?: string; en_source?: string }
 
 export interface BlockData {
@@ -74,12 +75,16 @@ export interface BlockData {
     title_en: string;
     text: BookText;
     en?: string;
-    answer_mode: "text" | "notes";
+    answer_mode: "text" | "notes" | "table";
     min_chars?: number;
     answer_key: string;
     /** Shown under the task text: 提示 Tips, then 正方 Pro side: ... */
     tips?: { label: BookText; label_en: string; items: { label: BookText; label_en: string; text: BookText }[] };
+    /** answer_mode "table": a survey table, saved as rows of cell strings. */
+    table?: TaskTable;
   };
+  /** The book's video, which moink doesn't have: its still and title. */
+  video: { label: string; title: BookText; title_en: string; image: Image };
   /** A 小语助力 Xiaoyu's Tip callout. */
   tip: { text: BookText; en?: string };
   self_check: {
