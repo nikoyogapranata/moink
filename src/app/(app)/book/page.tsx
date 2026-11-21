@@ -1,4 +1,4 @@
-import { Check } from "lucide-react";
+import { BookOpen, Check } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -18,8 +18,10 @@ export const metadata: Metadata = {
 const FOCUS_RING = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rust";
 
 function BookCard({ book, open }: { book: ShelfBook; open: boolean }) {
-  const done = book.lessons.filter((l) => l.done).length;
-  const total = book.lessons.length;
+  // The appendix lists with the lessons but isn't one.
+  const lessons = book.lessons.filter((l) => l.kind === "lesson");
+  const done = lessons.filter((l) => l.done).length;
+  const total = lessons.length;
   return (
     <Link
       href={`/book?book=${book.slug}`}
@@ -69,11 +71,11 @@ function LessonList({ book }: { book: ShelfBook }) {
       {book.lessons.map((l) => (
         <li key={l.id}>
           <Link
-            href={`/book/${book.slug}/${l.number}`}
+            href={`/book/${book.slug}/${l.ref}`}
             className={`flex items-center gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-highlight/40 sm:px-3 ${FOCUS_RING}`}
           >
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-highlight font-heading text-body font-bold text-rust-dark">
-              {l.number}
+              {l.number ?? <BookOpen size={17} aria-hidden="true" />}
             </span>
             <span className="flex min-w-0 flex-1 flex-col">
               <ZhText text={l.title} className="text-[18px] leading-[2.1] text-bark" />

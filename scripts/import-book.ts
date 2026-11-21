@@ -5,8 +5,11 @@
 //   pnpm import:book scripts/output/book/book-4a-lesson-01.json           dry run
 //   pnpm import:book scripts/output/book/book-4a-lesson-01.json --write   write
 //
+//   pnpm import:book scripts/output/book/book-4a-appendix.json            the appendix
+//
 // --write needs supabase/migrations/20270111120000_book.sql applied (and
-// 20270118120000_book_kinds_types.sql for bonus, tip and video).
+// 20270118120000_book_kinds_types.sql for bonus, tip and video;
+// 20270125120000_book_appendix.sql for the appendix, pos_table, word_index).
 //
 // The file is checked first, and nothing is written if anything fails:
 //   - every Text ({zh, py}): one py syllable per Han character in zh
@@ -25,6 +28,12 @@
 //     table: {columns: [{text, en}], rows, numbered?, row_labels?,
 //     merged_rows?}: one row label per row, merged rows in 0..rows-1
 //   - a video has a label, a Text title, a title_en and an image
+//   - the lesson is numbered (a whole number from 1, no slug), or it's the
+//     appendix (kind "appendix", number null, a slug) and every section
+//     has kind "appendix"; only the appendix has appendix sections
+//   - pos_table items have a Text text, an en and an abbr; word_index has
+//     letter groups of words with hanzi, pinyin and lesson numbers; beyond
+//     (vocab and word_index items) is true or false
 //
 // --write uploads the images (upsert, same path as src), then replaces the
 // lesson in one call to import_book_lesson (one transaction: a failed
@@ -39,12 +48,13 @@ const WRITE = hasFlag("--write");
 const ASSETS_DIR = "scripts/output/book/assets";
 const BUCKET = "book-assets";
 
-const SECTION_KINDS = new Set(["objectives", "warmup", "text", "grammar", "exercises", "task", "bonus", "summary"]);
+const SECTION_KINDS = new Set(["objectives", "warmup", "text", "grammar", "exercises", "task", "bonus", "summary", "appendix"]);
 const BLOCK_TYPES = new Set([
   "objectives", "instruction", "scene", "choice", "dialogue", "passage", "vocab", "prompts", "retell",
   "grammar", "dialogue_fill", "sentence_fill", "word_bank", "passage_fill", "image_match",
-  "picture_write", "task", "tip", "video", "self_check",
+  "picture_write", "task", "tip", "video", "self_check", "pos_table", "word_index",
 ]);
+const LESSON_SLUG = /^[a-z][a-z0-9]*(-[a-z0-9]+)*$/;
 const CONTENT_TYPES: Record<string, string> = {
   ".webp": "image/webp",
   ".png": "image/png",
@@ -59,7 +69,16 @@ interface Block { key: string; type: string; page: number; source?: string; data
 interface Section { key: string; kind: string; label_zh: string; label_en: string; page: number; blocks: Block[] }
 interface BookFile {
   book: { slug: string; title_zh: string; title_en: string; level: number; standard: string };
-  lesson: { number: number; title: { zh: string; py: string }; title_en: string; page_start: number; page_end: number };
+  lesson: {
+    /** "appendix" for the back matter; a numbered lesson otherwise. */
+    kind?: string;
+    slug?: string;
+    number: number | null;
+    title: { zh: string; py: string };
+    title_en: string;
+    page_start: number;
+    page_end: number;
+  };
   sections: Section[];
 }
 
@@ -70,6 +89,9 @@ const arr = (v: unknown): Obj[] => (Array.isArray(v) ? v.filter(isObj) : []);
 const labels = (v: unknown) => new Set(arr(v).map((o) => o.label));
 const isText = (v: unknown) => isObj(v) && typeof v.zh === "string" && typeof v.py === "string";
 const blanks = (text: unknown) => (isObj(text) && typeof text.zh === "string" ? (text.zh.match(BLANK) ?? []).length : 0);
+
+/** "lesson 5", or "appendix" (its slug). */
+const lessonName = (file: BookFile) => (file.lesson.number !== null ? `lesson ${file.lesson.number}` : (file.lesson.slug ?? "appendix"));
 
 function check(file: BookFile) {
   const problems: string[] = [];
@@ -107,11 +129,26 @@ function check(file: BookFile) {
     lastPage = p;
   };
 
+  // A numbered lesson, or the appendix: no number, a slug for its URL.
+  const L = file.lesson;
+  const appendix = L.kind === "appendix";
+  if (L.kind !== undefined && L.kind !== "lesson" && !appendix) problems.push(`lesson: unknown kind ${L.kind}`);
+  if (appendix) {
+    if (L.number !== null) problems.push(`lesson: an appendix has number null (got ${L.number})`);
+    if (typeof L.slug !== "string" || !LESSON_SLUG.test(L.slug)) problems.push(`lesson: an appendix needs a slug like "appendix" (got ${L.slug})`);
+  } else {
+    if (typeof L.number !== "number" || !Number.isInteger(L.number) || L.number < 1) problems.push(`lesson: number must be a whole number from 1 (got ${L.number})`);
+    if (L.slug !== undefined) problems.push(`lesson: only an appendix has a slug`);
+  }
+
   if (!Array.isArray(file.sections) || !file.sections.length) problems.push("no sections");
   for (const s of file.sections ?? []) {
     addKey(s.key, `section ${s.key}`);
     page(s.page, `section ${s.key}`);
     if (!SECTION_KINDS.has(s.kind)) problems.push(`section ${s.key}: unknown kind ${s.kind}`);
+    else if (appendix !== (s.kind === "appendix")) {
+      problems.push(`section ${s.key}: kind ${s.kind} in ${appendix ? "the appendix (every section is appendix)" : "a lesson (appendix sections are only in the appendix)"}`);
+    }
     if (!Array.isArray(s.blocks)) {
       problems.push(`section ${s.key}: no blocks`);
       continue;
@@ -129,6 +166,7 @@ function check(file: BookFile) {
       for (const list of ["items", "rows", "lines", "images"] as const) {
         arr(d[list]).forEach((item, i) => addKey(item.key, `${at} ${list}[${i}]`));
       }
+      arr(d.groups).forEach((g, gi) => arr(g.items).forEach((item, i) => addKey(item.key, `${at} groups[${gi}].items[${i}]`)));
       if (d.answer_key !== undefined) addKey(d.answer_key, `${at} answer_key`);
 
       if (b.type === "choice") {
@@ -183,7 +221,36 @@ function check(file: BookFile) {
         if (n !== answers.length) problems.push(`${at}: ${n} blanks, ${answers.length} answers`);
         const opts = labels(d.options);
         for (const a of answers) if (!opts.has(a)) problems.push(`${at}: answer ${a} not among the options`);
+      } else if (b.type === "pos_table") {
+        const items = arr(d.items);
+        if (!items.length) problems.push(`${at}: no items`);
+        for (const it of items) {
+          if (!isText(it.text) || typeof it.en !== "string" || typeof it.abbr !== "string") problems.push(`${at} ${it.key}: needs a Text text, an en and an abbr`);
+        }
+      } else if (b.type === "word_index") {
+        if (d.proper !== undefined && typeof d.proper !== "boolean") problems.push(`${at}: proper must be true or false`);
+        if (d.note !== undefined && (!isObj(d.note) || !isText(d.note.text) || (d.note.en !== undefined && typeof d.note.en !== "string"))) {
+          problems.push(`${at}: note must be {text, en?} with a Text text`);
+        }
+        const groups = arr(d.groups);
+        if (!groups.length) problems.push(`${at}: no groups`);
+        for (const [gi, g] of groups.entries()) {
+          if (typeof g.letter !== "string" || !g.letter) problems.push(`${at} groups[${gi}]: missing letter`);
+          const items = arr(g.items);
+          if (!items.length) problems.push(`${at} groups[${gi}]: no items`);
+          for (const it of items) {
+            if (typeof it.hanzi !== "string" || !it.hanzi || typeof it.pinyin !== "string" || !it.pinyin) problems.push(`${at} ${it.key}: needs hanzi and pinyin`);
+            const ls = Array.isArray(it.lessons) ? it.lessons : [];
+            if (!ls.length || ls.some((n) => typeof n !== "number" || !Number.isInteger(n) || n < 1)) {
+              problems.push(`${at} ${it.key}: lessons must be lesson numbers (got ${JSON.stringify(it.lessons)})`);
+            }
+            if (it.beyond !== undefined && typeof it.beyond !== "boolean") problems.push(`${at} ${it.key}: beyond must be true or false`);
+          }
+        }
       } else if (b.type === "vocab") {
+        for (const it of arr(d.items)) {
+          if (it.beyond !== undefined && typeof it.beyond !== "boolean") problems.push(`${at} ${it.key}: beyond must be true or false`);
+        }
         if (d.proper !== undefined && typeof d.proper !== "boolean") problems.push(`${at}: proper must be true or false`);
         if (d.proper === true) {
           if (d.audio != null) problems.push(`${at}: a proper-noun table has no audio`);
@@ -274,7 +341,7 @@ async function main() {
   for (const b of blocks) byType.set(b.type, (byType.get(b.type) ?? 0) + 1);
   const vocab = blocks.filter((b) => b.type === "vocab").reduce((n, b) => n + arr(b.data?.items).length, 0);
 
-  console.log(`${file.book.title_zh} lesson ${file.lesson.number}: ${file.lesson.title?.zh} (pages ${file.lesson.page_start}-${file.lesson.page_end})`);
+  console.log(`${file.book.title_zh} ${lessonName(file)}: ${file.lesson.title?.zh} (pages ${file.lesson.page_start}-${file.lesson.page_end})`);
   console.log(`Sections:  ${file.sections.length}`);
   console.log(`Blocks:    ${blocks.length}`);
   for (const [type, n] of [...byType].sort((a, b) => b[1] - a[1])) console.log(`  ${type.padEnd(14)} ${n}`);
@@ -322,7 +389,7 @@ async function main() {
     console.error("import_book_lesson failed (nothing was changed):", error);
     process.exit(1);
   }
-  console.log(`Imported lesson ${file.lesson.number}: ${file.sections.length} sections, ${blocks.length} blocks (lesson id ${lessonId}).`);
+  console.log(`Imported ${lessonName(file)}: ${file.sections.length} sections, ${blocks.length} blocks (lesson id ${lessonId}).`);
 }
 
 main().catch((err) => {

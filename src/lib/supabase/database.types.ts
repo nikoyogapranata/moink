@@ -74,7 +74,12 @@ export type BookSectionKind =
   | "exercises"
   | "task"
   | "bonus"
-  | "summary";
+  | "summary"
+  | "appendix";
+
+/** book_lessons.kind: a numbered lesson, or the book's appendix (no
+ *  number; found by its slug). */
+export type BookLessonKind = "lesson" | "appendix";
 
 export type Database = {
   public: {
@@ -738,7 +743,9 @@ export type Database = {
         Row: {
           id: string;
           book_id: string;
-          number: number;
+          kind: BookLessonKind;
+          slug: string | null;
+          number: number | null;
           title: BookText;
           title_en: string;
           page_start: number;
@@ -748,7 +755,9 @@ export type Database = {
         Insert: {
           id?: string;
           book_id: string;
-          number: number;
+          kind?: BookLessonKind;
+          slug?: string | null;
+          number?: number | null;
           title: BookText;
           title_en: string;
           page_start: number;
@@ -758,7 +767,9 @@ export type Database = {
         Update: {
           id?: string;
           book_id?: string;
-          number?: number;
+          kind?: BookLessonKind;
+          slug?: string | null;
+          number?: number | null;
           title?: BookText;
           title_en?: string;
           page_start?: number;

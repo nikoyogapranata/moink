@@ -5,7 +5,7 @@
 
 import type { createClient } from "@/lib/supabase/server";
 
-import type { Json } from "@/lib/supabase/database.types";
+import type { BookLessonKind, Json } from "@/lib/supabase/database.types";
 
 import { answerKeys, autoItems, type AutoItem } from "./answers";
 import type { Block, BookPrefs, BookText, Section } from "./types";
@@ -15,9 +15,16 @@ type Supabase = Awaited<ReturnType<typeof createClient>>;
 /** How long image links stay valid. */
 const SIGNED_URL_SECONDS = 60 * 60;
 
+/** A lesson's part of the URL, /book/<book>/<ref>: its number, or its slug
+ *  when it has none (the appendix). */
+const refOf = (l: { number: number | null; slug: string | null }) => (l.number !== null ? String(l.number) : (l.slug ?? ""));
+
 export interface ShelfLesson {
   id: string;
-  number: number;
+  kind: BookLessonKind;
+  /** Null for the appendix. */
+  number: number | null;
+  ref: string;
   title: BookText;
   title_en: string;
   page_start: number;
@@ -40,8 +47,9 @@ export async function loadShelf(supabase: Supabase, userId: string): Promise<She
     supabase.from("books").select("id, slug, title_zh, title_en, level").order("sort").order("slug"),
     supabase
       .from("book_lessons")
-      .select("id, book_id, number, title, title_en, page_start, page_end")
-      .order("number"),
+      .select("id, book_id, kind, slug, number, title, title_en, page_start, page_end")
+      // Numbered lessons in order, the appendix (no number) last.
+      .order("number", { nullsFirst: false }),
     supabase.from("user_book_progress").select("lesson_id, completed_at").eq("user_id", userId),
   ]);
   if (books.error) throw books.error;
@@ -55,7 +63,9 @@ export async function loadShelf(supabase: Supabase, userId: string): Promise<She
       .filter((l) => l.book_id === book.id)
       .map((l) => ({
         id: l.id,
+        kind: l.kind,
         number: l.number,
+        ref: refOf(l),
         title: l.title,
         title_en: l.title_en,
         page_start: l.page_start,
@@ -92,7 +102,9 @@ export interface BookNote {
 export interface ReaderLesson {
   id: string;
   book: { slug: string; title_zh: string; title_en: string };
-  number: number;
+  kind: BookLessonKind;
+  /** Null for the appendix. */
+  number: number | null;
   title: BookText;
   title_en: string;
   page_start: number;
@@ -111,18 +123,20 @@ export interface ReaderLesson {
   notes: BookNote[];
   done: boolean;
   lastBlockKey: string | null;
-  previous: number | null;
-  next: number | null;
+  /** The neighbours' refs (their URL part), in shelf order. */
+  previous: string | null;
+  next: string | null;
 }
 
 const toneless = (pinyin: string) => pinyin.replace(/\s+/g, "").toLowerCase();
 
-/** One lesson of a book for the reader; null when there's no such lesson. */
+/** One lesson of a book for the reader, by its ref (number, or the
+ *  appendix's slug); null when there's no such lesson. */
 export async function loadReaderLesson(
   supabase: Supabase,
   userId: string,
   bookSlug: string,
-  number: number,
+  ref: string,
 ): Promise<ReaderLesson | null> {
   const book = await supabase
     .from("books")
@@ -135,14 +149,14 @@ export async function loadReaderLesson(
   const [lessons, profile] = await Promise.all([
     supabase
       .from("book_lessons")
-      .select("id, number, title, title_en, page_start, page_end")
+      .select("id, kind, slug, number, title, title_en, page_start, page_end")
       .eq("book_id", book.data.id)
-      .order("number"),
+      .order("number", { nullsFirst: false }),
     supabase.from("profiles").select("show_pinyin, show_english, show_extras").eq("id", userId).maybeSingle(),
   ]);
   if (lessons.error) throw lessons.error;
   if (profile.error) throw profile.error;
-  const index = lessons.data.findIndex((l) => l.number === number);
+  const index = lessons.data.findIndex((l) => refOf(l) === ref);
   if (index === -1) return null;
   const lesson = lessons.data[index];
 
@@ -257,6 +271,7 @@ export async function loadReaderLesson(
   return {
     id: lesson.id,
     book: { slug: book.data.slug, title_zh: book.data.title_zh, title_en: book.data.title_en },
+    kind: lesson.kind,
     number: lesson.number,
     title: lesson.title,
     title_en: lesson.title_en,
@@ -283,7 +298,7 @@ export async function loadReaderLesson(
     },
     done: Boolean(progress.data?.completed_at),
     lastBlockKey: progress.data?.last_block_key ?? null,
-    previous: lessons.data[index - 1]?.number ?? null,
-    next: lessons.data[index + 1]?.number ?? null,
+    previous: index > 0 ? refOf(lessons.data[index - 1]) : null,
+    next: index + 1 < lessons.data.length ? refOf(lessons.data[index + 1]) : null,
   };
 }

@@ -16,8 +16,9 @@ import type { Block } from "./types";
 
 /** Every key a block's answers are stored under. */
 export function answerKeys(block: Block): string[] {
-  // Dialogue lines and vocab words have keys too, but nothing to answer.
-  if (block.type === "dialogue" || block.type === "vocab") return [];
+  // Dialogue lines, vocab words and the appendix's rows have keys too, but
+  // nothing to answer.
+  if (block.type === "dialogue" || block.type === "vocab" || block.type === "pos_table" || block.type === "word_index") return [];
   if (block.type === "prompts" && block.data.answer_mode === "none") return [];
   const d = block.data as Record<string, unknown>;
   const keys: string[] = [];

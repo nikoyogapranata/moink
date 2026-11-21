@@ -33,6 +33,8 @@ import { paragraphs, speakable, ZhText } from "./ZhText";
 // book-extra for moink additions.
 
 export interface BlockContext {
+  /** For links to the book's lessons (the word index). */
+  bookSlug: string;
   images: Record<string, string>;
   vocabWords: Record<string, VocabWord>;
   grammarLinks: Record<string, GrammarLink>;
@@ -77,6 +79,16 @@ function AudioChip({ track }: { track?: string | null }) {
     >
       <Headphones size={13} aria-hidden="true" />
       {track}
+    </span>
+  );
+}
+
+/** The book's * for a word beyond this level's syllabus. */
+function Beyond({ className = "" }: { className?: string }) {
+  return (
+    <span title="Beyond the HSK 4 syllabus" className={`cursor-help font-body text-bamboo-gold-dark ${className}`}>
+      <span aria-hidden="true">*</span>
+      <span className="sr-only"> (beyond the HSK 4 syllabus)</span>
     </span>
   );
 }
@@ -308,6 +320,7 @@ function Vocab({ data, ctx }: { data: BlockData["vocab"]; ctx: BlockContext }) {
                 <div className="flex flex-wrap items-baseline gap-x-3">
                   <span lang="zh-CN" className="book-vocab-hz font-hanzi text-bark">
                     {item.hanzi}
+                    {item.beyond && <Beyond className="ml-0.5 align-super text-[14px]" />}
                   </span>
                   <span className="book-vpy font-body font-medium text-rust-dark">{item.pinyin}</span>
                   {!proper && <span className="book-pos font-body italic text-bark-muted">{item.pos}</span>}
@@ -737,6 +750,118 @@ function SelfCheck({ data }: { data: BlockData["self_check"] }) {
   );
 }
 
+/** 词性对照表: part of speech, English name, abbreviation. From lg it
+ *  splits into two side-by-side halves, like the book. */
+function PosTable({ data }: { data: BlockData["pos_table"] }) {
+  const half = Math.ceil(data.items.length / 2);
+  const halves = [data.items.slice(0, half), data.items.slice(half)];
+  const table = (items: typeof data.items, i: number) => (
+    <table key={i} className={`w-full border-collapse ${i === 1 ? "lg:border-l-[1.5px] lg:border-line" : ""}`}>
+      <thead className={i === 1 ? "hidden lg:table-header-group" : ""}>
+        <tr className="border-b-[1.5px] border-line">
+          {[
+            ["词性", "Part of Speech"],
+            ["英文", "English"],
+            ["英文简写", "Abbreviation"],
+          ].map(([zh, en]) => (
+            <th key={en} scope="col" className="px-3 py-2 text-left align-bottom font-normal">
+              <span lang="zh-CN" className="block font-hanzi text-[15px] font-bold text-bark">
+                {zh}
+              </span>
+              <span className="block font-body text-[12px] leading-4 text-bark-muted">{en}</span>
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody className="divide-y-[1.5px] divide-line">
+        {items.map((it) => (
+          <tr key={it.key}>
+            <td className="px-3 py-1">
+              <ZhText text={it.text} className={ZH} />
+            </td>
+            <td className="px-3 py-1 font-body text-[15px] text-bark">{it.en}</td>
+            <td className="px-3 py-1 font-body text-[15px] italic text-bark-muted">{it.abbr}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+  return (
+    <div className={`${BOOK_CARD} !p-2 sm:!p-3`}>
+      {/* Phones and tablets: one table (the second half's header hidden, its
+          rows continuing the first's). */}
+      <div className="grid lg:grid-cols-2">{halves.map(table)}</div>
+    </div>
+  );
+}
+
+/** 词语表 / 专有名词: the appendix's word index, by initial letter. Plain
+ *  hanzi and pinyin (no ruby); each lesson number links to that lesson. */
+function WordIndex({ data, ctx }: { data: BlockData["word_index"]; ctx: BlockContext }) {
+  return (
+    <div className="flex flex-col gap-2">
+      <div className={`${BOOK_CARD} !p-2 sm:!p-3`}>
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="border-b-[1.5px] border-line">
+              {[
+                ["词语", "Word/Phrase"],
+                ["拼音", "Pinyin"],
+                ["课号", "Lesson"],
+              ].map(([zh, en], i) => (
+                <th key={en} scope="col" className={`px-3 py-2 align-bottom font-normal ${i === 2 ? "text-right" : "text-left"}`}>
+                  <span lang="zh-CN" className="block font-hanzi text-[15px] font-bold text-bark">
+                    {zh}
+                  </span>
+                  <span className="block font-body text-[12px] leading-4 text-bark-muted">{en}</span>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          {data.groups.map((g) => (
+            <tbody key={g.letter}>
+              <tr>
+                <th colSpan={3} scope="rowgroup" className="bg-highlight/50 px-3 py-1 text-left font-heading text-[15px] font-bold text-rust-dark">
+                  {g.letter}
+                </th>
+              </tr>
+              {g.items.map((it) => (
+                <tr key={it.key} className="border-t-[1.5px] border-line first:border-t-0">
+                  <td lang="zh-CN" className="whitespace-nowrap px-3 py-1.5 font-hanzi text-[17px] text-bark">
+                    {it.beyond && <Beyond className="mr-0.5" />}
+                    {it.hanzi}
+                  </td>
+                  <td className="px-3 py-1.5 font-body text-[15px] text-bark-muted">{it.pinyin}</td>
+                  <td className="px-3 py-1.5 text-right">
+                    <span className="inline-flex flex-wrap justify-end gap-1">
+                      {it.lessons.map((n) => (
+                        <Link
+                          key={n}
+                          href={`/book/${ctx.bookSlug}/${n}`}
+                          aria-label={`Lesson ${n}`}
+                          className="inline-flex h-7 min-w-7 items-center justify-center rounded-pill px-1.5 font-body text-[14px] font-medium text-rust-dark transition-colors hover:bg-highlight focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rust"
+                        >
+                          {n}
+                        </Link>
+                      ))}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          ))}
+        </table>
+      </div>
+      {data.note && (
+        <div className="px-1">
+          <ZhText text={data.note.text} className={`${ZH} text-[15px]!`} />
+          <En>{data.note.en}</En>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /** One block, by type. */
 export function BlockView({ block, ctx }: { block: Block; ctx: BlockContext }) {
   switch (block.type) {
@@ -779,6 +904,10 @@ export function BlockView({ block, ctx }: { block: Block; ctx: BlockContext }) {
       return <Video data={block.data} ctx={ctx} />;
     case "self_check":
       return <SelfCheck data={block.data} />;
+    case "pos_table":
+      return <PosTable data={block.data} />;
+    case "word_index":
+      return <WordIndex data={block.data} ctx={ctx} />;
     default:
       return null;
   }

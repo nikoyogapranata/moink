@@ -39,7 +39,7 @@ All Chinese is a Text object:
 { "key": "4a-01-t1", "kind": "text", "label_zh": "课文 1", "label_en": "Text 1", "page": 2, "blocks": [Block, ...] }
 ```
 
-`kind`: `objectives` · `warmup` · `text` · `grammar` · `exercises` · `task` · `bonus` · `summary`. (`bonus` = 小语的彩蛋 Xiaoyu's Bonus Content.)
+`kind`: `objectives` · `warmup` · `text` · `grammar` · `exercises` · `task` · `bonus` · `summary` · `appendix`. (`bonus` = 小语的彩蛋 Xiaoyu's Bonus Content. `appendix` is only used in the appendix file.)
 Sections become the chips at the top of the lesson. `key` is stable.
 
 ## Block
@@ -79,7 +79,17 @@ Sections become the chips at the top of the lesson. `key` is stable.
 | `task` | `title`, `title_en`, `text`, `en`, `answer_mode` (`text` / `notes` / `table`), `min_chars?`, `answer_key`, optional `tips: {label?, label_en?, items: [{label, label_en, text}]}` (when `label` is missing, show the items without a heading) shown under the task text (e.g. 提示 Tips: 正方 Pro side / 反方 Con side); optional `table: {columns: [{text, en}], rows, numbered?, row_labels?: [{text, en}], merged_rows?: [row index]}` for a table the user fills in (answer_mode `table`, answer saved as a 2D array of strings). `row_labels` puts a label cell at the start of each row (instead of a number). A row listed in `merged_rows` is one wide cell spanning all columns, saved as a one-item array | textarea (show live character count vs `min_chars`) |
 | `tip` | `text`, `en`. A 小语助力 Xiaoyu's Tip box: a small callout with the label "小语助力 Xiaoyu's Tip" | none |
 | `video` | `label` ("4-1", the book's video number), `title`, `title_en`, `image` (a still from the book). The video itself is not available: show the still with a play-icon overlay that does nothing, plus the title and a small "Video not included" note | none |
+| `pos_table` | `items: [{key, text, en, abbr}]` (词性对照表: part of speech, English name, abbreviation). Show as a 3-column table (词性 Part of Speech · 英文 English · 英文简写 Abbreviation); on wide screens it can split into two side-by-side halves like the book | none |
+| `word_index` | `groups: [{letter, items: [{key, hanzi, pinyin, lessons: [int], beyond?}]}]`, optional `proper: true` (专有名词 index), optional `note: {text, en}` (footnote under the table). Columns 词语 Word/Phrase · 拼音 Pinyin · 课号 Lesson, with a letter row before each group. Plain hanzi + pinyin (no ruby). Each lesson number links to `/book/<book>/<n>`. `beyond: true` shows `*` before the hanzi like the book | none |
 | `self_check` | `intro`, `intro_en`, `scale: [{zh, en}]`, `rows: [{key, text, en}]` | one choice of the scale per row |
+
+## Appendix file
+
+`book-<book>-appendix.json` has the same top level as a lesson, but `lesson` is
+`{ "kind": "appendix", "slug": "appendix", "number": null, "title", "title_en", "page_start", "page_end" }`.
+It is the book's back matter (4上: pp. 120–127): the parts-of-speech table, the full vocabulary
+index and the proper-nouns index. It lists after the last lesson and opens at `/book/<book>/appendix`.
+Every section has `kind: "appendix"`.
 
 ## Checking answers
 

@@ -50,6 +50,8 @@ export interface BlockData {
       pinyin: string;
       pos: string;
       en: string;
+      /** Beyond the HSK syllabus for this level: a small * after the hanzi. */
+      beyond?: boolean;
       extra?: { source: string; text: BookText; en?: string };
     }[];
   };
@@ -105,6 +107,15 @@ export interface BlockData {
   };
   /** The book's video, which moink doesn't have: its still and title. */
   video: { label: string; title: BookText; title_en: string; image: Image };
+  /** 词性对照表: parts of speech with their English names and abbreviations. */
+  pos_table: { items: { key: string; text: BookText; en: string; abbr: string }[] };
+  /** The appendix's word index (or, with proper, the proper-noun index): by
+   *  initial letter, each word with the lessons it's in. */
+  word_index: {
+    proper?: boolean;
+    note?: { text: BookText; en?: string };
+    groups: { letter: string; items: { key: string; hanzi: string; pinyin: string; lessons: number[]; beyond?: boolean }[] }[];
+  };
   /** A 小语助力 Xiaoyu's Tip callout. */
   tip: { text: BookText; en?: string };
   self_check: {

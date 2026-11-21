@@ -21,11 +21,11 @@ import { createClient } from "@/lib/supabase/server";
 const getLesson = cache(async (book: string, lesson: string) => {
   const user = await getAppUser();
   if (!user?.hasBookAccess) return "private" as const;
-  const number = Number(lesson);
-  if (!Number.isInteger(number) || number < 1) return null;
+  // A lesson number ("1", not "01") or the appendix's slug.
+  if (!/^([1-9][0-9]*|[a-z][a-z0-9]*(-[a-z0-9]+)*)$/.test(lesson)) return null;
   const supabase = await createClient();
   try {
-    return await loadReaderLesson(supabase, user.id, book, number);
+    return await loadReaderLesson(supabase, user.id, book, lesson);
   } catch (error) {
     console.error(`BookLessonPage: couldn't load ${book}/${lesson}.`, error);
     return "error" as const;
@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: PageProps<"/book/[book]/[less
   const { book, lesson } = await params;
   const data = await getLesson(book, lesson);
   if (!data || typeof data === "string") return { title: "HSK Book - moink" };
-  return { title: `${data.number}. ${data.title.zh} - moink` };
+  return { title: `${data.number !== null ? `${data.number}. ` : ""}${data.title.zh} - moink` };
 }
 
 /** What a block is, for its notes button and the Lesson notes panel. */
@@ -61,6 +61,8 @@ const BLOCK_NAMES: Record<BlockType, string> = {
   tip: "Xiaoyu's Tip",
   video: "Video",
   self_check: "Self-check",
+  pos_table: "Parts of speech",
+  word_index: "Word index",
 };
 
 /** "p. 3": the printed page, so the lesson can be followed in class. */
@@ -75,8 +77,8 @@ function PageTag({ page, className = "" }: { page: number; className?: string })
 }
 
 export default async function BookLessonPage({ params }: PageProps<"/book/[book]/[lesson]">) {
-  const { book, lesson: number } = await params;
-  const lesson = await getLesson(book, number);
+  const { book, lesson: ref } = await params;
+  const lesson = await getLesson(book, ref);
   if (lesson === "private") return <PrivateCard />;
   if (lesson === "error") {
     return (
@@ -90,7 +92,12 @@ export default async function BookLessonPage({ params }: PageProps<"/book/[book]
   }
   if (!lesson) notFound();
 
-  const ctx: BlockContext = { images: lesson.images, vocabWords: lesson.vocabWords, grammarLinks: lesson.grammarLinks };
+  const ctx: BlockContext = {
+    bookSlug: lesson.book.slug,
+    images: lesson.images,
+    vocabWords: lesson.vocabWords,
+    grammarLinks: lesson.grammarLinks,
+  };
 
   const header = (
     <header className="flex flex-col gap-1">
@@ -104,7 +111,9 @@ export default async function BookLessonPage({ params }: PageProps<"/book/[book]
         </span>
       </Link>
       <p className="flex items-center gap-2 font-body text-body-sm text-bark-muted">
-        <span className="rounded-pill bg-highlight px-2.5 py-0.5 font-medium text-rust-dark">Lesson {lesson.number}</span>
+        <span className="rounded-pill bg-highlight px-2.5 py-0.5 font-medium text-rust-dark">
+          {lesson.number !== null ? `Lesson ${lesson.number}` : "Appendix"}
+        </span>
         <span>
           pp. {lesson.page_start}–{lesson.page_end}
         </span>
