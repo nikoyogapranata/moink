@@ -15,6 +15,9 @@
 //   - choice, word_bank and image_match answers are among their labels,
 //     passage_fill has one answer per {_}, each among the option labels
 //   - every image src exists under scripts/output/book/assets/
+//   - vocab with proper: true has no audio, empty pos and nums 1, 2, 3...;
+//     task tips have a Text label, label_en and Text items; a tip has a
+//     Text text
 //
 // --write uploads the images (upsert, same path as src), then replaces the
 // lesson in one call to import_book_lesson (one transaction: a failed
@@ -33,7 +36,7 @@ const SECTION_KINDS = new Set(["objectives", "warmup", "text", "grammar", "exerc
 const BLOCK_TYPES = new Set([
   "objectives", "instruction", "scene", "choice", "dialogue", "passage", "vocab", "prompts", "retell",
   "grammar", "dialogue_fill", "sentence_fill", "word_bank", "passage_fill", "image_match",
-  "picture_write", "task", "self_check",
+  "picture_write", "task", "tip", "self_check",
 ]);
 const CONTENT_TYPES: Record<string, string> = {
   ".webp": "image/webp",
@@ -58,6 +61,7 @@ const BLANK = /\{_\}/g;
 const isObj = (v: unknown): v is Obj => typeof v === "object" && v !== null && !Array.isArray(v);
 const arr = (v: unknown): Obj[] => (Array.isArray(v) ? v.filter(isObj) : []);
 const labels = (v: unknown) => new Set(arr(v).map((o) => o.label));
+const isText = (v: unknown) => isObj(v) && typeof v.zh === "string" && typeof v.py === "string";
 const blanks = (text: unknown) => (isObj(text) && typeof text.zh === "string" ? (text.zh.match(BLANK) ?? []).length : 0);
 
 function check(file: BookFile) {
@@ -140,6 +144,31 @@ function check(file: BookFile) {
         if (n !== answers.length) problems.push(`${at}: ${n} blanks, ${answers.length} answers`);
         const opts = labels(d.options);
         for (const a of answers) if (!opts.has(a)) problems.push(`${at}: answer ${a} not among the options`);
+      } else if (b.type === "vocab") {
+        if (d.proper !== undefined && typeof d.proper !== "boolean") problems.push(`${at}: proper must be true or false`);
+        if (d.proper === true) {
+          if (d.audio != null) problems.push(`${at}: a proper-noun table has no audio`);
+          arr(d.items).forEach((it, i) => {
+            if (it.pos) problems.push(`${at} ${it.key}: a proper noun has no pos (got ${it.pos})`);
+            if (String(it.num) !== String(i + 1)) problems.push(`${at} ${it.key}: num ${it.num}, expected ${i + 1} (numbering restarts at 1)`);
+          });
+        }
+      } else if (b.type === "task" && d.tips !== undefined) {
+        const t = d.tips;
+        if (!isObj(t)) problems.push(`${at}: tips must be {label, label_en, items}`);
+        else {
+          if (!isText(t.label) || typeof t.label_en !== "string") problems.push(`${at}: tips need a Text label and a label_en`);
+          const items = Array.isArray(t.items) ? t.items : [];
+          if (!items.length) problems.push(`${at}: tips have no items`);
+          items.forEach((it, i) => {
+            if (!isObj(it) || !isText(it.label) || typeof it.label_en !== "string" || !isText(it.text)) {
+              problems.push(`${at} tips.items[${i}]: needs a Text label, a label_en and a Text text`);
+            }
+          });
+        }
+      } else if (b.type === "tip") {
+        if (!isText(d.text)) problems.push(`${at}: a tip needs a Text text`);
+        if (d.en !== undefined && typeof d.en !== "string") problems.push(`${at}: en must be a string`);
       }
     }
   }

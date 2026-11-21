@@ -1,4 +1,4 @@
-import { BookOpenText, Headphones, MapPin } from "lucide-react";
+import { BookOpenText, Headphones, MapPin, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -271,25 +271,30 @@ function Passage({ data, ctx }: { data: BlockData["passage"]; ctx: BlockContext 
   );
 }
 
+/** 生词 New words, or with `proper` the 专有名词 Proper Nouns table: no
+ *  audio track, no part of speech, numbered from ① whatever the file says. */
 function Vocab({ data, ctx }: { data: BlockData["vocab"]; ctx: BlockContext }) {
+  const proper = data.proper === true;
   return (
     <div className={BOOK_CARD}>
       <div className="mb-1 flex items-center gap-2">
         <h3 lang="zh-CN" className="font-hanzi text-[17px] font-bold text-bark">
-          生词
+          {proper ? "专有名词" : "生词"}
         </h3>
-        <span className="font-body text-body-sm text-bark-muted">New words</span>
-        <span className="ml-auto">
-          <AudioChip track={data.audio} />
-        </span>
+        <span className="font-body text-body-sm text-bark-muted">{proper ? "Proper Nouns" : "New words"}</span>
+        {!proper && (
+          <span className="ml-auto">
+            <AudioChip track={data.audio} />
+          </span>
+        )}
       </div>
       <ol className="flex flex-col divide-y-[1.5px] divide-line">
-        {data.items.map((item) => {
+        {data.items.map((item, i) => {
           const word = ctx.vocabWords[item.hanzi];
           return (
             <li key={item.key} data-vocab-row className="flex gap-2 py-3 sm:gap-3">
               <span aria-hidden="true" className="w-5 shrink-0 font-body text-[17px] leading-9 text-bark-muted">
-                {circled(item.num)}
+                {circled(proper ? i + 1 : item.num)}
               </span>
               <div className="min-w-0 flex-1">
                 {/* Phones: hanzi, pinyin and part of speech on one line, the
@@ -299,7 +304,7 @@ function Vocab({ data, ctx }: { data: BlockData["vocab"]; ctx: BlockContext }) {
                     {item.hanzi}
                   </span>
                   <span className="book-vpy font-body font-medium text-rust-dark">{item.pinyin}</span>
-                  <span className="book-pos font-body italic text-bark-muted">{item.pos}</span>
+                  {!proper && <span className="book-pos font-body italic text-bark-muted">{item.pos}</span>}
                   <span className="book-vocab-en basis-full font-body text-bark sm:basis-auto">{item.en}</span>
                 </div>
                 {item.extra && (
@@ -562,6 +567,24 @@ function Task({ data }: { data: BlockData["task"] }) {
       <En className="-mt-1 mb-2 font-medium">{data.title_en}</En>
       <ZhText text={data.text} className={ZH} />
       <En className="mt-1">{data.en}</En>
+      {data.tips && data.tips.items.length > 0 && (
+        <div className="mt-3">
+          <p className="flex items-baseline gap-2">
+            <ZhText text={data.tips.label} className={`${ZH} font-bold`} />
+            <span className="font-body text-body-sm font-medium text-bark-muted">{data.tips.label_en}</span>
+          </p>
+          <ul className="flex flex-col">
+            {data.tips.items.map((t, i) => (
+              <li key={i} className={ZH}>
+                <ZhText text={t.label} className="font-bold" />{" "}
+                <span className="font-body text-body-sm text-bark-muted">({t.label_en})</span>
+                <span aria-hidden="true">：</span>
+                <ZhText text={t.text} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       {data.min_chars ? (
         <p className="book-body mt-2 font-body">At least {data.min_chars} characters</p>
       ) : null}
@@ -574,6 +597,27 @@ function Task({ data }: { data: BlockData["task"] }) {
         />
       </div>
     </div>
+  );
+}
+
+/** 小语助力 Xiaoyu's Tip: a small callout, like the grammar card's gold
+ *  edge but lighter, its top-left corner tucked in like a speech bubble. */
+function Tip({ data }: { data: BlockData["tip"] }) {
+  return (
+    <aside
+      aria-label="Xiaoyu's Tip"
+      className="rounded-[18px] rounded-tl-[4px] border-[1.5px] border-l-[3px] border-line border-l-bamboo-gold bg-surface-raised px-4 py-3"
+    >
+      <p className="flex items-center gap-1.5 font-body text-[12px] font-medium leading-4 text-bamboo-gold-dark">
+        <MessageCircle size={13} aria-hidden="true" />
+        <span lang="zh-CN" className="font-hanzi">
+          小语助力
+        </span>
+        <span>Xiaoyu&apos;s Tip</span>
+      </p>
+      <ZhText text={data.text} className={`${ZH} mt-1 block`} />
+      <En>{data.en}</En>
+    </aside>
   );
 }
 
@@ -660,6 +704,8 @@ export function BlockView({ block, ctx }: { block: Block; ctx: BlockContext }) {
       return <PictureWrite data={block.data} ctx={ctx} />;
     case "task":
       return <Task data={block.data} />;
+    case "tip":
+      return <Tip data={block.data} />;
     case "self_check":
       return <SelfCheck data={block.data} />;
     default:

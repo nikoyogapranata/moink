@@ -24,8 +24,12 @@ export interface BlockData {
   dialogue: { image?: Image; lines: DialogueLine[] };
   /** indent: false = no first-line indent (a diary's date line, say). */
   passage: { image?: Image; paragraphs: (Translated & { indent?: boolean })[] };
+  /** proper: a 专有名词 Proper Nouns table (no audio, empty pos, numbered
+   *  from 1). */
   vocab: {
-    audio: string | null;
+    proper?: boolean;
+    /** Absent on a proper-noun table. */
+    audio?: string | null;
     items: {
       key: string;
       num: string;
@@ -73,7 +77,11 @@ export interface BlockData {
     answer_mode: "text" | "notes";
     min_chars?: number;
     answer_key: string;
+    /** Shown under the task text: 提示 Tips, then 正方 Pro side: ... */
+    tips?: { label: BookText; label_en: string; items: { label: BookText; label_en: string; text: BookText }[] };
   };
+  /** A 小语助力 Xiaoyu's Tip callout. */
+  tip: { text: BookText; en?: string };
   self_check: {
     intro: BookText;
     intro_en?: string;

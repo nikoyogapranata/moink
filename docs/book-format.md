@@ -66,7 +66,7 @@ Sections become the chips at the top of the lesson. `key` is stable.
 | `choice` | `items: [{key, num, text, options: [{label, text}], answer, answer_source}]` | pick one option per item |
 | `dialogue` | `image?: {src, alt}`, `lines: [{key, speaker: string[] \| null, text, en?, en_source?}]` | none (notes allowed per line) |
 | `passage` | `image?`, `paragraphs: [{text, en, en_source, indent?}]`. `indent: false` = no first-line indent (e.g. a diary date line); default is indented | none |
-| `vocab` | `audio`, `items: [{key, num, hanzi, pinyin, pos, en, extra: {source, text, en}}]` | "add to Training" per word |
+| `vocab` | `audio`, `items: [{key, num, hanzi, pinyin, pos, en, extra: {source, text, en}}]` Optional `proper: true` = a 专有名词 Proper Nouns table (no `audio`, `pos` is empty, numbering restarts at 1). | "add to Training" per word |
 | `prompts` | `answer_mode` (`text` / `none`), `items: [{key, num, text, sample?: [Text], sample_source?}]` | textarea per item |
 | `retell` | `text` (prompt passage with ……), `answer_key` | textarea |
 | `grammar` | `num`, `title`, `title_en`, `explain`, `explain_en`, `examples: [{text, en, en_source}]`, `extra: {source, examples: [{text, en}], related: [grammar slugs]}` | none |
@@ -76,7 +76,8 @@ Sections become the chips at the top of the lesson. `key` is stable.
 | `passage_fill` | `options: [{label, text}]`, `text` (with several `{_}`), `answers: ["C","B",...]`, `answer_source`, `answer_key` | pick a label per blank |
 | `image_match` | `images: [{key, src, alt, answer}]`, `options: [{label, text}]`, `answer_source` | pick a label per image |
 | `picture_write` | `items: [{key, num, image, word: Text, sample?, sample_source}]` | textarea per item |
-| `task` | `title`, `title_en`, `text`, `en`, `answer_mode` (`text` / `notes`), `min_chars?`, `answer_key` | textarea (show live character count vs `min_chars`) |
+| `task` | `title`, `title_en`, `text`, `en`, `answer_mode` (`text` / `notes`), `min_chars?`, `answer_key`, optional `tips: {label, label_en, items: [{label, label_en, text}]}` shown under the task text (e.g. 提示 Tips: 正方 Pro side / 反方 Con side) | textarea (show live character count vs `min_chars`) |
+| `tip` | `text`, `en`. A 小语助力 Xiaoyu's Tip box: a small callout with the label "小语助力 Xiaoyu's Tip" | none |
 | `self_check` | `intro`, `intro_en`, `scale: [{zh, en}]`, `rows: [{key, text, en}]` | one choice of the scale per row |
 
 ## Checking answers

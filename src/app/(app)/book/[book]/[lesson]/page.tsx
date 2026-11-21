@@ -58,6 +58,7 @@ const BLOCK_NAMES: Record<BlockType, string> = {
   image_match: "Picture match",
   picture_write: "Picture writing",
   task: "Task",
+  tip: "Xiaoyu's Tip",
   self_check: "Self-check",
 };
 
