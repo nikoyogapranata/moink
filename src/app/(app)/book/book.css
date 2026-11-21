@@ -1,0 +1,273 @@
+/* HSK Book reader. The display switches are data attributes on the reader
+   root (Reader.tsx), so flipping one restyles the page without
+   re-rendering any of it.
+
+   Plain (unlayered) CSS: it wins over Tailwind's utilities, so sizes set
+   here are the reader's type scale. */
+
+/* ---------------------------------------------------------------------------
+   Type scale. Phones first (under 640px), then sm and up.
+   --zh / --zh-lg: the two Chinese sizes; --lh: line height of any text with
+   ruby (lower when 拼音 is off, the only layout change of that switch).
+   Things that sit beside the first line of Chinese (speaker names, item
+   numbers, markers) use .book-line / .book-line-lg: one line tall.
+   --------------------------------------------------------------------------- */
+
+.book-reader {
+  --zh: 18px;
+  --zh-lg: 20px;
+  --lh: 2.4;
+}
+
+.book-reader[data-pinyin="off"] {
+  --lh: 1.8;
+}
+
+@media (min-width: 640px) {
+  .book-reader {
+    --zh: 19px;
+    --zh-lg: 22px;
+  }
+}
+
+/* Instructions, scene text, exercise items, prompts. */
+.book-zh {
+  font-size: var(--zh);
+  line-height: var(--lh);
+}
+
+/* Dialogue lines, passages, grammar examples, retell. */
+.book-zh-lg {
+  font-size: var(--zh-lg);
+  line-height: var(--lh);
+}
+
+/* A box one line of Chinese tall, its content centred on that line. */
+.book-line,
+.book-line-lg {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  height: calc(var(--zh) * var(--lh));
+}
+
+.book-line-lg {
+  height: calc(var(--zh-lg) * var(--lh));
+}
+
+/* Text beside a line of Chinese (speaker names): same line height, so it
+   sits on the first line and wraps onto the next ones. */
+.book-beside {
+  line-height: calc(var(--zh) * var(--lh));
+}
+
+.book-beside-lg {
+  line-height: calc(var(--zh-lg) * var(--lh));
+}
+
+/* With 拼音 off the hidden pinyin still sits above the characters, so they
+   are a little below the middle of the (shorter) line: move what sits
+   beside them down to match. With 拼音 on they are centred. */
+.book-line,
+.book-beside {
+  position: relative;
+  top: var(--py-shift, 0px);
+}
+
+.book-line-lg,
+.book-beside-lg {
+  position: relative;
+  top: var(--py-shift-lg, 0px);
+}
+
+.book-reader[data-pinyin="off"] {
+  --py-shift: calc(var(--zh) * 0.22);
+  --py-shift-lg: calc(var(--zh-lg) * 0.22);
+}
+
+/* Headings. */
+.book-section-zh {
+  font-size: 26px;
+  line-height: 36px;
+}
+
+.book-title-zh {
+  font-size: 22px;
+  line-height: var(--lh);
+}
+
+/* Vocab: hanzi, pinyin column, part of speech, English. */
+.book-vocab-hz {
+  font-size: 24px;
+  line-height: 36px;
+}
+
+.book-vpy {
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.book-pos {
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.book-vocab-en {
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* English translations and body text. */
+.book-en,
+.book-body {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--color-bark-muted);
+}
+
+@media (min-width: 640px) {
+  .book-section-zh {
+    font-size: 30px;
+    line-height: 40px;
+  }
+
+  .book-title-zh {
+    font-size: 24px;
+  }
+
+  .book-vocab-hz {
+    font-size: 26px;
+  }
+
+  .book-en,
+  .book-body {
+    font-size: 16px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Ruby
+   --------------------------------------------------------------------------- */
+
+.zh {
+  font-family: var(--font-hanzi);
+}
+
+.zh ruby {
+  ruby-position: over;
+}
+
+.zh rt {
+  font-family: var(--font-body), sans-serif;
+  /* Half the Chinese size (11px on 22px), never below 10px. */
+  font-size: max(10px, 0.5em);
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--color-bark-muted);
+  user-select: none;
+  /* Sides: just enough that neighbouring syllables never touch (the ruby
+     widens its character to fit). Bottom: room between the pinyin and its
+     character. Padding is part of the annotation box in Chrome, Safari and
+     Firefox alike, unlike a transform, which inline boxes ignore. */
+  padding: 0 0.1em 0.2em;
+}
+
+/* Hidden but kept: only the line height changes (--lh), nothing else. */
+.book-reader[data-pinyin="off"] .zh rt,
+.book-reader[data-pinyin="off"] .book-vpy {
+  visibility: hidden;
+}
+
+/* With pinyin off, a tapped (or Enter/Space) vocab row shows its own until
+   the next tap (Reader.tsx sets data-py-shown and the tabindex). */
+.book-reader[data-pinyin="off"] [data-vocab-row] {
+  cursor: pointer;
+}
+
+[data-vocab-row]:focus-visible {
+  outline: 2px solid var(--color-rust);
+  outline-offset: 2px;
+  border-radius: 12px;
+}
+
+.book-reader[data-pinyin="off"] [data-py-shown] .zh rt,
+.book-reader[data-pinyin="off"] [data-py-shown] .book-vpy {
+  visibility: visible;
+}
+
+.book-reader[data-en="off"] .book-en,
+.book-reader[data-extras="off"] .book-extra {
+  display: none !important;
+}
+
+/* ---------------------------------------------------------------------------
+   Blanks
+   --------------------------------------------------------------------------- */
+
+.book-blank {
+  display: inline-block;
+  min-width: 4em;
+  margin: 0 0.15em;
+  border-bottom: 1.5px solid var(--color-bark-muted);
+  text-align: center;
+  line-height: 1.2;
+  vertical-align: baseline;
+}
+
+.book-blank-num {
+  font-family: var(--font-body), sans-serif;
+  font-size: 0.7em;
+  color: var(--color-bark-muted);
+}
+
+/* ---------------------------------------------------------------------------
+   Answers (Inputs.tsx). A pick is data-selected; data-result says whether it
+   matches moink's answer key, and only shows while moink extras are on:
+   with extras off a pick just looks selected.
+   --------------------------------------------------------------------------- */
+
+.book-pick[data-selected] {
+  border-color: var(--color-rust-dark);
+  background-color: var(--color-highlight);
+}
+
+.book-reader[data-extras="on"] .book-pick[data-result="correct"] {
+  border-color: var(--color-deep-grass);
+  background-color: var(--color-good-tint);
+}
+
+.book-reader[data-extras="on"] .book-pick[data-result="wrong"] {
+  border-color: var(--color-danger);
+  background-color: var(--color-again-tint);
+}
+
+@keyframes book-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-4px);
+  }
+  40%,
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+/* Once, when a wrong pick appears (a new pick remounts the pill). */
+@media (prefers-reduced-motion: no-preference) {
+  .book-reader[data-extras="on"] button.book-pick[data-result="wrong"][aria-pressed="true"] {
+    animation: book-shake 320ms ease-in-out 1;
+  }
+}
+
+/* Inline answer inputs take the size of the Chinese around them. */
+.book-fill {
+  font-size: inherit;
+  line-height: 1.5;
+  vertical-align: baseline;
+}

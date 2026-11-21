@@ -44,7 +44,7 @@ export const loadAccount = cache(
   async (): Promise<
     | { status: "signed-out" }
     | { status: "error" }
-    | { status: "ok"; user: AccountUser; profile: AccountProfile | null }
+    | { status: "ok"; user: AccountUser; profile: AccountProfile | null; bookAccess: boolean }
   > => {
     const supabase = await createClient();
     const { data, error: authError } = await supabase.auth.getClaims();
@@ -56,18 +56,24 @@ export const loadAccount = cache(
     if (!claims?.sub) return { status: "signed-out" };
     const user: AccountUser = { id: claims.sub, metadata: claims.user_metadata ?? {} };
 
-    const { data: profile, error } = await supabase
-      .from("profiles")
-      .select(
-        "username, display_name, hsk_level_target, hsk_standard, daily_new_words, daily_new_writing, timezone, timezone_confirmed",
-      )
-      .eq("id", user.id)
-      .maybeSingle<AccountProfile>();
+    const [{ data: profile, error }, access] = await Promise.all([
+      supabase
+        .from("profiles")
+        .select(
+          "username, display_name, hsk_level_target, hsk_standard, daily_new_words, daily_new_writing, timezone, timezone_confirmed",
+        )
+        .eq("id", user.id)
+        .maybeSingle<AccountProfile>(),
+      // The HSK Book allowlist (RLS shows only the user's own row). A
+      // failed read only hides the section, it never fails the account.
+      supabase.from("book_access").select("user_id").eq("user_id", user.id).maybeSingle(),
+    ]);
     if (error) {
       console.error(`loadAccount: couldn't load the profile of ${user.id}.`, error);
       return { status: "error" };
     }
-    return { status: "ok", user, profile };
+    if (access.error) console.error(`loadAccount: couldn't read book access of ${user.id}.`, access.error);
+    return { status: "ok", user, profile, bookAccess: Boolean(access.data) };
   },
 );
 
@@ -82,7 +88,7 @@ export async function getAppUser(): Promise<AppUser | null> {
   const account = await loadAccount();
   if (account.status === "error") return null;
   if (account.status === "signed-out") redirect("/login");
-  const { user, profile } = account;
+  const { user, profile, bookAccess } = account;
   if (!profile?.username) redirect("/onboarding");
 
   const meta = user.metadata;
@@ -93,6 +99,7 @@ export async function getAppUser(): Promise<AppUser | null> {
     hskStandard: profile.hsk_standard,
     timeZone: profile.timezone,
     timeZoneConfirmed: profile.timezone_confirmed,
+    hasBookAccess: bookAccess,
     avatarUrl:
       typeof meta.avatar_url === "string"
         ? meta.avatar_url

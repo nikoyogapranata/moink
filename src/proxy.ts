@@ -12,6 +12,7 @@ const APP_ROUTES = [
   "/dictionary",
   "/profile",
   "/settings",
+  "/book",
 ];
 
 function isAppRoute(pathname: string) {

@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  BookMarked,
   BookOpen,
   Coins,
   Flame,
@@ -37,6 +38,8 @@ export interface AppUser {
   timeZone: string;
   /** False until the zone came from the browser or Settings. */
   timeZoneConfirmed: boolean;
+  /** On the HSK Book allowlist (book_access). */
+  hasBookAccess: boolean;
   avatarUrl: string | null;
   fullName: string | null;
 }
@@ -50,13 +53,22 @@ export function useAppUser() {
   return user;
 }
 
-const NAV: { href: string; label: string; short: string; icon: LucideIcon }[] = [
+type NavItem = { href: string; label: string; short: string; icon: LucideIcon };
+
+const NAV: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", short: "Home", icon: House },
   { href: "/training", label: "Training", short: "Train", icon: SquareStack },
   { href: "/dictionary", label: "Dictionary", short: "Words", icon: BookOpen },
   { href: "/grammar", label: "Grammar", short: "Grammar", icon: NotebookPen },
   { href: "/profile", label: "Profile", short: "Profile", icon: User },
 ];
+
+// Only for users on the book_access allowlist, after Grammar.
+const BOOK_NAV: NavItem = { href: "/book", label: "HSK Book", short: "Book", icon: BookMarked };
+
+function navFor(user: AppUser) {
+  return user.hasBookAccess ? [...NAV.slice(0, 4), BOOK_NAV, ...NAV.slice(4)] : NAV;
+}
 
 function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
@@ -118,7 +130,7 @@ function Avatar({ user }: { user: AppUser }) {
   );
 }
 
-function Sidebar({ pathname, user }: { pathname: string; user: AppUser }) {
+function Sidebar({ pathname, user, nav }: { pathname: string; user: AppUser; nav: NavItem[] }) {
   return (
     <aside
       className={`fixed inset-y-4 left-4 z-30 hidden w-55 flex-col rounded-[22px] p-3 lg:flex ${PANEL}`}
@@ -129,7 +141,7 @@ function Sidebar({ pathname, user }: { pathname: string; user: AppUser }) {
 
       <nav aria-label="Main">
         <ul className="flex flex-col gap-1">
-          {NAV.map(({ href, label, icon: Icon }) => {
+          {nav.map(({ href, label, icon: Icon }) => {
             const active = isActive(pathname, href);
             return (
               <li key={href}>
@@ -202,23 +214,25 @@ function MobileTopBar() {
   );
 }
 
-function TabBar({ pathname }: { pathname: string }) {
+function TabBar({ pathname, nav }: { pathname: string; nav: NavItem[] }) {
+  const six = nav.length > 5;
   return (
     <nav
       aria-label="Main"
       className={`fixed inset-x-3 bottom-[calc(12px+env(safe-area-inset-bottom))] z-30 rounded-[22px] p-1.5 lg:hidden ${PANEL}`}
     >
       {/* Five tabs: at 375px each is about 64px wide, room for "Grammar" at
-          12px, and 52px tall. */}
-      <ul className="grid grid-cols-5 gap-1">
-        {NAV.map(({ href, short, icon: Icon }) => {
+          12px, and 52px tall. Six (with HSK Book): about 53px, so the
+          labels drop to 11px with less side padding. */}
+      <ul className={`grid gap-1 ${six ? "grid-cols-6" : "grid-cols-5"}`}>
+        {nav.map(({ href, short, icon: Icon }) => {
           const active = isActive(pathname, href);
           return (
             <li key={href}>
               <Link
                 href={href}
                 aria-current={active ? "page" : undefined}
-                className={`flex min-h-13 flex-col items-center justify-center gap-0.5 rounded-[16px] px-1 py-1.5 transition-colors ${FOCUS_RING} ${
+                className={`flex min-h-13 flex-col items-center justify-center gap-0.5 rounded-[16px] ${six ? "px-0" : "px-1"} py-1.5 transition-colors ${FOCUS_RING} ${
                   active ? "bg-highlight text-bark" : "text-bark-muted"
                 }`}
               >
@@ -228,7 +242,7 @@ function TabBar({ pathname }: { pathname: string }) {
                   className={active ? "text-rust-dark" : undefined}
                 />
                 <span
-                  className={`font-body text-[12px] leading-4 ${active ? "font-medium" : ""}`}
+                  className={`font-body leading-4 ${six ? "text-[11px]" : "text-[12px]"} ${active ? "font-medium" : ""}`}
                 >
                   {short}
                 </span>
@@ -269,13 +283,14 @@ export function AppShell({
   children: ReactNode;
 }) {
   const pathname = usePathname();
+  const nav = navFor(user);
   useAdoptBrowserTimeZone(user);
 
   return (
     <AppUserContext.Provider value={user}>
       <HskStandardProvider standard={user.hskStandard}>
         <div className="min-h-dvh bg-background">
-          <Sidebar pathname={pathname} user={user} />
+          <Sidebar pathname={pathname} user={user} nav={nav} />
           <MobileTopBar />
           {/* Desktop: sidebar 220px + its 16px gaps on both sides + 24px.
               Mobile: room for the tab bar (about 66px tall, 12px off the
@@ -283,7 +298,7 @@ export function AppShell({
           <main className="px-4 pb-[calc(7rem+env(safe-area-inset-bottom))] pt-4 sm:px-6 lg:pb-10 lg:pl-69 lg:pr-8 lg:pt-10">
             <div className="mx-auto w-full max-w-275">{children}</div>
           </main>
-          <TabBar pathname={pathname} />
+          <TabBar pathname={pathname} nav={nav} />
         </div>
       </HskStandardProvider>
     </AppUserContext.Provider>

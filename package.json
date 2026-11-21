@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "seed:words": "tsx scripts/seed-words.ts",
+    "import:book": "tsx scripts/import-book.ts",
     "test:dev-login": "tsx scripts/check-dev-login.ts"
   },
   "dependencies": {

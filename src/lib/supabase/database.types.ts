@@ -4,8 +4,8 @@
 // 20261101120000_dictionary_search.sql, 20261102120000_training.sql and
 // 20261109120000_writing.sql, and the later migrations up to
 // 20261214120000_rest_days_timezone.sql, and the grammar tables of
-// 20261228120000_grammar.sql (checked against the live schema) and
-// 20270104120000_grammar_literal.sql;
+// 20261228120000_grammar.sql (checked against the live schema),
+// 20270104120000_grammar_literal.sql and 20270111120000_book.sql;
 // regenerate with the
 // CLI once it's set up, and keep this file's name so imports don't change.
 
@@ -63,6 +63,18 @@ export type GrammarSection = {
   items?: { wrong: string; right: string; reason: string }[];
 };
 
+/** Chinese with one pinyin syllable per Han character (docs/book-format.md). */
+export type BookText = { zh: string; py: string };
+
+export type BookSectionKind =
+  | "objectives"
+  | "warmup"
+  | "text"
+  | "grammar"
+  | "exercises"
+  | "task"
+  | "summary";
+
 export type Database = {
   public: {
     Tables: {
@@ -90,6 +102,10 @@ export type Database = {
           /** The time zone came from the browser or was picked in Settings;
            *  until then the app may replace the default once. */
           timezone_confirmed: boolean;
+          /** HSK Book display switches. */
+          show_pinyin: boolean;
+          show_english: boolean;
+          show_extras: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -109,6 +125,9 @@ export type Database = {
           daily_new_writing?: number;
           timezone?: string;
           timezone_confirmed?: boolean;
+          show_pinyin?: boolean;
+          show_english?: boolean;
+          show_extras?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -128,6 +147,9 @@ export type Database = {
           daily_new_writing?: number;
           timezone?: string;
           timezone_confirmed?: boolean;
+          show_pinyin?: boolean;
+          show_english?: boolean;
+          show_extras?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -663,6 +685,303 @@ export type Database = {
           },
         ];
       };
+      book_access: {
+        Row: {
+          user_id: string;
+          granted_at: string;
+        };
+        Insert: {
+          user_id: string;
+          granted_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          granted_at?: string;
+        };
+        Relationships: [];
+      };
+      books: {
+        Row: {
+          id: string;
+          slug: string;
+          title_zh: string;
+          title_en: string;
+          level: number;
+          standard: string;
+          sort: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          slug: string;
+          title_zh: string;
+          title_en: string;
+          level: number;
+          standard: string;
+          sort?: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          slug?: string;
+          title_zh?: string;
+          title_en?: string;
+          level?: number;
+          standard?: string;
+          sort?: number;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      book_lessons: {
+        Row: {
+          id: string;
+          book_id: string;
+          number: number;
+          title: BookText;
+          title_en: string;
+          page_start: number;
+          page_end: number;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          book_id: string;
+          number: number;
+          title: BookText;
+          title_en: string;
+          page_start: number;
+          page_end: number;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          book_id?: string;
+          number?: number;
+          title?: BookText;
+          title_en?: string;
+          page_start?: number;
+          page_end?: number;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "book_lessons_book_id_fkey";
+            columns: ["book_id"];
+            isOneToOne: false;
+            referencedRelation: "books";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      book_sections: {
+        Row: {
+          id: string;
+          lesson_id: string;
+          key: string;
+          sort: number;
+          kind: BookSectionKind;
+          label_zh: string;
+          label_en: string;
+          page: number;
+        };
+        Insert: {
+          id?: string;
+          lesson_id: string;
+          key: string;
+          sort: number;
+          kind: BookSectionKind;
+          label_zh: string;
+          label_en: string;
+          page: number;
+        };
+        Update: {
+          id?: string;
+          lesson_id?: string;
+          key?: string;
+          sort?: number;
+          kind?: BookSectionKind;
+          label_zh?: string;
+          label_en?: string;
+          page?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "book_sections_lesson_id_fkey";
+            columns: ["lesson_id"];
+            isOneToOne: false;
+            referencedRelation: "book_lessons";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      book_blocks: {
+        Row: {
+          id: string;
+          section_id: string;
+          lesson_id: string;
+          key: string;
+          sort: number;
+          page: number;
+          type: string;
+          source: string;
+          data: Json;
+        };
+        Insert: {
+          id?: string;
+          section_id: string;
+          lesson_id: string;
+          key: string;
+          sort: number;
+          page: number;
+          type: string;
+          source?: string;
+          data: Json;
+        };
+        Update: {
+          id?: string;
+          section_id?: string;
+          lesson_id?: string;
+          key?: string;
+          sort?: number;
+          page?: number;
+          type?: string;
+          source?: string;
+          data?: Json;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "book_blocks_section_id_fkey";
+            columns: ["section_id"];
+            isOneToOne: false;
+            referencedRelation: "book_sections";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "book_blocks_lesson_id_fkey";
+            columns: ["lesson_id"];
+            isOneToOne: false;
+            referencedRelation: "book_lessons";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      user_book_answers: {
+        Row: {
+          user_id: string;
+          item_key: string;
+          answer: Json;
+          is_correct: boolean | null;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          item_key: string;
+          answer: Json;
+          is_correct?: boolean | null;
+          updated_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          item_key?: string;
+          answer?: Json;
+          is_correct?: boolean | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "user_book_answers_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      user_book_notes: {
+        Row: {
+          id: string;
+          user_id: string;
+          lesson_id: string;
+          block_key: string | null;
+          body: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          lesson_id: string;
+          block_key?: string | null;
+          body: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          lesson_id?: string;
+          block_key?: string | null;
+          body?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "user_book_notes_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "user_book_notes_lesson_id_fkey";
+            columns: ["lesson_id"];
+            isOneToOne: false;
+            referencedRelation: "book_lessons";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      user_book_progress: {
+        Row: {
+          user_id: string;
+          lesson_id: string;
+          last_block_key: string | null;
+          completed_at: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          lesson_id: string;
+          last_block_key?: string | null;
+          completed_at?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          lesson_id?: string;
+          last_block_key?: string | null;
+          completed_at?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "user_book_progress_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "user_book_progress_lesson_id_fkey";
+            columns: ["lesson_id"];
+            isOneToOne: false;
+            referencedRelation: "book_lessons";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -808,6 +1127,15 @@ export type Database = {
           /** False for newly eligible words (no writing row yet). */
           has_card: boolean;
         }[];
+      };
+      has_book_access: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
+      /** Service role only (scripts/import-book.ts). Returns the lesson id. */
+      import_book_lesson: {
+        Args: { p_book: Json; p_lesson: Json; p_sections: Json };
+        Returns: string;
       };
     };
     Enums: {
