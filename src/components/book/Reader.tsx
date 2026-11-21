@@ -2,7 +2,7 @@
 
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import Link from "next/link";
-import { Fragment, useEffect, useRef, useState, useTransition, type ReactNode } from "react";
+import { Fragment, useEffect, useLayoutEffect, useRef, useState, useTransition, type ReactNode } from "react";
 
 import { Button } from "@/components/ui/Button";
 import { saveBookPosition, saveBookPref, setBookLessonDone } from "@/lib/book/actions";
@@ -86,6 +86,42 @@ function useSavePosition(lessonId: string, root: React.RefObject<HTMLDivElement 
       window.clearTimeout(timer);
     };
   }, [lessonId, root, initial]);
+}
+
+/**
+ * Puts pinyin the same distance above its character in every browser.
+ * Chrome sits the pinyin on the Chinese font's em box; Firefox and Safari
+ * on its whole ascent, which for these fonts is about a quarter of the size
+ * higher (more pinyin gap, and taller lines, worst with pinyin off). Measured
+ * once, on the first ruby: where the browser puts the pinyin, and (canvas)
+ * the font's ascent above its em box, as a fraction of the size. book.css
+ * pulls the pinyin down by that much (--py-fix) where it's needed.
+ */
+function useRubyFix(root: React.RefObject<HTMLDivElement | null>) {
+  useLayoutEffect(() => {
+    const el = root.current;
+    const ruby = el?.querySelector(".zh ruby");
+    const rt = ruby?.querySelector("rt");
+    const base = ruby?.firstChild;
+    if (!el || !rt || !base || base.nodeType !== Node.TEXT_NODE) return;
+    const range = document.createRange();
+    range.selectNodeContents(base);
+    // Chrome: the pinyin's box overlaps the character's (font) box.
+    if (range.getBoundingClientRect().top - rt.getBoundingClientRect().bottom < -1) return;
+    const { fontSize, fontFamily } = getComputedStyle(ruby);
+    const ctx = document.createElement("canvas").getContext("2d");
+    if (!ctx) return;
+    ctx.font = `${fontSize} ${fontFamily}`;
+    const m = ctx.measureText(base.textContent ?? "");
+    const size = parseFloat(fontSize);
+    const ascent = m.fontBoundingBoxAscent;
+    const height = ascent + m.fontBoundingBoxDescent;
+    if (!(size > 0 && height > size)) return;
+    // The em box shares the font box's proportions, so its top is this far
+    // below the ascent.
+    const above = ascent * (1 - size / height);
+    el.style.setProperty("--py-fix", (above / size).toFixed(3));
+  }, [root]);
 }
 
 /** With pinyin off, a tap on a vocab row (or Enter / Space on the focused
@@ -241,6 +277,7 @@ export function Reader({
   const active = useActiveSection(sections.map((s) => s.key));
   useSavePosition(lessonId, root, lastBlockKey);
   useRevealVocabPinyin(root, prefs.pinyin);
+  useRubyFix(root);
 
   function toggle(pref: keyof BookPrefs) {
     const shown = !prefs[pref];

@@ -221,24 +221,35 @@ function Scene({ data }: { data: BlockData["scene"] }) {
   );
 }
 
+/** The dialogue, passage and video pictures: natural height, at most 420px
+ *  wide, centred. The fallback (no image) keeps some height. */
+const FIGURE = "mx-auto block h-auto min-h-24 w-full max-w-105 rounded-lg";
+
+/** A dialogue line's card. */
+const LINE_CARD = "min-w-0 rounded-[16px] border-[1.5px] border-line bg-surface-raised px-3 py-2 sm:px-4";
+
 function Dialogue({ data, ctx }: { data: BlockData["dialogue"]; ctx: BlockContext }) {
   return (
     <div className={BOOK_CARD}>
-      {data.image && (
-        <BookImage image={data.image} ctx={ctx} className="mb-4 aspect-[2/1] max-h-[220px] w-full rounded-lg object-cover" />
-      )}
+      {data.image && <BookImage image={data.image} ctx={ctx} className={`${FIGURE} mb-4`} />}
       <ol className="flex flex-col gap-2">
         {data.lines.map((line) =>
           line.speaker === null ? (
-            <li key={line.key} className="text-center">
+            // Narration: the full width, no name column.
+            <li key={line.key} className={`${LINE_CARD} text-center`}>
               <ZhText text={line.text} className={`${ZH_LG} italic !text-bark-muted`} />
               <En className="italic">{line.en}</En>
             </li>
           ) : (
-            <li key={line.key} className="grid grid-cols-[4.5rem_minmax(0,1fr)] gap-x-3 sm:grid-cols-[7rem_minmax(0,1fr)]">
-              {/* Same line height as the text, so the name sits on its first
-                  line; two speakers break between names, never inside one. */}
-              <span lang="zh-CN" className="book-beside-lg font-hanzi text-[15px] font-bold text-bark-muted sm:text-[16px]">
+            // Phones: the name above its card. sm and up: a 72px column
+            // beside it, pushed down by the card's top border and padding
+            // and one text line tall, so it sits on the text's first line.
+            <li key={line.key} className="flex flex-col gap-0.5 sm:grid sm:grid-cols-[72px_minmax(0,1fr)] sm:gap-x-3">
+              {/* Two speakers break between names, never inside one. */}
+              <span
+                lang="zh-CN"
+                className="px-1 font-hanzi text-[15px] font-bold leading-6 text-deep-grass sm:relative sm:top-(--py-shift-lg) sm:px-0 sm:leading-[calc(var(--zh-lg)*var(--lh))] sm:pt-[calc(0.5rem+1.5px)] sm:text-[16px]"
+              >
                 {line.speaker.map((name, i) => (
                   <span key={i} className="whitespace-nowrap">
                     {name}
@@ -246,7 +257,7 @@ function Dialogue({ data, ctx }: { data: BlockData["dialogue"]; ctx: BlockContex
                   </span>
                 ))}
               </span>
-              <div className="min-w-0">
+              <div className={LINE_CARD}>
                 <div className="flex items-start gap-1">
                   <ZhText text={line.text} className={`${ZH_LG} min-w-0 flex-1`} />
                   <span className="book-line-lg">
@@ -265,13 +276,9 @@ function Dialogue({ data, ctx }: { data: BlockData["dialogue"]; ctx: BlockContex
 
 function Passage({ data, ctx }: { data: BlockData["passage"]; ctx: BlockContext }) {
   return (
-    <div className={`${BOOK_CARD} flow-root`}>
+    <div className={BOOK_CARD}>
       {data.image && (
-        <BookImage
-          image={data.image}
-          ctx={ctx}
-          className="mb-4 aspect-[3/2] w-full rounded-lg object-cover sm:float-right sm:mb-3 sm:ml-5 sm:w-[42%]"
-        />
+        <BookImage image={data.image} ctx={ctx} className={`${FIGURE} mb-4`} />
       )}
       <div className="flex flex-col gap-3">
         {data.paragraphs.map((p, i) => {
@@ -676,13 +683,13 @@ function Tip({ data }: { data: BlockData["tip"] }) {
 }
 
 /** The book's video: moink doesn't have it, so its still with a play icon
- *  that does nothing, and a note saying so. Capped at the dialogue
- *  picture's 220px height, kept 16:9 (so at most 391px wide). */
+ *  that does nothing, and a note saying so. The still is sized like the
+ *  dialogue and passage pictures, centred above its title. */
 function Video({ data, ctx }: { data: BlockData["video"]; ctx: BlockContext }) {
   return (
-    <div className={`${BOOK_CARD} flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5`}>
-      <div className="relative w-full shrink-0 sm:max-w-[391px] sm:basis-1/2">
-        <BookImage image={data.image} ctx={ctx} className="aspect-video w-full rounded-lg border-[1.5px] border-line object-cover" />
+    <div className={`${BOOK_CARD} flex flex-col gap-3`}>
+      <div className="relative mx-auto w-full max-w-105">
+        <BookImage image={data.image} ctx={ctx} className={`${FIGURE} border-[1.5px] border-line`} />
         <span aria-hidden="true" className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <span className="flex h-14 w-14 items-center justify-center rounded-full bg-black/50 text-white">
             <Play size={26} fill="currentColor" className="ml-1" />

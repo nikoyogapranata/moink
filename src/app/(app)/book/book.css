@@ -151,8 +151,29 @@
    Ruby
    --------------------------------------------------------------------------- */
 
+/* The gap between pinyin and its character, set on the Chinese so it's a
+   length of the Chinese size (registered, so it inherits as px, not as an
+   em the smaller rt would resolve again): about 0.3em of the Chinese, never
+   below 6px. */
+@property --py-gap {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+
+/* Firefox and Safari only: how far to pull the pinyin down so it sits where
+   Chrome puts it (Reader.tsx useRubyFix sets --py-fix, a fraction of the
+   Chinese size). Registered like --py-gap. */
+@property --py-drop {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+
 .zh {
   font-family: var(--font-hanzi);
+  --py-gap: calc(0.5 * max(12px, 0.62em));
+  --py-drop: calc(var(--py-fix, 0) * 1em);
 }
 
 .zh ruby {
@@ -160,21 +181,23 @@
 }
 
 .zh rt {
-  font-family: var(--font-body), sans-serif;
-  /* 0.62 of the Chinese size (13.6px on 22px), never below 12px. */
-  font-size: max(12px, 0.62em);
+  /* Inter (layout.tsx): narrow enough at this size that long syllables
+     (zhōng, zhuāng) barely widen their characters. */
+  font-family: var(--font-pinyin), var(--font-body), sans-serif;
+  /* Half the Chinese size (11px on 22px), never below 12px. */
+  font-size: max(12px, 0.5em);
   font-weight: 400;
   font-style: normal;
   line-height: 1;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   color: var(--color-bark-muted);
   user-select: none;
   /* Sides: just enough that neighbouring syllables never touch (the ruby
-     widens its character to fit). Bottom: the gap between the pinyin and
-     its character, about 0.3em of the Chinese (0.5 of the pinyin's 0.62em).
+     widens its character to fit). Bottom: the gap to the character.
      Padding is part of the annotation box in Chrome, Safari and Firefox
      alike, unlike a transform, which inline boxes ignore. */
-  padding: 0 0.1em 0.5em;
+  padding: 0 0.1em var(--py-gap);
+  margin-bottom: calc(-1 * var(--py-drop));
 }
 
 /* Hidden but kept, so no character moves sideways: only the line height
