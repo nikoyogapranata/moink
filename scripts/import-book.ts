@@ -18,7 +18,8 @@
 //     passage_fill has one answer per {_}, each among the option labels
 //   - every image src exists under scripts/output/book/assets/
 //   - vocab with proper: true has no audio and an empty pos;
-//     task tips have a Text label, label_en and Text items; a tip has a
+//     task tips have Text items and, if labelled, a Text label with a
+//     label_en; a tip has a
 //     Text text
 //   - a task's answer_mode is text, notes or table; a table task has
 //     table: {columns: [{text, en}], rows, numbered}
@@ -207,9 +208,11 @@ function check(file: BookFile) {
         }
         if (d.tips !== undefined) {
           const t = d.tips;
-          if (!isObj(t)) problems.push(`${at}: tips must be {label, label_en, items}`);
+          if (!isObj(t)) problems.push(`${at}: tips must be {label?, label_en?, items}`);
           else {
-            if (!isText(t.label) || typeof t.label_en !== "string") problems.push(`${at}: tips need a Text label and a label_en`);
+            // The heading is optional; when there is one it needs both names.
+            if (t.label !== undefined && (!isText(t.label) || typeof t.label_en !== "string")) problems.push(`${at}: a tips label must be Text, with a label_en`);
+            if (t.label === undefined && t.label_en !== undefined) problems.push(`${at}: tips have a label_en but no label`);
             const items = Array.isArray(t.items) ? t.items : [];
             if (!items.length) problems.push(`${at}: tips have no items`);
             items.forEach((it, i) => {

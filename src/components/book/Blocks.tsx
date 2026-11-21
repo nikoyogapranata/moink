@@ -599,10 +599,12 @@ function Task({ data }: { data: BlockData["task"] }) {
       <En className="mt-1">{data.en}</En>
       {data.tips && data.tips.items.length > 0 && (
         <div className="mt-3">
-          <p className="flex items-baseline gap-2">
-            <ZhText text={data.tips.label} className={`${ZH} font-bold`} />
-            <span className="font-body text-body-sm font-medium text-bark-muted">{data.tips.label_en}</span>
-          </p>
+          {data.tips.label && (
+            <p className="flex items-baseline gap-2">
+              <ZhText text={data.tips.label} className={`${ZH} font-bold`} />
+              <span className="font-body text-body-sm font-medium text-bark-muted">{data.tips.label_en}</span>
+            </p>
+          )}
           <ul className="flex flex-col">
             {data.tips.items.map((t, i) => (
               <li key={i} className={ZH}>

@@ -88,7 +88,8 @@ export interface BlockData {
     min_chars?: number;
     answer_key: string;
     /** Shown under the task text: 提示 Tips, then 正方 Pro side: ... */
-    tips?: { label: BookText; label_en: string; items: { label: BookText; label_en: string; text: BookText }[] };
+    /** label (with label_en): the "提示 Tips" heading; without it, just the items. */
+    tips?: { label?: BookText; label_en?: string; items: { label: BookText; label_en: string; text: BookText }[] };
     /** answer_mode "table": a survey table, saved as rows of cell strings. */
     table?: TaskTable;
   };
