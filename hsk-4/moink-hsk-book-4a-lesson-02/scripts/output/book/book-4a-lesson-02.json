@@ -1,0 +1,3206 @@
+{
+  "book": {
+    "slug": "4a",
+    "title_zh": "新HSK教程 4上",
+    "title_en": "New HSK Course 4A",
+    "level": 4,
+    "standard": "hsk3_2025"
+  },
+  "lesson": {
+    "number": 2,
+    "title": {
+      "zh": "租到了合适的房子",
+      "py": "zū dào le hé shì de fáng zi"
+    },
+    "title_en": "I have rented a suitable apartment",
+    "page_start": 12,
+    "page_end": 22
+  },
+  "sections": [
+    {
+      "key": "4a-02-obj",
+      "kind": "objectives",
+      "label_zh": "目标",
+      "label_en": "Objectives",
+      "page": 12,
+      "blocks": [
+        {
+          "key": "4a-02-obj-b01",
+          "type": "objectives",
+          "page": 12,
+          "source": "book",
+          "data": {
+            "items": [
+              {
+                "text": {
+                  "zh": "能够听懂并交流关于租房的话题。",
+                  "py": "néng gòu tīng dǒng bìng jiāo liú guān yú zū fáng de huà tí"
+                },
+                "en": "Be able to understand and discuss topics related to renting an apartment.",
+                "key": "4a-02-obj-b01-i1"
+              },
+              {
+                "text": {
+                  "zh": "能够口头或书面表达租房意愿、要求等。",
+                  "py": "néng gòu kǒu tóu huò shū miàn biǎo dá zū fáng yì yuàn yāo qiú děng"
+                },
+                "en": "Be able to express rental intentions and requirements, etc. orally or in writing.",
+                "key": "4a-02-obj-b01-i2"
+              },
+              {
+                "text": {
+                  "zh": "了解中国人的住房观念。",
+                  "py": "liǎo jiě zhōng guó rén de zhù fáng guān niàn"
+                },
+                "en": "Understand Chinese perspectives on housing.",
+                "key": "4a-02-obj-b01-i3"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "4a-02-warm",
+      "kind": "warmup",
+      "label_zh": "热身",
+      "label_en": "Warm-Up",
+      "page": 12,
+      "blocks": [
+        {
+          "key": "4a-02-warm-b01",
+          "type": "instruction",
+          "page": 12,
+          "source": "book",
+          "data": {
+            "num": "1",
+            "text": {
+              "zh": "给下面的词语选择对应的图片。",
+              "py": "gěi xià miàn de cí yǔ xuǎn zé duì yìng de tú piàn"
+            },
+            "en": "Match the words with the pictures.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-02-warm-b02",
+          "type": "image_match",
+          "page": 12,
+          "source": "book",
+          "data": {
+            "images": [
+              {
+                "src": "4a/02/warmup-1.webp",
+                "alt": "Graduates in gowns throwing their caps",
+                "answer": "D",
+                "key": "4a-02-warm-b02-i1"
+              },
+              {
+                "src": "4a/02/warmup-2.webp",
+                "alt": "A cleaner holding cleaning supplies",
+                "answer": "C",
+                "key": "4a-02-warm-b02-i2"
+              },
+              {
+                "src": "4a/02/warmup-3.webp",
+                "alt": "A living room with a sofa",
+                "answer": "A",
+                "key": "4a-02-warm-b02-i3"
+              },
+              {
+                "src": "4a/02/warmup-4.webp",
+                "alt": "A kitchen",
+                "answer": "E",
+                "key": "4a-02-warm-b02-i4"
+              },
+              {
+                "src": "4a/02/warmup-5.webp",
+                "alt": "Price tags on a shelf",
+                "answer": "F",
+                "key": "4a-02-warm-b02-i5"
+              },
+              {
+                "src": "4a/02/warmup-6.webp",
+                "alt": "Hands planting a seedling in soil",
+                "answer": "B",
+                "key": "4a-02-warm-b02-i6"
+              }
+            ],
+            "options": [
+              {
+                "label": "A",
+                "text": {
+                  "zh": "客厅",
+                  "py": "kè tīng"
+                }
+              },
+              {
+                "label": "B",
+                "text": {
+                  "zh": "种",
+                  "py": "zhòng"
+                }
+              },
+              {
+                "label": "C",
+                "text": {
+                  "zh": "收拾",
+                  "py": "shōu shi"
+                }
+              },
+              {
+                "label": "D",
+                "text": {
+                  "zh": "毕业",
+                  "py": "bì yè"
+                }
+              },
+              {
+                "label": "E",
+                "text": {
+                  "zh": "厨房",
+                  "py": "chú fáng"
+                }
+              },
+              {
+                "label": "F",
+                "text": {
+                  "zh": "价格",
+                  "py": "jià gé"
+                }
+              }
+            ],
+            "answer_source": "moink"
+          }
+        },
+        {
+          "key": "4a-02-warm-b03",
+          "type": "instruction",
+          "page": 12,
+          "source": "book",
+          "data": {
+            "num": "2",
+            "text": {
+              "zh": "两人一组，根据实际情况互相问答。",
+              "py": "liǎng rén yì zǔ gēn jù shí jì qíng kuàng hù xiāng wèn dá"
+            },
+            "en": "Work in pairs and ask each other questions based on real-life situations.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-02-warm-b04",
+          "type": "prompts",
+          "page": 12,
+          "source": "book",
+          "data": {
+            "answer_mode": "text",
+            "items": [
+              {
+                "num": "1",
+                "text": {
+                  "zh": "你觉得租房子好，还是买房子好？为什么？",
+                  "py": "nǐ jué de zū fáng zi hǎo hái shi mǎi fáng zi hǎo wèi shén me"
+                },
+                "key": "4a-02-warm-b04-i1"
+              },
+              {
+                "num": "2",
+                "text": {
+                  "zh": "如果租房子，你喜欢租什么样的房子？",
+                  "py": "rú guǒ zū fáng zi nǐ xǐ huan zū shén me yàng de fáng zi"
+                },
+                "key": "4a-02-warm-b04-i2"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "4a-02-t1",
+      "kind": "text",
+      "label_zh": "课文 1",
+      "label_en": "Text 1",
+      "page": 13,
+      "blocks": [
+        {
+          "key": "4a-02-t1-b01",
+          "type": "scene",
+          "page": 13,
+          "source": "book",
+          "data": {
+            "icon": "pin",
+            "text": {
+              "zh": "白家月想租房，李文陪白家月去看房。",
+              "py": "bái jiā yuè xiǎng zū fáng lǐ wén péi bái jiā yuè qù kàn fáng"
+            },
+            "en": "Bai Jiayue wanted to rent an apartment, and Li Wen was accompanying her to view one."
+          }
+        },
+        {
+          "key": "4a-02-t1-b02",
+          "type": "instruction",
+          "page": 13,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "听对话，选择正确答案。",
+              "py": "tīng duì huà xuǎn zé zhèng què dá àn"
+            },
+            "en": "Listen to the dialogue and choose the correct answer.",
+            "audio": "2-1"
+          }
+        },
+        {
+          "key": "4a-02-t1-b03",
+          "type": "choice",
+          "page": 13,
+          "source": "book",
+          "data": {
+            "items": [
+              {
+                "num": "1",
+                "text": {
+                  "zh": "白家月在看的房子每个月房租是多少？",
+                  "py": "bái jiā yuè zài kàn de fáng zi měi gè yuè fáng zū shì duō shao"
+                },
+                "options": [
+                  {
+                    "label": "A",
+                    "text": {
+                      "zh": "3500元",
+                      "py": "yuán"
+                    }
+                  },
+                  {
+                    "label": "B",
+                    "text": {
+                      "zh": "5000元",
+                      "py": "yuán"
+                    }
+                  },
+                  {
+                    "label": "C",
+                    "text": {
+                      "zh": "5500元",
+                      "py": "yuán"
+                    }
+                  },
+                  {
+                    "label": "D",
+                    "text": {
+                      "zh": "6500元",
+                      "py": "yuán"
+                    }
+                  }
+                ],
+                "answer": "C",
+                "answer_source": "moink",
+                "key": "4a-02-t1-b03-i1"
+              },
+              {
+                "num": "2",
+                "text": {
+                  "zh": "白家月在看的房子离哪里近？",
+                  "py": "bái jiā yuè zài kàn de fáng zi lí nǎ lǐ jìn"
+                },
+                "options": [
+                  {
+                    "label": "A",
+                    "text": {
+                      "zh": "公司",
+                      "py": "gōng sī"
+                    }
+                  },
+                  {
+                    "label": "B",
+                    "text": {
+                      "zh": "地铁站",
+                      "py": "dì tiě zhàn"
+                    }
+                  },
+                  {
+                    "label": "C",
+                    "text": {
+                      "zh": "公交站",
+                      "py": "gōng jiāo zhàn"
+                    }
+                  },
+                  {
+                    "label": "D",
+                    "text": {
+                      "zh": "大超市",
+                      "py": "dà chāo shì"
+                    }
+                  }
+                ],
+                "answer": "B",
+                "answer_source": "moink",
+                "key": "4a-02-t1-b03-i2"
+              }
+            ]
+          }
+        },
+        {
+          "key": "4a-02-t1-b04",
+          "type": "dialogue",
+          "page": 13,
+          "source": "book",
+          "data": {
+            "image": {
+              "src": "4a/02/text1.webp",
+              "alt": "Two young people and a landlord standing in a living room"
+            },
+            "lines": [
+              {
+                "speaker": [
+                  "房东"
+                ],
+                "text": {
+                  "zh": "请进！我给你们介绍一下，这个房子有两个房间，那个大房间出租，房租每月5500元。现在已经收拾好了，想租的话，今天就可以搬进来。",
+                  "py": "qǐng jìn wǒ gěi nǐ men jiè shào yí xià zhè ge fáng zi yǒu liǎng gè fáng jiān nà ge dà fáng jiān chū zū fáng zū měi yuè yuán xiàn zài yǐ jīng shōu shi hǎo le xiǎng zū de huà jīn tiān jiù kě yǐ bān jìn lái"
+                },
+                "en": "Come in! Let me show you around. This apartment has two rooms, and the big one is for rent. The rent is 5,500 yuan a month. It's already been tidied up, so if you want it, you can move in today.",
+                "en_source": "moink",
+                "key": "4a-02-t1-b04-l1"
+              },
+              {
+                "speaker": [
+                  "白家月"
+                ],
+                "text": {
+                  "zh": "嗯，这个房间真不小，还挺亮。小区离我们学校也不远。",
+                  "py": "ǹg zhè ge fáng jiān zhēn bù xiǎo hái tǐng liàng xiǎo qū lí wǒ men xué xiào yě bù yuǎn"
+                },
+                "en": "Mm, this room is really quite big, and pretty bright too. The neighborhood isn't far from our school either.",
+                "en_source": "moink",
+                "key": "4a-02-t1-b04-l2"
+              },
+              {
+                "speaker": [
+                  "房东"
+                ],
+                "text": {
+                  "zh": "是的，我们小区离地铁站也很近，生活上很方便。如果决定租了，告诉我就是了。",
+                  "py": "shì de wǒ men xiǎo qū lí dì tiě zhàn yě hěn jìn shēng huó shàng hěn fāng biàn rú guǒ jué dìng zū le gào su wǒ jiù shì le"
+                },
+                "en": "Yes, our neighborhood is close to the subway station too, so daily life is very convenient. If you decide to rent it, just let me know.",
+                "en_source": "moink",
+                "key": "4a-02-t1-b04-l3"
+              },
+              {
+                "speaker": [
+                  "白家月"
+                ],
+                "text": {
+                  "zh": "好的，我们再去看看外边的环境。",
+                  "py": "hǎo de wǒ men zài qù kàn kan wài bian de huán jìng"
+                },
+                "en": "OK. We'll go and have a look at the surroundings outside.",
+                "en_source": "moink",
+                "key": "4a-02-t1-b04-l4"
+              }
+            ]
+          }
+        },
+        {
+          "key": "4a-02-t1-b05",
+          "type": "vocab",
+          "page": 13,
+          "source": "book",
+          "data": {
+            "audio": "2-2",
+            "items": [
+              {
+                "num": "1",
+                "hanzi": "房东",
+                "pinyin": "fángdōng",
+                "pos": "n.",
+                "en": "landlord; landlady",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "我的房东",
+                    "py": "wǒ de fáng dōng"
+                  },
+                  "en": "my landlord"
+                },
+                "key": "4a-02-t1-b05-i1"
+              },
+              {
+                "num": "2",
+                "hanzi": "出租",
+                "pinyin": "chūzū",
+                "pos": "v.",
+                "en": "rent out",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "出租房子",
+                    "py": "chū zū fáng zi"
+                  },
+                  "en": "rent out a house"
+                },
+                "key": "4a-02-t1-b05-i2"
+              },
+              {
+                "num": "3",
+                "hanzi": "房租",
+                "pinyin": "fángzū",
+                "pos": "n.",
+                "en": "house rent",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "交房租",
+                    "py": "jiāo fáng zū"
+                  },
+                  "en": "pay the rent"
+                },
+                "key": "4a-02-t1-b05-i3"
+              },
+              {
+                "num": "4",
+                "hanzi": "收拾",
+                "pinyin": "shōushi",
+                "pos": "v.",
+                "en": "tidy up; clear away",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "收拾房间",
+                    "py": "shōu shi fáng jiān"
+                  },
+                  "en": "tidy the room"
+                },
+                "key": "4a-02-t1-b05-i4"
+              },
+              {
+                "num": "5",
+                "hanzi": "租",
+                "pinyin": "zū",
+                "pos": "v.",
+                "en": "rent",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "租房子",
+                    "py": "zū fáng zi"
+                  },
+                  "en": "rent a place"
+                },
+                "key": "4a-02-t1-b05-i5"
+              },
+              {
+                "num": "6",
+                "hanzi": "嗯",
+                "pinyin": "ǹg",
+                "pos": "int.",
+                "en": "mhm; yes",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "嗯，好的。",
+                    "py": "ǹg hǎo de"
+                  },
+                  "en": "Mm, OK."
+                },
+                "key": "4a-02-t1-b05-i6"
+              },
+              {
+                "num": "7",
+                "hanzi": "亮",
+                "pinyin": "liàng",
+                "pos": "adj./v.",
+                "en": "bright; shine",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "灯亮了",
+                    "py": "dēng liàng le"
+                  },
+                  "en": "the light is on"
+                },
+                "key": "4a-02-t1-b05-i7"
+              },
+              {
+                "num": "8",
+                "hanzi": "就是",
+                "pinyin": "jiùshì",
+                "pos": "part.",
+                "en": "usually used with “了” at the end of a sentence to give force to the statement",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "你去就是了",
+                    "py": "nǐ qù jiù shì le"
+                  },
+                  "en": "just go"
+                },
+                "key": "4a-02-t1-b05-i8"
+              }
+            ]
+          }
+        },
+        {
+          "key": "4a-02-t1-b06",
+          "type": "instruction",
+          "page": 14,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "分角色朗读对话。",
+              "py": "fēn jué sè lǎng dú duì huà"
+            },
+            "en": "Role-play the dialogue.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-02-t1-b07",
+          "type": "instruction",
+          "page": 14,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "根据课文内容回答问题。",
+              "py": "gēn jù kè wén nèi róng huí dá wèn tí"
+            },
+            "en": "Answer the questions according to the text.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-02-t1-b08",
+          "type": "prompts",
+          "page": 14,
+          "source": "book",
+          "data": {
+            "answer_mode": "text",
+            "items": [
+              {
+                "num": "1",
+                "text": {
+                  "zh": "房东要出租哪个房间？那个房间怎么样？",
+                  "py": "fáng dōng yào chū zū nǎ ge fáng jiān nà ge fáng jiān zěn me yàng"
+                },
+                "sample": [
+                  {
+                    "zh": "要出租那个大房间。那个房间不小，还挺亮。",
+                    "py": "yào chū zū nà ge dà fáng jiān nà ge fáng jiān bù xiǎo hái tǐng liàng"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-02-t1-b08-i1"
+              },
+              {
+                "num": "2",
+                "text": {
+                  "zh": "房东为什么说住在那个小区生活上很方便？",
+                  "py": "fáng dōng wèi shén me shuō zhù zài nà ge xiǎo qū shēng huó shàng hěn fāng biàn"
+                },
+                "sample": [
+                  {
+                    "zh": "因为小区离地铁站很近。",
+                    "py": "yīn wèi xiǎo qū lí dì tiě zhàn hěn jìn"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-02-t1-b08-i2"
+              }
+            ]
+          }
+        },
+        {
+          "key": "4a-02-t1-b09",
+          "type": "instruction",
+          "page": 14,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "根据给出的提示复述课文。",
+              "py": "gēn jù gěi chū de tí shì fù shù kè wén"
+            },
+            "en": "Retell the text using the provided prompts.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-02-t1-b10",
+          "type": "retell",
+          "page": 14,
+          "source": "book",
+          "data": {
+            "text": {
+              "zh": "李文和白家月到房东家看房子。房东要出租的是……，房租……。房东告诉白家月，要出租的房间现在……，想租的话，今天……。这个房间……，还……。小区离白家月的……不远，离地铁站……，生活上……。白家月比较满意，他们决定再……。",
+              "py": "lǐ wén hé bái jiā yuè dào fáng dōng jiā kàn fáng zi fáng dōng yào chū zū de shì fáng zū fáng dōng gào su bái jiā yuè yào chū zū de fáng jiān xiàn zài xiǎng zū de huà jīn tiān zhè ge fáng jiān hái xiǎo qū lí bái jiā yuè de bù yuǎn lí dì tiě zhàn shēng huó shàng bái jiā yuè bǐ jiào mǎn yì tā men jué dìng zài"
+            },
+            "answer_key": "4a-02-t1-b10-a"
+          }
+        }
+      ]
+    },
+    {
+      "key": "4a-02-g1",
+      "kind": "grammar",
+      "label_zh": "小语讲堂 1",
+      "label_en": "Xiaoyu's Classroom",
+      "page": 14,
+      "blocks": [
+        {
+          "key": "4a-02-g1-b01",
+          "type": "grammar",
+          "page": 14,
+          "source": "book",
+          "data": {
+            "num": "1",
+            "title": {
+              "zh": "固定格式“×就是了”",
+              "py": "gù dìng gé shì jiù shì le"
+            },
+            "title_en": "Fixed Pattern “×就是了”",
+            "explain": {
+              "zh": "固定格式“×就是了”用于口语中，在句子末尾表示肯定。例如：",
+              "py": "gù dìng gé shì jiù shì le yòng yú kǒu yǔ zhōng zài jù zi mò wěi biǎo shì kěn dìng lì rú"
+            },
+            "explain_en": "The fixed pattern “×就是了” is used in spoken Chinese at the end of a sentence to indicate affirmation. For example:",
+            "examples": [
+              {
+                "text": {
+                  "zh": "如果决定租了，告诉我就是了。",
+                  "py": "rú guǒ jué dìng zū le gào su wǒ jiù shì le"
+                },
+                "en": "If you decide to rent it, just let me know.",
+                "en_source": "moink"
+              },
+              {
+                "text": {
+                  "zh": "我一定能办到，您放心就是了。",
+                  "py": "wǒ yí dìng néng bàn dào nín fàng xīn jiù shì le"
+                },
+                "en": "I can definitely get it done, so don't worry.",
+                "en_source": "moink"
+              },
+              {
+                "text": {
+                  "zh": "这次考得不好没关系，下次努力就是了。",
+                  "py": "zhè cì kǎo de bù hǎo méi guān xi xià cì nǔ lì jiù shì le"
+                },
+                "en": "It's fine that this exam didn't go well. Just work harder next time.",
+                "en_source": "moink"
+              }
+            ],
+            "extra": {
+              "source": "moink",
+              "examples": [
+                {
+                  "text": {
+                    "zh": "有什么问题，问我就是了。",
+                    "py": "yǒu shén me wèn tí wèn wǒ jiù shì le"
+                  },
+                  "en": "If you have any questions, just ask me.",
+                  "en_source": "moink"
+                },
+                {
+                  "text": {
+                    "zh": "你别担心，我明天早点儿来就是了。",
+                    "py": "nǐ bié dān xīn wǒ míng tiān zǎo diǎn r lái jiù shì le"
+                  },
+                  "en": "Don't worry, I'll just come a bit earlier tomorrow.",
+                  "en_source": "moink"
+                }
+              ],
+              "related": [
+                "jiushile"
+              ]
+            }
+          }
+        },
+        {
+          "key": "4a-02-g1-b02",
+          "type": "instruction",
+          "page": 14,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "完成对话。",
+              "py": "wán chéng duì huà"
+            },
+            "en": "Complete the dialogues.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-02-g1-b03",
+          "type": "dialogue_fill",
+          "page": 14,
+          "source": "book",
+          "data": {
+            "items": [
+              {
+                "num": "1",
+                "lines": [
+                  {
+                    "speaker": "A",
+                    "text": {
+                      "zh": "这个房子很干净，小区也安静，我租不租呢？",
+                      "py": "zhè ge fáng zi hěn gān jìng xiǎo qū yě ān jìng wǒ zū bu zū ne"
+                    }
+                  },
+                  {
+                    "speaker": "B",
+                    "text": {
+                      "zh": "{_}。",
+                      "py": ""
+                    }
+                  }
+                ],
+                "sample": [
+                  {
+                    "zh": "喜欢的话，租下来就是了",
+                    "py": "xǐ huan de huà zū xià lái jiù shì le"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-02-g1-b03-i1"
+              },
+              {
+                "num": "2",
+                "lines": [
+                  {
+                    "speaker": "A",
+                    "text": {
+                      "zh": "这里离地铁站比较远，我怎么去好呢？",
+                      "py": "zhè lǐ lí dì tiě zhàn bǐ jiào yuǎn wǒ zěn me qù hǎo ne"
+                    }
+                  },
+                  {
+                    "speaker": "B",
+                    "text": {
+                      "zh": "{_}。",
+                      "py": ""
+                    }
+                  }
+                ],
+                "sample": [
+                  {
+                    "zh": "你坐公交车去就是了",
+                    "py": "nǐ zuò gōng jiāo chē qù jiù shì le"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-02-g1-b03-i2"
+              },
+              {
+                "num": "3",
+                "lines": [
+                  {
+                    "speaker": "A",
+                    "text": {
+                      "zh": "你觉得这件衣服怎么样？我要不要买？",
+                      "py": "nǐ jué de zhè jiàn yī fu zěn me yàng wǒ yào bu yào mǎi"
+                    }
+                  },
+                  {
+                    "speaker": "B",
+                    "text": {
+                      "zh": "我觉得很漂亮，{_}。",
+                      "py": "wǒ jué de hěn piào liang"
+                    }
+                  }
+                ],
+                "sample": [
+                  {
+                    "zh": "你买就是了",
+                    "py": "nǐ mǎi jiù shì le"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-02-g1-b03-i3"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "4a-02-t2",
+      "kind": "text",
+      "label_zh": "课文 2",
+      "label_en": "Text 2",
+      "page": 15,
+      "blocks": [
+        {
+          "key": "4a-02-t2-b01",
+          "type": "scene",
+          "page": 15,
+          "source": "book",
+          "data": {
+            "icon": "pin",
+            "text": {
+              "zh": "在小区里，白家月和李文继续查看周围环境。",
+              "py": "zài xiǎo qū li bái jiā yuè hé lǐ wén jì xù chá kàn zhōu wéi huán jìng"
+            },
+            "en": "In the neighborhood, Bai Jiayue and Li Wen continued to check out the surroundings."
+          }
+        },
+        {
+          "key": "4a-02-t2-b02",
+          "type": "instruction",
+          "page": 15,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "听对话，选择正确答案。",
+              "py": "tīng duì huà xuǎn zé zhèng què dá àn"
+            },
+            "en": "Listen to the dialogue and choose the correct answer.",
+            "audio": "2-3"
+          }
+        },
+        {
+          "key": "4a-02-t2-b03",
+          "type": "choice",
+          "page": 15,
+          "source": "book",
+          "data": {
+            "items": [
+              {
+                "num": "1",
+                "text": {
+                  "zh": "白家月觉得小区的环境怎么样？",
+                  "py": "bái jiā yuè jué de xiǎo qū de huán jìng zěn me yàng"
+                },
+                "options": [
+                  {
+                    "label": "A",
+                    "text": {
+                      "zh": "树太少",
+                      "py": "shù tài shǎo"
+                    }
+                  },
+                  {
+                    "label": "B",
+                    "text": {
+                      "zh": "不太好",
+                      "py": "bú tài hǎo"
+                    }
+                  },
+                  {
+                    "label": "C",
+                    "text": {
+                      "zh": "很安静",
+                      "py": "hěn ān jìng"
+                    }
+                  },
+                  {
+                    "label": "D",
+                    "text": {
+                      "zh": "很干净",
+                      "py": "hěn gān jìng"
+                    }
+                  }
+                ],
+                "answer": "C",
+                "answer_source": "moink",
+                "key": "4a-02-t2-b03-i1"
+              },
+              {
+                "num": "2",
+                "text": {
+                  "zh": "白家月想什么时候搬进新房子？",
+                  "py": "bái jiā yuè xiǎng shén me shí hou bān jìn xīn fáng zi"
+                },
+                "options": [
+                  {
+                    "label": "A",
+                    "text": {
+                      "zh": "今天",
+                      "py": "jīn tiān"
+                    }
+                  },
+                  {
+                    "label": "B",
+                    "text": {
+                      "zh": "明天",
+                      "py": "míng tiān"
+                    }
+                  },
+                  {
+                    "label": "C",
+                    "text": {
+                      "zh": "后天下午",
+                      "py": "hòu tiān xià wǔ"
+                    }
+                  },
+                  {
+                    "label": "D",
+                    "text": {
+                      "zh": "后天晚上",
+                      "py": "hòu tiān wǎn shang"
+                    }
+                  }
+                ],
+                "answer": "B",
+                "answer_source": "moink",
+                "key": "4a-02-t2-b03-i2"
+              }
+            ]
+          }
+        },
+        {
+          "key": "4a-02-t2-b04",
+          "type": "dialogue",
+          "page": 15,
+          "source": "book",
+          "data": {
+            "image": {
+              "src": "4a/02/text2.webp",
+              "alt": "A small garden with trees in a residential area"
+            },
+            "lines": [
+              {
+                "speaker": [
+                  "李文"
+                ],
+                "text": {
+                  "zh": "家月，你看，那边还有个小花园。",
+                  "py": "jiā yuè nǐ kàn nà biān hái yǒu gè xiǎo huā yuán"
+                },
+                "en": "Jiayue, look, there's a little garden over there.",
+                "en_source": "moink",
+                "key": "4a-02-t2-b04-l1"
+              },
+              {
+                "speaker": [
+                  "白家月"
+                ],
+                "text": {
+                  "zh": "嗯，这个小区到处是花，还种了不少树，周围也很安静。",
+                  "py": "ǹg zhè ge xiǎo qū dào chù shì huā hái zhòng le bù shǎo shù zhōu wéi yě hěn ān jìng"
+                },
+                "en": "Mm, there are flowers everywhere here, and lots of trees have been planted. It's quiet around here too.",
+                "en_source": "moink",
+                "key": "4a-02-t2-b04-l2"
+              },
+              {
+                "speaker": [
+                  "李文"
+                ],
+                "text": {
+                  "zh": "是啊！这个小区的环境真不错，不过我听说，附近有十几家公司，很多刚毕业的学生都租住在这里。周末他们可能会玩到很晚，恐怕会影响你休息。",
+                  "py": "shì a zhè ge xiǎo qū de huán jìng zhēn bú cuò bú guò wǒ tīng shuō fù jìn yǒu shí jǐ jiā gōng sī hěn duō gāng bì yè de xué sheng dōu zū zhù zài zhè lǐ zhōu mò tā men kě néng huì wán dào hěn wǎn kǒng pà huì yǐng xiǎng nǐ xiū xi"
+                },
+                "en": "Yes! The environment here is really nice. But I've heard there are a dozen or so companies nearby, and lots of new graduates rent here. They might stay out late on weekends, which could disturb your rest.",
+                "en_source": "moink",
+                "key": "4a-02-t2-b04-l3"
+              },
+              {
+                "speaker": [
+                  "白家月"
+                ],
+                "text": {
+                  "zh": "没关系，我还想多认识一些朋友，和他们一起玩呢。",
+                  "py": "méi guān xi wǒ hái xiǎng duō rèn shi yì xiē péng you hé tā men yì qǐ wán ne"
+                },
+                "en": "That's fine. I'd like to make some more friends and hang out with them.",
+                "en_source": "moink",
+                "key": "4a-02-t2-b04-l4"
+              },
+              {
+                "speaker": [
+                  "李文"
+                ],
+                "text": {
+                  "zh": "是呢，大家可以一起热闹热闹。",
+                  "py": "shì ne dà jiā kě yǐ yì qǐ rè nao rè nao"
+                },
+                "en": "True, everyone can have some fun together.",
+                "en_source": "moink",
+                "key": "4a-02-t2-b04-l5"
+              },
+              {
+                "speaker": [
+                  "白家月"
+                ],
+                "text": {
+                  "zh": "这里房租合适，环境很好，而且房东也热情，所以我决定租这个房子了，明天就入住新家。",
+                  "py": "zhè lǐ fáng zū hé shì huán jìng hěn hǎo ér qiě fáng dōng yě rè qíng suǒ yǐ wǒ jué dìng zū zhè ge fáng zi le míng tiān jiù rù zhù xīn jiā"
+                },
+                "en": "The rent here is reasonable, the environment is great, and the landlord is friendly too, so I've decided to rent this place. I'll move into my new home tomorrow.",
+                "en_source": "moink",
+                "key": "4a-02-t2-b04-l6"
+              }
+            ]
+          }
+        },
+        {
+          "key": "4a-02-t2-b05",
+          "type": "vocab",
+          "page": 15,
+          "source": "book",
+          "data": {
+            "audio": "2-4",
+            "items": [
+              {
+                "num": "9",
+                "hanzi": "种",
+                "pinyin": "zhòng",
+                "pos": "v.",
+                "en": "plant",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "种花",
+                    "py": "zhòng huā"
+                  },
+                  "en": "plant flowers"
+                },
+                "key": "4a-02-t2-b05-i1"
+              },
+              {
+                "num": "10",
+                "hanzi": "周围",
+                "pinyin": "zhōuwéi",
+                "pos": "n.",
+                "en": "surroundings",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "学校周围",
+                    "py": "xué xiào zhōu wéi"
+                  },
+                  "en": "around the school"
+                },
+                "key": "4a-02-t2-b05-i2"
+              },
+              {
+                "num": "11",
+                "hanzi": "不过",
+                "pinyin": "búguò",
+                "pos": "conj.",
+                "en": "but; however",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "不过我很喜欢",
+                    "py": "bú guò wǒ hěn xǐ huan"
+                  },
+                  "en": "but I really like it"
+                },
+                "key": "4a-02-t2-b05-i3"
+              },
+              {
+                "num": "12",
+                "hanzi": "毕业",
+                "pinyin": "bìyè",
+                "pos": "v.",
+                "en": "graduate",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "大学毕业",
+                    "py": "dà xué bì yè"
+                  },
+                  "en": "graduate from university"
+                },
+                "key": "4a-02-t2-b05-i4"
+              },
+              {
+                "num": "13",
+                "hanzi": "恐怕",
+                "pinyin": "kǒngpà",
+                "pos": "adv.",
+                "en": "perhaps",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "恐怕来不及",
+                    "py": "kǒng pà lái bu jí"
+                  },
+                  "en": "I'm afraid there isn't time"
+                },
+                "key": "4a-02-t2-b05-i5"
+              },
+              {
+                "num": "14",
+                "hanzi": "热闹",
+                "pinyin": "rènao",
+                "pos": "v./adj./n.",
+                "en": "have a jolly time; bustling with noise and excitement; excitement",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "很热闹的街",
+                    "py": "hěn rè nao de jiē"
+                  },
+                  "en": "a lively street"
+                },
+                "key": "4a-02-t2-b05-i6"
+              },
+              {
+                "num": "15",
+                "hanzi": "入住",
+                "pinyin": "rùzhù",
+                "pos": "v.",
+                "en": "move into (a new house); check into (a hotel)",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "入住酒店",
+                    "py": "rù zhù jiǔ diàn"
+                  },
+                  "en": "check into a hotel"
+                },
+                "key": "4a-02-t2-b05-i7"
+              }
+            ]
+          }
+        },
+        {
+          "key": "4a-02-t2-b06",
+          "type": "instruction",
+          "page": 16,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "分角色朗读对话。",
+              "py": "fēn jué sè lǎng dú duì huà"
+            },
+            "en": "Role-play the dialogue.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-02-t2-b07",
+          "type": "instruction",
+          "page": 16,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "根据课文内容回答问题。",
+              "py": "gēn jù kè wén nèi róng huí dá wèn tí"
+            },
+            "en": "Answer the questions according to the text.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-02-t2-b08",
+          "type": "prompts",
+          "page": 16,
+          "source": "book",
+          "data": {
+            "answer_mode": "text",
+            "items": [
+              {
+                "num": "1",
+                "text": {
+                  "zh": "李文为什么担心周末白家月休息不好？",
+                  "py": "lǐ wén wèi shén me dān xīn zhōu mò bái jiā yuè xiū xi bù hǎo"
+                },
+                "sample": [
+                  {
+                    "zh": "因为附近很多刚毕业的学生周末可能会玩到很晚。",
+                    "py": "yīn wèi fù jìn hěn duō gāng bì yè de xué sheng zhōu mò kě néng huì wán dào hěn wǎn"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-02-t2-b08-i1"
+              },
+              {
+                "num": "2",
+                "text": {
+                  "zh": "白家月为什么决定租那个房子？",
+                  "py": "bái jiā yuè wèi shén me jué dìng zū nà ge fáng zi"
+                },
+                "sample": [
+                  {
+                    "zh": "因为那里房租合适，环境很好，而且房东也热情。",
+                    "py": "yīn wèi nà lǐ fáng zū hé shì huán jìng hěn hǎo ér qiě fáng dōng yě rè qíng"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-02-t2-b08-i2"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "4a-02-g2",
+      "kind": "grammar",
+      "label_zh": "小语讲堂 2",
+      "label_en": "Xiaoyu's Classroom",
+      "page": 16,
+      "blocks": [
+        {
+          "key": "4a-02-g2-b01",
+          "type": "grammar",
+          "page": 16,
+          "source": "book",
+          "data": {
+            "num": "2",
+            "title": {
+              "zh": "转折复句“……，不过……”",
+              "py": "zhuǎn zhé fù jù bú guò"
+            },
+            "title_en": "Adversative Complex Sentence “……，不过……”",
+            "explain": {
+              "zh": "连词“不过”用在两个分句中后一个分句的开头，表示转折。例如：",
+              "py": "lián cí bú guò yòng zài liǎng gè fēn jù zhōng hòu yí gè fēn jù de kāi tóu biǎo shì zhuǎn zhé lì rú"
+            },
+            "explain_en": "The conjunction “不过” is used at the beginning of the second clause to indicate a turn in meaning. For example:",
+            "examples": [
+              {
+                "text": {
+                  "zh": "这个小区的环境真不错，不过我听说，附近有十几家公司，很多刚毕业的学生都租住在这里。",
+                  "py": "zhè ge xiǎo qū de huán jìng zhēn bú cuò bú guò wǒ tīng shuō fù jìn yǒu shí jǐ jiā gōng sī hěn duō gāng bì yè de xué sheng dōu zū zhù zài zhè lǐ"
+                },
+                "en": "The environment here is really nice, but I've heard there are a dozen or so companies nearby, and many new graduates rent here.",
+                "en_source": "moink"
+              },
+              {
+                "text": {
+                  "zh": "我们在动物园看见了很多动物，不过没看见大熊猫。",
+                  "py": "wǒ men zài dòng wù yuán kàn jiàn le hěn duō dòng wù bú guò méi kàn jiàn dà xióng māo"
+                },
+                "en": "We saw lots of animals at the zoo, but we didn't see any giant pandas.",
+                "en_source": "moink"
+              },
+              {
+                "text": {
+                  "zh": "我刚来北京时还不太习惯这里的天气，不过很快就适应了。",
+                  "py": "wǒ gāng lái běi jīng shí hái bú tài xí guàn zhè lǐ de tiān qì bú guò hěn kuài jiù shì yìng le"
+                },
+                "en": "When I first came to Beijing, I wasn't used to the weather, but I adapted quickly.",
+                "en_source": "moink"
+              }
+            ],
+            "extra": {
+              "source": "moink",
+              "examples": [
+                {
+                  "text": {
+                    "zh": "这家饭馆的菜很好吃，不过有点儿贵。",
+                    "py": "zhè jiā fàn guǎn de cài hěn hǎo chī bú guò yǒu diǎn r guì"
+                  },
+                  "en": "The food at this restaurant is great, but a bit expensive.",
+                  "en_source": "moink"
+                },
+                {
+                  "text": {
+                    "zh": "我很想去，不过明天没有时间。",
+                    "py": "wǒ hěn xiǎng qù bú guò míng tiān méi yǒu shí jiān"
+                  },
+                  "en": "I'd love to go, but I don't have time tomorrow.",
+                  "en_source": "moink"
+                }
+              ],
+              "related": [
+                "buguo",
+                "danshi"
+              ]
+            }
+          }
+        },
+        {
+          "key": "4a-02-g2-b02",
+          "type": "instruction",
+          "page": 16,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "完成对话。",
+              "py": "wán chéng duì huà"
+            },
+            "en": "Complete the dialogues.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-02-g2-b03",
+          "type": "dialogue_fill",
+          "page": 16,
+          "source": "book",
+          "data": {
+            "items": [
+              {
+                "num": "1",
+                "lines": [
+                  {
+                    "speaker": "A",
+                    "text": {
+                      "zh": "你觉得这个手机怎么样？",
+                      "py": "nǐ jué de zhè ge shǒu jī zěn me yàng"
+                    }
+                  },
+                  {
+                    "speaker": "B",
+                    "text": {
+                      "zh": "还可以，不过{_}。",
+                      "py": "hái kě yǐ bú guò"
+                    }
+                  }
+                ],
+                "sample": [
+                  {
+                    "zh": "有点儿贵",
+                    "py": "yǒu diǎn r guì"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-02-g2-b03-i1"
+              },
+              {
+                "num": "2",
+                "lines": [
+                  {
+                    "speaker": "A",
+                    "text": {
+                      "zh": "你生病了？",
+                      "py": "nǐ shēng bìng le"
+                    }
+                  },
+                  {
+                    "speaker": "B",
+                    "text": {
+                      "zh": "没有，{_}。",
+                      "py": "méi yǒu"
+                    }
+                  }
+                ],
+                "sample": [
+                  {
+                    "zh": "不过有点儿累",
+                    "py": "bú guò yǒu diǎn r lèi"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-02-g2-b03-i2"
+              },
+              {
+                "num": "3",
+                "lines": [
+                  {
+                    "speaker": "A",
+                    "text": {
+                      "zh": "我们可以走着去那里吗？",
+                      "py": "wǒ men kě yǐ zǒu zhe qù nà lǐ ma"
+                    }
+                  },
+                  {
+                    "speaker": "B",
+                    "text": {
+                      "zh": "可以，{_}。",
+                      "py": "kě yǐ"
+                    }
+                  }
+                ],
+                "sample": [
+                  {
+                    "zh": "不过要走半个小时",
+                    "py": "bú guò yào zǒu bàn gè xiǎo shí"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-02-g2-b03-i3"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "4a-02-t3",
+      "kind": "text",
+      "label_zh": "课文 3",
+      "label_en": "Text 3",
+      "page": 16,
+      "blocks": [
+        {
+          "key": "4a-02-t3-b01",
+          "type": "scene",
+          "page": 16,
+          "source": "book",
+          "data": {
+            "icon": "pin",
+            "text": {
+              "zh": "搬进新家后，白家月很开心，写了一篇日记。",
+              "py": "bān jìn xīn jiā hòu bái jiā yuè hěn kāi xīn xiě le yì piān rì jì"
+            },
+            "en": "After moving into her new home, Bai Jiayue was very happy and wrote a diary entry."
+          }
+        },
+        {
+          "key": "4a-02-t3-b02",
+          "type": "instruction",
+          "page": 16,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "听课文，选择正确答案。",
+              "py": "tīng kè wén xuǎn zé zhèng què dá àn"
+            },
+            "en": "Listen to the text and choose the correct answer.",
+            "audio": "2-5"
+          }
+        },
+        {
+          "key": "4a-02-t3-b03",
+          "type": "choice",
+          "page": 16,
+          "source": "book",
+          "data": {
+            "items": [
+              {
+                "num": "1",
+                "text": {
+                  "zh": "白家月租的房子，客厅里都有什么？",
+                  "py": "bái jiā yuè zū de fáng zi kè tīng li dōu yǒu shén me"
+                },
+                "options": [
+                  {
+                    "label": "A",
+                    "text": {
+                      "zh": "椅子、沙发和电视",
+                      "py": "yǐ zi shā fā hé diàn shì"
+                    }
+                  },
+                  {
+                    "label": "B",
+                    "text": {
+                      "zh": "椅子、空调和书桌",
+                      "py": "yǐ zi kōng tiáo hé shū zhuō"
+                    }
+                  },
+                  {
+                    "label": "C",
+                    "text": {
+                      "zh": "冰箱、电视和空调",
+                      "py": "bīng xiāng diàn shì hé kōng tiáo"
+                    }
+                  },
+                  {
+                    "label": "D",
+                    "text": {
+                      "zh": "书桌、椅子和沙发",
+                      "py": "shū zhuō yǐ zi hé shā fā"
+                    }
+                  }
+                ],
+                "answer": "A",
+                "answer_source": "moink",
+                "key": "4a-02-t3-b03-i1"
+              },
+              {
+                "num": "2",
+                "text": {
+                  "zh": "白家月平常主要在哪儿吃饭？",
+                  "py": "bái jiā yuè píng cháng zhǔ yào zài nǎ r chī fàn"
+                },
+                "options": [
+                  {
+                    "label": "A",
+                    "text": {
+                      "zh": "家里",
+                      "py": "jiā li"
+                    }
+                  },
+                  {
+                    "label": "B",
+                    "text": {
+                      "zh": "饭馆",
+                      "py": "fàn guǎn"
+                    }
+                  },
+                  {
+                    "label": "C",
+                    "text": {
+                      "zh": "邻居家",
+                      "py": "lín jū jiā"
+                    }
+                  },
+                  {
+                    "label": "D",
+                    "text": {
+                      "zh": "学校食堂",
+                      "py": "xué xiào shí táng"
+                    }
+                  }
+                ],
+                "answer": "D",
+                "answer_source": "moink",
+                "key": "4a-02-t3-b03-i2"
+              }
+            ]
+          }
+        },
+        {
+          "key": "4a-02-t3-b04",
+          "type": "passage",
+          "page": 17,
+          "source": "book",
+          "data": {
+            "image": {
+              "src": "4a/02/text3.webp",
+              "alt": "A bright living room with a white sofa and a TV"
+            },
+            "paragraphs": [
+              {
+                "text": {
+                  "zh": "8月25日，晴",
+                  "py": "yuè rì qíng"
+                },
+                "en": "August 25, sunny",
+                "en_source": "moink",
+                "indent": false
+              },
+              {
+                "text": {
+                  "zh": "昨天我顺利租到了合适的房子，今天李文帮我搬家。搬进去的时候，房东又向我介绍了一下房子里的东西，并告诉我这些东西怎么用。",
+                  "py": "zuó tiān wǒ shùn lì zū dào le hé shì de fáng zi jīn tiān lǐ wén bāng wǒ bān jiā bān jìn qù de shí hou fáng dōng yòu xiàng wǒ jiè shào le yí xià fáng zi li de dōng xi bìng gào su wǒ zhè xiē dōng xi zěn me yòng"
+                },
+                "en": "Yesterday I managed to rent a suitable apartment, and today Li Wen helped me move. When we moved in, the landlord showed me the things in the apartment again and told me how to use them.",
+                "en_source": "moink"
+              },
+              {
+                "text": {
+                  "zh": "我看了一下，客厅里有椅子、沙发，还有一台大电视；厨房里有冰箱和一些做饭用的东西，不过，我平常主要在学校食堂吃，基本上不做饭。我租的房间里，除了一张床以外，还有一台空调、一张书桌和一把椅子。",
+                  "py": "wǒ kàn le yí xià kè tīng li yǒu yǐ zi shā fā hái yǒu yì tái dà diàn shì chú fáng li yǒu bīng xiāng hé yì xiē zuò fàn yòng de dōng xi bú guò wǒ píng cháng zhǔ yào zài xué xiào shí táng chī jī běn shàng bú zuò fàn wǒ zū de fáng jiān li chú le yì zhāng chuáng yǐ wài hái yǒu yì tái kōng tiáo yì zhāng shū zhuō hé yì bǎ yǐ zi"
+                },
+                "en": "I had a look around. The living room has chairs, a sofa and a big TV; the kitchen has a fridge and some cooking things. But I usually eat at the school canteen, so I basically don't cook. In my room, besides a bed, there's an air conditioner, a desk and a chair.",
+                "en_source": "moink"
+              },
+              {
+                "text": {
+                  "zh": "看完整个房子后，我准备再去买几条毛巾，其他东西还不需要。",
+                  "py": "kàn wán zhěng gè fáng zi hòu wǒ zhǔn bèi zài qù mǎi jǐ tiáo máo jīn qí tā dōng xi hái bù xū yào"
+                },
+                "en": "After looking around the whole place, I plan to go and buy a few towels. I don't need anything else yet.",
+                "en_source": "moink"
+              }
+            ]
+          }
+        },
+        {
+          "key": "4a-02-t3-b05",
+          "type": "vocab",
+          "page": 17,
+          "source": "book",
+          "data": {
+            "audio": "2-6",
+            "items": [
+              {
+                "num": "16",
+                "hanzi": "日记",
+                "pinyin": "rìjì",
+                "pos": "n.",
+                "en": "diary",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "写日记",
+                    "py": "xiě rì jì"
+                  },
+                  "en": "keep a diary"
+                },
+                "key": "4a-02-t3-b05-i1"
+              },
+              {
+                "num": "17",
+                "hanzi": "顺利",
+                "pinyin": "shùnlì",
+                "pos": "adj.",
+                "en": "successful; smooth",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "一切顺利",
+                    "py": "yí qiè shùn lì"
+                  },
+                  "en": "everything goes smoothly"
+                },
+                "key": "4a-02-t3-b05-i2"
+              },
+              {
+                "num": "18",
+                "hanzi": "并",
+                "pinyin": "bìng",
+                "pos": "conj./adv.",
+                "en": "and; what's more; actually; definitely",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "并不难",
+                    "py": "bìng bù nán"
+                  },
+                  "en": "isn't actually hard"
+                },
+                "key": "4a-02-t3-b05-i3"
+              },
+              {
+                "num": "19",
+                "hanzi": "客厅",
+                "pinyin": "kètīng",
+                "pos": "n.",
+                "en": "living room",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "在客厅看电视",
+                    "py": "zài kè tīng kàn diàn shì"
+                  },
+                  "en": "watch TV in the living room"
+                },
+                "key": "4a-02-t3-b05-i4"
+              },
+              {
+                "num": "20",
+                "hanzi": "台",
+                "pinyin": "tái",
+                "pos": "m.",
+                "en": "for certain machinery, apparatus, etc.",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "一台电脑",
+                    "py": "yì tái diàn nǎo"
+                  },
+                  "en": "a computer"
+                },
+                "key": "4a-02-t3-b05-i5"
+              },
+              {
+                "num": "21",
+                "hanzi": "厨房",
+                "pinyin": "chúfáng",
+                "pos": "n.",
+                "en": "kitchen",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "厨房很干净",
+                    "py": "chú fáng hěn gān jìng"
+                  },
+                  "en": "the kitchen is clean"
+                },
+                "key": "4a-02-t3-b05-i6"
+              },
+              {
+                "num": "22",
+                "hanzi": "平常",
+                "pinyin": "píngcháng",
+                "pos": "n./adj.",
+                "en": "usual days; usual; ordinary",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "平常很忙",
+                    "py": "píng cháng hěn máng"
+                  },
+                  "en": "usually busy"
+                },
+                "key": "4a-02-t3-b05-i7"
+              },
+              {
+                "num": "23",
+                "hanzi": "基本上",
+                "pinyin": "jīběnshàng",
+                "pos": "adv.",
+                "en": "in general; basically",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "基本上完成了",
+                    "py": "jī běn shàng wán chéng le"
+                  },
+                  "en": "basically finished"
+                },
+                "key": "4a-02-t3-b05-i8"
+              },
+              {
+                "num": "24",
+                "hanzi": "整个",
+                "pinyin": "zhěnggè",
+                "pos": "adj.",
+                "en": "whole",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "整个上午",
+                    "py": "zhěng gè shàng wǔ"
+                  },
+                  "en": "the whole morning"
+                },
+                "key": "4a-02-t3-b05-i9"
+              },
+              {
+                "num": "25",
+                "hanzi": "毛巾",
+                "pinyin": "máojīn",
+                "pos": "n.",
+                "en": "towel",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "一条毛巾",
+                    "py": "yì tiáo máo jīn"
+                  },
+                  "en": "a towel"
+                },
+                "key": "4a-02-t3-b05-i10"
+              }
+            ]
+          }
+        },
+        {
+          "key": "4a-02-t3-b06",
+          "type": "instruction",
+          "page": 17,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "大声朗读课文。",
+              "py": "dà shēng lǎng dú kè wén"
+            },
+            "en": "Read the text aloud.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-02-t3-b07",
+          "type": "instruction",
+          "page": 17,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "根据课文内容回答问题。",
+              "py": "gēn jù kè wén nèi róng huí dá wèn tí"
+            },
+            "en": "Answer the questions according to the text.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-02-t3-b08",
+          "type": "prompts",
+          "page": 17,
+          "source": "book",
+          "data": {
+            "answer_mode": "text",
+            "items": [
+              {
+                "num": "1",
+                "text": {
+                  "zh": "白家月租的房间里都有什么？",
+                  "py": "bái jiā yuè zū de fáng jiān li dōu yǒu shén me"
+                },
+                "sample": [
+                  {
+                    "zh": "有一张床、一台空调、一张书桌和一把椅子。",
+                    "py": "yǒu yì zhāng chuáng yì tái kōng tiáo yì zhāng shū zhuō hé yì bǎ yǐ zi"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-02-t3-b08-i1"
+              },
+              {
+                "num": "2",
+                "text": {
+                  "zh": "白家月准备去买什么？",
+                  "py": "bái jiā yuè zhǔn bèi qù mǎi shén me"
+                },
+                "sample": [
+                  {
+                    "zh": "她准备去买几条毛巾。",
+                    "py": "tā zhǔn bèi qù mǎi jǐ tiáo máo jīn"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-02-t3-b08-i2"
+              }
+            ]
+          }
+        },
+        {
+          "key": "4a-02-t3-b09",
+          "type": "instruction",
+          "page": 17,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "根据给出的提示复述课文。",
+              "py": "gēn jù gěi chū de tí shì fù shù kè wén"
+            },
+            "en": "Retell the text using the provided prompts.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-02-t3-b10",
+          "type": "retell",
+          "page": 17,
+          "source": "book",
+          "data": {
+            "text": {
+              "zh": "昨天白家月顺利……，今天李文帮她……。搬进去的时候，房东又向白家月……，并告诉她……。白家月看到，客厅里有……，还有……；厨房里有冰箱和……，不过，白家月平常……，基本上……。白家月租的房间里，除了……以外，还有一台空调、……。看完整个房子后，她觉得再去……就行了。",
+              "py": "zuó tiān bái jiā yuè shùn lì jīn tiān lǐ wén bāng tā bān jìn qù de shí hou fáng dōng yòu xiàng bái jiā yuè bìng gào su tā bái jiā yuè kàn dào kè tīng li yǒu hái yǒu chú fáng li yǒu bīng xiāng hé bú guò bái jiā yuè píng cháng jī běn shàng bái jiā yuè zū de fáng jiān li chú le yǐ wài hái yǒu yì tái kōng tiáo kàn wán zhěng gè fáng zi hòu tā jué de zài qù jiù xíng le"
+            },
+            "answer_key": "4a-02-t3-b10-a"
+          }
+        }
+      ]
+    },
+    {
+      "key": "4a-02-g3",
+      "kind": "grammar",
+      "label_zh": "小语讲堂 3",
+      "label_en": "Xiaoyu's Classroom",
+      "page": 18,
+      "blocks": [
+        {
+          "key": "4a-02-g3-b01",
+          "type": "grammar",
+          "page": 18,
+          "source": "book",
+          "data": {
+            "num": "3",
+            "title": {
+              "zh": "连词/副词“并”",
+              "py": "lián cí fù cí bìng"
+            },
+            "title_en": "Conjunction/Adverb “并”",
+            "explain": {
+              "zh": "“并”有多种用法，本课介绍“并”的连词和副词用法：（1）“并”作连词，连接并列的双音节动词、短语或小句，表示并列关系，有更进一层的意思；（2）“并”作副词，用在否定词前，加强否定语气，说明事实并非如此。例如：",
+              "py": "bìng yǒu duō zhǒng yòng fǎ běn kè jiè shào bìng de lián cí hé fù cí yòng fǎ bìng zuò lián cí lián jiē bìng liè de shuāng yīn jié dòng cí duǎn yǔ huò xiǎo jù biǎo shì bìng liè guān xì yǒu gèng jìn yì céng de yì si bìng zuò fù cí yòng zài fǒu dìng cí qián jiā qiáng fǒu dìng yǔ qì shuō míng shì shí bìng fēi rú cǐ lì rú"
+            },
+            "explain_en": "“并” has multiple usages. This lesson introduces its functions as a conjunction and an adverb: (1) as a conjunction, “并” connects parallel disyllabic verbs, phrases, or clauses to indicate a coordinative relationship, implying a further progression; (2) as an adverb, “并” is placed before negative words to strengthen the negative tone, indicating that the fact is not as such. For example:",
+            "examples": [
+              {
+                "text": {
+                  "zh": "房东又向我介绍了一下房子里的东西，并告诉我这些东西怎么用。",
+                  "py": "fáng dōng yòu xiàng wǒ jiè shào le yí xià fáng zi li de dōng xi bìng gào su wǒ zhè xiē dōng xi zěn me yòng"
+                },
+                "en": "The landlord showed me the things in the apartment again and also told me how to use them.",
+                "en_source": "moink"
+              },
+              {
+                "text": {
+                  "zh": "她考上了北京大学并申请到了奖学金。",
+                  "py": "tā kǎo shàng le běi jīng dà xué bìng shēn qǐng dào le jiǎng xué jīn"
+                },
+                "en": "She got into Peking University and also won a scholarship.",
+                "en_source": "moink"
+              },
+              {
+                "text": {
+                  "zh": "我并没有答应（dāying, promise）你就租这个房子，我还要再想想。",
+                  "py": "wǒ bìng méi yǒu dā ying nǐ jiù zū zhè ge fáng zi wǒ hái yào zài xiǎng xiang"
+                },
+                "en": "I never actually promised you I'd rent this place. I still need to think it over.",
+                "en_source": "moink"
+              }
+            ],
+            "extra": {
+              "source": "moink",
+              "examples": [
+                {
+                  "text": {
+                    "zh": "这个问题并不难。",
+                    "py": "zhè ge wèn tí bìng bù nán"
+                  },
+                  "en": "This question isn't actually hard.",
+                  "en_source": "moink"
+                },
+                {
+                  "text": {
+                    "zh": "老师看了我们的作业，并给了我们一些建议。",
+                    "py": "lǎo shī kàn le wǒ men de zuò yè bìng gěi le wǒ men yì xiē jiàn yì"
+                  },
+                  "en": "The teacher looked at our homework and also gave us some suggestions.",
+                  "en_source": "moink"
+                }
+              ],
+              "related": [
+                "bing"
+              ]
+            }
+          }
+        },
+        {
+          "key": "4a-02-g3-b02",
+          "type": "instruction",
+          "page": 18,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "完成句子。",
+              "py": "wán chéng jù zi"
+            },
+            "en": "Complete the sentences.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-02-g3-b03",
+          "type": "sentence_fill",
+          "page": 18,
+          "source": "book",
+          "data": {
+            "items": [
+              {
+                "num": "1",
+                "lines": [
+                  {
+                    "speaker": null,
+                    "text": {
+                      "zh": "他毕业后来到北京工作，{_}。",
+                      "py": "tā bì yè hòu lái dào běi jīng gōng zuò"
+                    }
+                  }
+                ],
+                "hint": {
+                  "zh": "租",
+                  "py": "zū"
+                },
+                "sample": [
+                  {
+                    "zh": "并在公司附近租了一个房子",
+                    "py": "bìng zài gōng sī fù jìn zū le yí gè fáng zi"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-02-g3-b03-i1"
+              },
+              {
+                "num": "2",
+                "lines": [
+                  {
+                    "speaker": null,
+                    "text": {
+                      "zh": "我吃完饭{_}后，才去公园跑步。",
+                      "py": "wǒ chī wán fàn hòu cái qù gōng yuán pǎo bù"
+                    }
+                  }
+                ],
+                "hint": {
+                  "zh": "收拾",
+                  "py": "shōu shi"
+                },
+                "sample": [
+                  {
+                    "zh": "并收拾好厨房",
+                    "py": "bìng shōu shi hǎo chú fáng"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-02-g3-b03-i2"
+              },
+              {
+                "num": "3",
+                "lines": [
+                  {
+                    "speaker": null,
+                    "text": {
+                      "zh": "她{_}这个小区，这里人太多，她不喜欢。",
+                      "py": "tā zhè ge xiǎo qū zhè lǐ rén tài duō tā bù xǐ huan"
+                    }
+                  }
+                ],
+                "hint": {
+                  "zh": "入住",
+                  "py": "rù zhù"
+                },
+                "sample": [
+                  {
+                    "zh": "并不想入住",
+                    "py": "bìng bù xiǎng rù zhù"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-02-g3-b03-i3"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "4a-02-t4",
+      "kind": "text",
+      "label_zh": "课文 4",
+      "label_en": "Text 4",
+      "page": 18,
+      "blocks": [
+        {
+          "key": "4a-02-t4-b01",
+          "type": "scene",
+          "page": 18,
+          "source": "book",
+          "data": {
+            "icon": "reading",
+            "text": {
+              "zh": "怎样租到合适的房子",
+              "py": "zěn yàng zū dào hé shì de fáng zi"
+            },
+            "en": "How to Rent a Suitable Apartment",
+            "audio": "2-7"
+          }
+        },
+        {
+          "key": "4a-02-t4-b02",
+          "type": "instruction",
+          "page": 18,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "快速阅读短文，选择正确答案。",
+              "py": "kuài sù yuè dú duǎn wén xuǎn zé zhèng què dá àn"
+            },
+            "en": "Read the passage quickly and choose the correct answer.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-02-t4-b03",
+          "type": "choice",
+          "page": 18,
+          "source": "book",
+          "data": {
+            "items": [
+              {
+                "num": "1",
+                "text": {
+                  "zh": "白家月觉得这次租房怎么样？",
+                  "py": "bái jiā yuè jué de zhè cì zū fáng zěn me yàng"
+                },
+                "options": [
+                  {
+                    "label": "A",
+                    "text": {
+                      "zh": "很简单",
+                      "py": "hěn jiǎn dān"
+                    }
+                  },
+                  {
+                    "label": "B",
+                    "text": {
+                      "zh": "不容易",
+                      "py": "bù róng yì"
+                    }
+                  },
+                  {
+                    "label": "C",
+                    "text": {
+                      "zh": "不理想",
+                      "py": "bù lǐ xiǎng"
+                    }
+                  },
+                  {
+                    "label": "D",
+                    "text": {
+                      "zh": "有意思",
+                      "py": "yǒu yì si"
+                    }
+                  }
+                ],
+                "answer": "B",
+                "answer_source": "moink",
+                "key": "4a-02-t4-b03-i1"
+              },
+              {
+                "num": "2",
+                "text": {
+                  "zh": "根据课文，很多刚工作的年轻人为什么选择租房？",
+                  "py": "gēn jù kè wén hěn duō gāng gōng zuò de nián qīng rén wèi shén me xuǎn zé zū fáng"
+                },
+                "options": [
+                  {
+                    "label": "A",
+                    "text": {
+                      "zh": "更有安全感",
+                      "py": "gèng yǒu ān quán gǎn"
+                    }
+                  },
+                  {
+                    "label": "B",
+                    "text": {
+                      "zh": "不喜欢买房",
+                      "py": "bù xǐ huan mǎi fáng"
+                    }
+                  },
+                  {
+                    "label": "C",
+                    "text": {
+                      "zh": "喜欢租房子住",
+                      "py": "xǐ huan zū fáng zi zhù"
+                    }
+                  },
+                  {
+                    "label": "D",
+                    "text": {
+                      "zh": "工资还不太高",
+                      "py": "gōng zī hái bú tài gāo"
+                    }
+                  }
+                ],
+                "answer": "D",
+                "answer_source": "moink",
+                "key": "4a-02-t4-b03-i2"
+              }
+            ]
+          }
+        },
+        {
+          "key": "4a-02-t4-b04",
+          "type": "passage",
+          "page": 19,
+          "source": "book",
+          "data": {
+            "image": {
+              "src": "4a/02/text4.webp",
+              "alt": "A small model house next to stacks of coins and a hand holding a key"
+            },
+            "paragraphs": [
+              {
+                "text": {
+                  "zh": "在李文的帮助下，白家月租到了合适的房子。对白家月来说，这次租房并不容易。根据李文的建议，她先在租房网站和App上查看有关信息，查找合适的房子，接着又去看了看房子，同时了解房子周围的环境。她看了好几个房子，才找到一个位置、环境和价格都合适的，最后顺利租到了理想的房子。",
+                  "py": "zài lǐ wén de bāng zhù xià bái jiā yuè zū dào le hé shì de fáng zi duì bái jiā yuè lái shuō zhè cì zū fáng bìng bù róng yì gēn jù lǐ wén de jiàn yì tā xiān zài zū fáng wǎng zhàn hé shang chá kàn yǒu guān xìn xī chá zhǎo hé shì de fáng zi jiē zhe yòu qù kàn le kan fáng zi tóng shí liǎo jiě fáng zi zhōu wéi de huán jìng tā kàn le hǎo jǐ gè fáng zi cái zhǎo dào yí gè wèi zhi huán jìng hé jià gé dōu hé shì de zuì hòu shùn lì zū dào le lǐ xiǎng de fáng zi"
+                },
+                "en": "With Li Wen's help, Bai Jiayue rented a suitable apartment. For her, renting this time wasn't easy. Following Li Wen's advice, she first checked listings on rental websites and apps to find suitable places, then went to see the apartments and, at the same time, got to know the surroundings. She looked at quite a few places before finding one where the location, environment and price all suited her, and in the end she rented her ideal apartment.",
+                "en_source": "moink"
+              },
+              {
+                "text": {
+                  "zh": "租房的时候，李文告诉白家月，在中国，由于很多刚工作的年轻人工资还不太高，所以他们一开始也不买房，都选择租房。工作几年后，不少人就会买房，因为大家一直觉得，有房才有家，有自己的房子会更有安全感。",
+                  "py": "zū fáng de shí hou lǐ wén gào su bái jiā yuè zài zhōng guó yóu yú hěn duō gāng gōng zuò de nián qīng rén gōng zī hái bú tài gāo suǒ yǐ tā men yì kāi shǐ yě bù mǎi fáng dōu xuǎn zé zū fáng gōng zuò jǐ nián hòu bù shǎo rén jiù huì mǎi fáng yīn wèi dà jiā yì zhí jué de yǒu fáng cái yǒu jiā yǒu zì jǐ de fáng zi huì gèng yǒu ān quán gǎn"
+                },
+                "en": "While she was looking, Li Wen told her that in China, because many young people who have just started working don't earn much yet, they don't buy a home at first and choose to rent instead. After a few years of work, many of them do buy, because people have always felt that a house makes a home, and owning one gives you more of a sense of security.",
+                "en_source": "moink"
+              }
+            ]
+          }
+        },
+        {
+          "key": "4a-02-t4-b05",
+          "type": "vocab",
+          "page": 19,
+          "source": "book",
+          "data": {
+            "audio": "2-8",
+            "items": [
+              {
+                "num": "26",
+                "hanzi": "建议",
+                "pinyin": "jiànyì",
+                "pos": "n./v.",
+                "en": "suggestion; suggest",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "给你一个建议",
+                    "py": "gěi nǐ yí gè jiàn yì"
+                  },
+                  "en": "give you a suggestion"
+                },
+                "key": "4a-02-t4-b05-i1"
+              },
+              {
+                "num": "27",
+                "hanzi": "查看",
+                "pinyin": "chákàn",
+                "pos": "v.",
+                "en": "check",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "查看信息",
+                    "py": "chá kàn xìn xī"
+                  },
+                  "en": "check the information"
+                },
+                "key": "4a-02-t4-b05-i2"
+              },
+              {
+                "num": "28",
+                "hanzi": "信息",
+                "pinyin": "xìnxī",
+                "pos": "n.",
+                "en": "information; message",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "发信息",
+                    "py": "fā xìn xī"
+                  },
+                  "en": "send a message"
+                },
+                "key": "4a-02-t4-b05-i3"
+              },
+              {
+                "num": "29",
+                "hanzi": "查找",
+                "pinyin": "cházhǎo",
+                "pos": "v.",
+                "en": "look for",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "查找资料",
+                    "py": "chá zhǎo zī liào"
+                  },
+                  "en": "look up materials"
+                },
+                "key": "4a-02-t4-b05-i4"
+              },
+              {
+                "num": "30",
+                "hanzi": "接着",
+                "pinyin": "jiēzhe",
+                "pos": "adv./v.",
+                "en": "after that; go on (with)",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "接着说",
+                    "py": "jiē zhe shuō"
+                  },
+                  "en": "go on talking"
+                },
+                "key": "4a-02-t4-b05-i5"
+              },
+              {
+                "num": "31",
+                "hanzi": "同时",
+                "pinyin": "tóngshí",
+                "pos": "conj./n.",
+                "en": "in addition; same time",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "同时进行",
+                    "py": "tóng shí jìn xíng"
+                  },
+                  "en": "happen at the same time"
+                },
+                "key": "4a-02-t4-b05-i6"
+              },
+              {
+                "num": "32",
+                "hanzi": "位置",
+                "pinyin": "wèizhi",
+                "pos": "n.",
+                "en": "location",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "位置很好",
+                    "py": "wèi zhi hěn hǎo"
+                  },
+                  "en": "a good location"
+                },
+                "key": "4a-02-t4-b05-i7"
+              },
+              {
+                "num": "33",
+                "hanzi": "价格",
+                "pinyin": "jiàgé",
+                "pos": "n.",
+                "en": "price",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "价格不高",
+                    "py": "jià gé bù gāo"
+                  },
+                  "en": "the price isn't high"
+                },
+                "key": "4a-02-t4-b05-i8"
+              },
+              {
+                "num": "34",
+                "hanzi": "理想",
+                "pinyin": "lǐxiǎng",
+                "pos": "adj./n.",
+                "en": "ideal",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "理想的工作",
+                    "py": "lǐ xiǎng de gōng zuò"
+                  },
+                  "en": "an ideal job"
+                },
+                "key": "4a-02-t4-b05-i9"
+              },
+              {
+                "num": "35",
+                "hanzi": "由于",
+                "pinyin": "yóuyú",
+                "pos": "conj./prep.",
+                "en": "because; because of",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "由于下雨",
+                    "py": "yóu yú xià yǔ"
+                  },
+                  "en": "because of the rain"
+                },
+                "key": "4a-02-t4-b05-i10"
+              },
+              {
+                "num": "36",
+                "hanzi": "工资",
+                "pinyin": "gōngzī",
+                "pos": "n.",
+                "en": "wage; salary; pay",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "工资很高",
+                    "py": "gōng zī hěn gāo"
+                  },
+                  "en": "a high salary"
+                },
+                "key": "4a-02-t4-b05-i11"
+              },
+              {
+                "num": "37",
+                "hanzi": "感",
+                "pinyin": "gǎn",
+                "pos": "suf.",
+                "en": "sense",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "安全感",
+                    "py": "ān quán gǎn"
+                  },
+                  "en": "sense of security"
+                },
+                "key": "4a-02-t4-b05-i12"
+              }
+            ]
+          }
+        },
+        {
+          "key": "4a-02-t4-b06",
+          "type": "instruction",
+          "page": 19,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "大声朗读课文。",
+              "py": "dà shēng lǎng dú kè wén"
+            },
+            "en": "Read the text aloud.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-02-t4-b07",
+          "type": "instruction",
+          "page": 19,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "根据课文内容回答问题。",
+              "py": "gēn jù kè wén nèi róng huí dá wèn tí"
+            },
+            "en": "Answer the questions according to the text.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-02-t4-b08",
+          "type": "prompts",
+          "page": 19,
+          "source": "book",
+          "data": {
+            "answer_mode": "text",
+            "items": [
+              {
+                "num": "1",
+                "text": {
+                  "zh": "白家月是怎么租到合适的房子的？",
+                  "py": "bái jiā yuè shì zěn me zū dào hé shì de fáng zi de"
+                },
+                "sample": [
+                  {
+                    "zh": "她先在租房网站和App上查找合适的房子，接着又去看了看房子，同时了解周围的环境。",
+                    "py": "tā xiān zài zū fáng wǎng zhàn hé shang chá zhǎo hé shì de fáng zi jiē zhe yòu qù kàn le kan fáng zi tóng shí liǎo jiě zhōu wéi de huán jìng"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-02-t4-b08-i1"
+              },
+              {
+                "num": "2",
+                "text": {
+                  "zh": "在中国，为什么不少人工作几年后会买房？",
+                  "py": "zài zhōng guó wèi shén me bù shǎo rén gōng zuò jǐ nián hòu huì mǎi fáng"
+                },
+                "sample": [
+                  {
+                    "zh": "因为大家觉得有房才有家，有自己的房子会更有安全感。",
+                    "py": "yīn wèi dà jiā jué de yǒu fáng cái yǒu jiā yǒu zì jǐ de fáng zi huì gèng yǒu ān quán gǎn"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-02-t4-b08-i2"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "4a-02-g4",
+      "kind": "grammar",
+      "label_zh": "小语讲堂 4",
+      "label_en": "Xiaoyu's Classroom",
+      "page": 19,
+      "blocks": [
+        {
+          "key": "4a-02-g4-b01",
+          "type": "grammar",
+          "page": 19,
+          "source": "book",
+          "data": {
+            "num": "4",
+            "title": {
+              "zh": "连词/介词“由于”",
+              "py": "lián cí jiè cí yóu yú"
+            },
+            "title_en": "Conjunction/Preposition “由于”",
+            "explain": {
+              "zh": "“由于”有两种用法：（1）作连词，用在复句中前一分句的开头，表示原因，后一分句开头一般有“所以、因此（yīncǐ, therefore）”等词语；（2）作介词，表示原因或理由。例如：",
+              "py": "yóu yú yǒu liǎng zhǒng yòng fǎ zuò lián cí yòng zài fù jù zhōng qián yì fēn jù de kāi tóu biǎo shì yuán yīn hòu yì fēn jù kāi tóu yì bān yǒu suǒ yǐ yīn cǐ děng cí yǔ zuò jiè cí biǎo shì yuán yīn huò lǐ yóu lì rú"
+            },
+            "explain_en": "“由于” has two usages: (1) as a conjunction, used at the beginning of the first clause in a complex sentence to indicate cause, with the second clause generally beginning with words such as “所以” or “因此 (yīncǐ, therefore)”; (2) as a preposition, indicating cause or reason. For example:",
+            "examples_page": 20,
+            "examples": [
+              {
+                "text": {
+                  "zh": "在中国，由于很多刚工作的年轻人工资还不太高，所以他们一开始也不买房，都选择租房。",
+                  "py": "zài zhōng guó yóu yú hěn duō gāng gōng zuò de nián qīng rén gōng zī hái bú tài gāo suǒ yǐ tā men yì kāi shǐ yě bù mǎi fáng dōu xuǎn zé zū fáng"
+                },
+                "en": "In China, because many young people who have just started working don't earn much yet, they don't buy a home at first and choose to rent.",
+                "en_source": "moink"
+              },
+              {
+                "text": {
+                  "zh": "由于一直下大雨，所以我们决定不爬山了。",
+                  "py": "yóu yú yì zhí xià dà yǔ suǒ yǐ wǒ men jué dìng bù pá shān le"
+                },
+                "en": "Because it kept pouring, we decided not to go hiking.",
+                "en_source": "moink"
+              },
+              {
+                "text": {
+                  "zh": "由于大家的努力，这次运动会我们班获得了第一名。",
+                  "py": "yóu yú dà jiā de nǔ lì zhè cì yùn dòng huì wǒ men bān huò dé le dì yī míng"
+                },
+                "en": "Thanks to everyone's effort, our class won first place at this sports meet.",
+                "en_source": "moink"
+              }
+            ],
+            "extra": {
+              "source": "moink",
+              "examples": [
+                {
+                  "text": {
+                    "zh": "由于路上堵车，他迟到了二十分钟。",
+                    "py": "yóu yú lù shang dǔ chē tā chí dào le èr shí fēn zhōng"
+                  },
+                  "en": "Because of a traffic jam, he was twenty minutes late.",
+                  "en_source": "moink"
+                },
+                {
+                  "text": {
+                    "zh": "由于身体不舒服，她今天没来上课。",
+                    "py": "yóu yú shēn tǐ bù shū fu tā jīn tiān méi lái shàng kè"
+                  },
+                  "en": "Because she wasn't feeling well, she didn't come to class today.",
+                  "en_source": "moink"
+                }
+              ],
+              "related": [
+                "youyu",
+                "yinwei-suoyi"
+              ]
+            }
+          }
+        },
+        {
+          "key": "4a-02-g4-b02",
+          "type": "instruction",
+          "page": 20,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "完成句子。",
+              "py": "wán chéng jù zi"
+            },
+            "en": "Complete the sentences.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-02-g4-b03",
+          "type": "sentence_fill",
+          "page": 20,
+          "source": "book",
+          "data": {
+            "items": [
+              {
+                "num": "1",
+                "lines": [
+                  {
+                    "speaker": null,
+                    "text": {
+                      "zh": "由于手机没电了，{_}。",
+                      "py": "yóu yú shǒu jī méi diàn le"
+                    }
+                  }
+                ],
+                "sample": [
+                  {
+                    "zh": "所以我没给你打电话",
+                    "py": "suǒ yǐ wǒ méi gěi nǐ dǎ diàn huà"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-02-g4-b03-i1"
+              },
+              {
+                "num": "2",
+                "lines": [
+                  {
+                    "speaker": null,
+                    "text": {
+                      "zh": "由于这个小区很安静，房子价格也不高，因此，{_}。",
+                      "py": "yóu yú zhè ge xiǎo qū hěn ān jìng fáng zi jià gé yě bù gāo yīn cǐ"
+                    }
+                  }
+                ],
+                "sample": [
+                  {
+                    "zh": "很多人都想在这里租房",
+                    "py": "hěn duō rén dōu xiǎng zài zhè lǐ zū fáng"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-02-g4-b03-i2"
+              },
+              {
+                "num": "3",
+                "lines": [
+                  {
+                    "speaker": null,
+                    "text": {
+                      "zh": "{_}，我们很快就完成了这个工作。",
+                      "py": "wǒ men hěn kuài jiù wán chéng le zhè ge gōng zuò"
+                    }
+                  }
+                ],
+                "sample": [
+                  {
+                    "zh": "由于大家的帮助",
+                    "py": "yóu yú dà jiā de bāng zhù"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-02-g4-b03-i3"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "4a-02-ex",
+      "kind": "exercises",
+      "label_zh": "综合练习",
+      "label_en": "Comprehensive Exercises",
+      "page": 20,
+      "blocks": [
+        {
+          "key": "4a-02-ex-b01",
+          "type": "instruction",
+          "page": 20,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "选词填空。",
+              "py": "xuǎn cí tián kòng"
+            },
+            "en": "Choose the proper words to fill in the blanks.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-02-ex-b02",
+          "type": "word_bank",
+          "page": 20,
+          "source": "book",
+          "data": {
+            "bank": [
+              {
+                "label": "A",
+                "text": {
+                  "zh": "收拾",
+                  "py": "shōu shi"
+                }
+              },
+              {
+                "label": "B",
+                "text": {
+                  "zh": "房租",
+                  "py": "fáng zū"
+                }
+              },
+              {
+                "label": "C",
+                "text": {
+                  "zh": "入住",
+                  "py": "rù zhù"
+                }
+              },
+              {
+                "label": "D",
+                "text": {
+                  "zh": "租",
+                  "py": "zū"
+                }
+              },
+              {
+                "label": "E",
+                "text": {
+                  "zh": "查看",
+                  "py": "chá kàn"
+                }
+              }
+            ],
+            "items": [
+              {
+                "num": "1",
+                "lines": [
+                  {
+                    "speaker": null,
+                    "text": {
+                      "zh": "这个小区环境好，{_}也不高，一个月才5000元。",
+                      "py": "zhè ge xiǎo qū huán jìng hǎo yě bù gāo yí gè yuè cái yuán"
+                    }
+                  }
+                ],
+                "answer": "B",
+                "answer_source": "moink",
+                "key": "4a-02-ex-b02-i1"
+              },
+              {
+                "num": "2",
+                "lines": [
+                  {
+                    "speaker": null,
+                    "text": {
+                      "zh": "要{_}一个好房子也不容易，需要多多比较。",
+                      "py": "yào yí gè hǎo fáng zi yě bù róng yì xū yào duō duō bǐ jiào"
+                    }
+                  }
+                ],
+                "answer": "D",
+                "answer_source": "moink",
+                "key": "4a-02-ex-b02-i2"
+              },
+              {
+                "num": "3",
+                "lines": [
+                  {
+                    "speaker": null,
+                    "text": {
+                      "zh": "我女儿每天都把房间{_}得干干净净的。",
+                      "py": "wǒ nǚ ér měi tiān dōu bǎ fáng jiān de gān gān jìng jìng de"
+                    }
+                  }
+                ],
+                "answer": "A",
+                "answer_source": "moink",
+                "key": "4a-02-ex-b02-i3"
+              },
+              {
+                "num": "4",
+                "lines": [
+                  {
+                    "speaker": null,
+                    "text": {
+                      "zh": "这次比赛的通知已经发到大家的邮箱了，请注意{_}。",
+                      "py": "zhè cì bǐ sài de tōng zhī yǐ jīng fā dào dà jiā de yóu xiāng le qǐng zhù yì"
+                    }
+                  }
+                ],
+                "answer": "E",
+                "answer_source": "moink",
+                "key": "4a-02-ex-b02-i4"
+              },
+              {
+                "num": "5",
+                "lines": [
+                  {
+                    "speaker": null,
+                    "text": {
+                      "zh": "{_}后我发现，宾馆房间的灯是坏的。",
+                      "py": "hòu wǒ fā xiàn bīn guǎn fáng jiān de dēng shì huài de"
+                    }
+                  }
+                ],
+                "answer": "C",
+                "answer_source": "moink",
+                "key": "4a-02-ex-b02-i5"
+              }
+            ]
+          }
+        },
+        {
+          "key": "4a-02-ex-b03",
+          "type": "word_bank",
+          "page": 20,
+          "source": "book",
+          "data": {
+            "bank": [
+              {
+                "label": "A",
+                "text": {
+                  "zh": "周围",
+                  "py": "zhōu wéi"
+                }
+              },
+              {
+                "label": "B",
+                "text": {
+                  "zh": "建议",
+                  "py": "jiàn yì"
+                }
+              },
+              {
+                "label": "C",
+                "text": {
+                  "zh": "查找",
+                  "py": "chá zhǎo"
+                }
+              },
+              {
+                "label": "D",
+                "text": {
+                  "zh": "客厅",
+                  "py": "kè tīng"
+                }
+              },
+              {
+                "label": "E",
+                "text": {
+                  "zh": "接着",
+                  "py": "jiē zhe"
+                }
+              }
+            ],
+            "items": [
+              {
+                "num": "6",
+                "lines": [
+                  {
+                    "speaker": "A",
+                    "text": {
+                      "zh": "我最近打算在公司附近租个房子。",
+                      "py": "wǒ zuì jìn dǎ suàn zài gōng sī fù jìn zū gè fáng zi"
+                    }
+                  },
+                  {
+                    "speaker": "B",
+                    "text": {
+                      "zh": "那你上网{_}租房信息时，一定要小心，不要只看价格。",
+                      "py": "nà nǐ shàng wǎng zū fáng xìn xī shí yí dìng yào xiǎo xīn bú yào zhǐ kàn jià gé"
+                    }
+                  }
+                ],
+                "answer": "C",
+                "answer_source": "moink",
+                "key": "4a-02-ex-b03-i1"
+              },
+              {
+                "num": "7",
+                "lines": [
+                  {
+                    "speaker": "A",
+                    "text": {
+                      "zh": "你假期打算做什么？",
+                      "py": "nǐ jià qī dǎ suàn zuò shén me"
+                    }
+                  },
+                  {
+                    "speaker": "B",
+                    "text": {
+                      "zh": "我要先回家住几天，{_}跟朋友去上海玩。",
+                      "py": "wǒ yào xiān huí jiā zhù jǐ tiān gēn péng you qù shàng hǎi wán"
+                    }
+                  }
+                ],
+                "answer": "E",
+                "answer_source": "moink",
+                "key": "4a-02-ex-b03-i2"
+              },
+              {
+                "num": "8",
+                "lines": [
+                  {
+                    "speaker": "A",
+                    "text": {
+                      "zh": "听说小区{_}有很多公司，很多年轻人都租住在附近。",
+                      "py": "tīng shuō xiǎo qū yǒu hěn duō gōng sī hěn duō nián qīng rén dōu zū zhù zài fù jìn"
+                    }
+                  },
+                  {
+                    "speaker": "B",
+                    "text": {
+                      "zh": "是的，所以周末时特别热闹。",
+                      "py": "shì de suǒ yǐ zhōu mò shí tè bié rè nao"
+                    }
+                  }
+                ],
+                "answer": "A",
+                "answer_source": "moink",
+                "key": "4a-02-ex-b03-i3"
+              },
+              {
+                "num": "9",
+                "lines": [
+                  {
+                    "speaker": "A",
+                    "text": {
+                      "zh": "这个房子怎么样？",
+                      "py": "zhè ge fáng zi zěn me yàng"
+                    }
+                  },
+                  {
+                    "speaker": "B",
+                    "text": {
+                      "zh": "很大，{_}也大，里边除了沙发以外，还有一台大电视。",
+                      "py": "hěn dà yě dà lǐ bian chú le shā fā yǐ wài hái yǒu yì tái dà diàn shì"
+                    }
+                  }
+                ],
+                "answer": "D",
+                "answer_source": "moink",
+                "key": "4a-02-ex-b03-i4"
+              },
+              {
+                "num": "10",
+                "lines": [
+                  {
+                    "speaker": "A",
+                    "text": {
+                      "zh": "关于租什么样的房子合适，你还有什么好{_}？",
+                      "py": "guān yú zū shén me yàng de fáng zi hé shì nǐ hái yǒu shén me hǎo"
+                    }
+                  },
+                  {
+                    "speaker": "B",
+                    "text": {
+                      "zh": "除了离公司近以外，我觉得生活上方便也很重要。",
+                      "py": "chú le lí gōng sī jìn yǐ wài wǒ jué de shēng huó shàng fāng biàn yě hěn zhòng yào"
+                    }
+                  }
+                ],
+                "answer": "B",
+                "answer_source": "moink",
+                "key": "4a-02-ex-b03-i5"
+              }
+            ]
+          }
+        },
+        {
+          "key": "4a-02-ex-b04",
+          "type": "instruction",
+          "page": 21,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "选择合适的内容完成短文。",
+              "py": "xuǎn zé hé shì de nèi róng wán chéng duǎn wén"
+            },
+            "en": "Choose the appropriate options to complete the passage.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-02-ex-b05",
+          "type": "passage_fill",
+          "page": 21,
+          "source": "book",
+          "data": {
+            "options": [
+              {
+                "label": "A",
+                "text": {
+                  "zh": "就给房东打了电话",
+                  "py": "jiù gěi fáng dōng dǎ le diàn huà"
+                }
+              },
+              {
+                "label": "B",
+                "text": {
+                  "zh": "觉得房子很不错",
+                  "py": "jué de fáng zi hěn bú cuò"
+                }
+              },
+              {
+                "label": "C",
+                "text": {
+                  "zh": "她决定在公司附近租个房子",
+                  "py": "tā jué dìng zài gōng sī fù jìn zū gè fáng zi"
+                }
+              },
+              {
+                "label": "D",
+                "text": {
+                  "zh": "但是很干净",
+                  "py": "dàn shì hěn gān jìng"
+                }
+              }
+            ],
+            "text": {
+              "zh": "小张最近换了一个比较理想的工作。由于新公司离她现在住的地方比较远，{_}。她在网上查找到一条出租信息，{_}。房东说，小张要租的房子不太大，{_}，房租不高，位置也比较好。接着，房东又建议小张过去看看。小张看了以后，{_}，就租了下来。",
+              "py": "xiǎo zhāng zuì jìn huàn le yí gè bǐ jiào lǐ xiǎng de gōng zuò yóu yú xīn gōng sī lí tā xiàn zài zhù de dì fang bǐ jiào yuǎn tā zài wǎng shàng chá zhǎo dào yì tiáo chū zū xìn xī fáng dōng shuō xiǎo zhāng yào zū de fáng zi bú tài dà fáng zū bù gāo wèi zhi yě bǐ jiào hǎo jiē zhe fáng dōng yòu jiàn yì xiǎo zhāng guò qù kàn kan xiǎo zhāng kàn le yǐ hòu jiù zū le xià lái"
+            },
+            "answers": [
+              "C",
+              "A",
+              "D",
+              "B"
+            ],
+            "answer_source": "moink",
+            "answer_key": "4a-02-ex-b05-a"
+          }
+        },
+        {
+          "key": "4a-02-ex-b06",
+          "type": "instruction",
+          "page": 21,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "看图，用词语造句。",
+              "py": "kàn tú yòng cí yǔ zào jù"
+            },
+            "en": "Look at the pictures and write sentences using the given words.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-02-ex-b07",
+          "type": "picture_write",
+          "page": 21,
+          "source": "book",
+          "data": {
+            "items": [
+              {
+                "num": "1",
+                "image": {
+                  "src": "4a/02/write-1.webp",
+                  "alt": "Two people talking in a kitchen"
+                },
+                "word": {
+                  "zh": "房东",
+                  "py": "fáng dōng"
+                },
+                "sample": [
+                  {
+                    "zh": "房东正在给他介绍厨房。",
+                    "py": "fáng dōng zhèng zài gěi tā jiè shào chú fáng"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-02-ex-b07-i1"
+              },
+              {
+                "num": "2",
+                "image": {
+                  "src": "4a/02/write-2.webp",
+                  "alt": "Folded towels stacked on shelves"
+                },
+                "word": {
+                  "zh": "毛巾",
+                  "py": "máo jīn"
+                },
+                "sample": [
+                  {
+                    "zh": "商店里有很多颜色的毛巾。",
+                    "py": "shāng diàn li yǒu hěn duō yán sè de máo jīn"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-02-ex-b07-i2"
+              },
+              {
+                "num": "3",
+                "image": {
+                  "src": "4a/02/write-3.webp",
+                  "alt": "The traditional gate of Peking University"
+                },
+                "word": {
+                  "zh": "理想",
+                  "py": "lǐ xiǎng"
+                },
+                "sample": [
+                  {
+                    "zh": "北京大学是我理想的大学。",
+                    "py": "běi jīng dà xué shì wǒ lǐ xiǎng de dà xué"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-02-ex-b07-i3"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "4a-02-task",
+      "kind": "task",
+      "label_zh": "任务活动",
+      "label_en": "Task-Based Activities",
+      "page": 21,
+      "blocks": [
+        {
+          "key": "4a-02-task-b01",
+          "type": "task",
+          "page": 21,
+          "source": "book",
+          "data": {
+            "title": {
+              "zh": "角色扮演",
+              "py": "jué sè bàn yǎn"
+            },
+            "title_en": "Role-Play",
+            "answer_mode": "notes",
+            "text": {
+              "zh": "一个人扮演租房人，另一个人扮演房东。租房人到房东那儿看房子，询问租房价格、房屋情况及周围环境等，房东一一向租房人介绍。",
+              "py": "yí gè rén bàn yǎn zū fáng rén lìng yí gè rén bàn yǎn fáng dōng zū fáng rén dào fáng dōng nà r kàn fáng zi xún wèn zū fáng jià gé fáng wū qíng kuàng jí zhōu wéi huán jìng děng fáng dōng yī yī xiàng zū fáng rén jiè shào"
+            },
+            "en": "One person plays the tenant, and the other plays the landlord. The tenant visits the landlord to view the apartment, asking about the rental price, the condition of the apartment, and the surrounding environment. The landlord provides a detailed introduction of each aspect to the tenant.",
+            "answer_key": "4a-02-task-b01-a"
+          }
+        },
+        {
+          "key": "4a-02-task-b02",
+          "type": "task",
+          "page": 22,
+          "source": "book",
+          "data": {
+            "title": {
+              "zh": "写作",
+              "py": "xiě zuò"
+            },
+            "title_en": "Writing",
+            "answer_mode": "text",
+            "min_chars": 120,
+            "text": {
+              "zh": "假如你是一个刚毕业的大学生，想要租房子。请你写一段租房需求信息，不少于120字。",
+              "py": "jiǎ rú nǐ shì yí gè gāng bì yè de dà xué shēng xiǎng yào zū fáng zi qǐng nǐ xiě yí duàn zū fáng xū qiú xìn xī bù shǎo yú zì"
+            },
+            "en": "If you are a recent university graduate looking to rent an apartment, please write a description of your rental requirements with at least 120 characters.",
+            "answer_key": "4a-02-task-b02-a"
+          }
+        }
+      ]
+    },
+    {
+      "key": "4a-02-sum",
+      "kind": "summary",
+      "label_zh": "学习小结",
+      "label_en": "Learning Summary",
+      "page": 22,
+      "blocks": [
+        {
+          "key": "4a-02-sum-b01",
+          "type": "self_check",
+          "page": 22,
+          "source": "book",
+          "data": {
+            "intro": {
+              "zh": "本课你学得怎么样？记住了多少词汇？“小语讲堂”里的语言点你会用了吗？关于租房子的话题，你能表达了吗？请想一想，填写下边的表格：",
+              "py": "běn kè nǐ xué de zěn me yàng jì zhù le duō shǎo cí huì xiǎo yǔ jiǎng táng lǐ de yǔ yán diǎn nǐ huì yòng le ma guān yú zū fáng zi de huà tí nǐ néng biǎo dá le ma qǐng xiǎng yi xiǎng tián xiě xià bian de biǎo gé"
+            },
+            "intro_en": "How much did you learn in this lesson? How many words do you remember? Can you apply the language points from “Xiaoyu's Classroom”? Can you communicate effectively on the topic of renting an apartment? Please reflect on these questions and complete the table below:",
+            "scale": [
+              {
+                "zh": "没问题",
+                "en": "No Problem"
+              },
+              {
+                "zh": "还可以",
+                "en": "It's OK"
+              },
+              {
+                "zh": "需要努力",
+                "en": "Need to Improve"
+              }
+            ],
+            "rows": [
+              {
+                "text": {
+                  "zh": "能使用本课“房东、出租、房租、收拾、租、入住”等词语，谈论租房话题。",
+                  "py": "néng shǐ yòng běn kè fáng dōng chū zū fáng zū shōu shi zū rù zhù děng cí yǔ tán lùn zū fáng huà tí"
+                },
+                "en": "Be able to use key vocabulary from this lesson, such as “房东”, “出租”, “房租”, “收拾”, “租”, and “入住”, to discuss the topic of renting an apartment.",
+                "key": "4a-02-sum-b01-r1"
+              },
+              {
+                "text": {
+                  "zh": "能理解并运用“×就是了”“……，不过……”“并”“由于”等语言点。",
+                  "py": "néng lǐ jiě bìng yùn yòng jiù shì le bú guò bìng yóu yú děng yǔ yán diǎn"
+                },
+                "en": "Be able to understand and apply language points such as “×就是了”, “……，不过……”, “并”, and “由于”.",
+                "key": "4a-02-sum-b01-r2"
+              },
+              {
+                "text": {
+                  "zh": "能表达租房还是买房的观点。",
+                  "py": "néng biǎo dá zū fáng hái shi mǎi fáng de guān diǎn"
+                },
+                "en": "Be able to express your views on renting or buying an apartment.",
+                "key": "4a-02-sum-b01-r3"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

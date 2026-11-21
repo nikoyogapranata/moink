@@ -260,7 +260,7 @@ function Passage({ data, ctx }: { data: BlockData["passage"]; ctx: BlockContext 
       <div className="flex flex-col gap-3">
         {data.paragraphs.map((p, i) => (
           <div key={i}>
-            <p className={`${ZH_LG} indent-[2em]`}>
+            <p className={`${ZH_LG} ${p.indent === false ? "" : "indent-[2em]"}`}>
               <ZhText text={p.text} /> <SpeakButton text={speakable(p.text)} />
             </p>
             <En className="mt-1">{p.en}</En>

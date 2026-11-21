@@ -1,0 +1,3283 @@
+{
+  "book": {
+    "slug": "4a",
+    "title_zh": "新HSK教程 4上",
+    "title_en": "New HSK Course 4A",
+    "level": 4,
+    "standard": "hsk3_2025"
+  },
+  "lesson": {
+    "number": 1,
+    "title": {
+      "zh": "我们来中国学习了",
+      "py": "wǒ men lái zhōng guó xué xí le"
+    },
+    "title_en": "We have come to China to study",
+    "page_start": 1,
+    "page_end": 11
+  },
+  "sections": [
+    {
+      "key": "4a-01-obj",
+      "kind": "objectives",
+      "label_zh": "目标",
+      "label_en": "Objectives",
+      "page": 1,
+      "blocks": [
+        {
+          "key": "4a-01-obj-b01",
+          "type": "objectives",
+          "page": 1,
+          "source": "book",
+          "data": {
+            "items": [
+              {
+                "text": {
+                  "zh": "能够听懂并交流办理入学手续和申请奖学金的信息。",
+                  "py": "néng gòu tīng dǒng bìng jiāo liú bàn lǐ rù xué shǒu xù hé shēn qǐng jiǎng xué jīn de xìn xī"
+                },
+                "en": "Be able to understand and discuss information about enrollment procedures and scholarship applications.",
+                "key": "4a-01-obj-b01-i1"
+              },
+              {
+                "text": {
+                  "zh": "能够口头或书面表达专业选择理由及未来职业发展方向。",
+                  "py": "néng gòu kǒu tóu huò shū miàn biǎo dá zhuān yè xuǎn zé lǐ yóu jí wèi lái zhí yè fā zhǎn fāng xiàng"
+                },
+                "en": "Be able to express the reasons for choosing a major and describe future career development plans orally or in writing.",
+                "key": "4a-01-obj-b01-i2"
+              },
+              {
+                "text": {
+                  "zh": "了解外国学生在中国大学的学习和生活情况。",
+                  "py": "liǎo jiě wài guó xué sheng zài zhōng guó dà xué de xué xí hé shēng huó qíng kuàng"
+                },
+                "en": "Understand the study and life of international students at Chinese universities.",
+                "key": "4a-01-obj-b01-i3"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "4a-01-warm",
+      "kind": "warmup",
+      "label_zh": "热身",
+      "label_en": "Warm-Up",
+      "page": 1,
+      "blocks": [
+        {
+          "key": "4a-01-warm-b01",
+          "type": "instruction",
+          "page": 1,
+          "source": "book",
+          "data": {
+            "num": "1",
+            "text": {
+              "zh": "给下面的词语选择对应的图片。",
+              "py": "gěi xià miàn de cí yǔ xuǎn zé duì yìng de tú piàn"
+            },
+            "en": "Match the words with the pictures.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-01-warm-b02",
+          "type": "image_match",
+          "page": 1,
+          "source": "book",
+          "data": {
+            "images": [
+              {
+                "src": "4a/01/warmup-1.webp",
+                "alt": "A teacher standing at a blackboard",
+                "answer": "E",
+                "key": "4a-01-warm-b02-i1"
+              },
+              {
+                "src": "4a/01/warmup-2.webp",
+                "alt": "Food counters in a dining hall",
+                "answer": "C",
+                "key": "4a-01-warm-b02-i2"
+              },
+              {
+                "src": "4a/01/warmup-3.webp",
+                "alt": "A crowd cheering",
+                "answer": "F",
+                "key": "4a-01-warm-b02-i3"
+              },
+              {
+                "src": "4a/01/warmup-4.webp",
+                "alt": "A stack of papers",
+                "answer": "D",
+                "key": "4a-01-warm-b02-i4"
+              },
+              {
+                "src": "4a/01/warmup-5.webp",
+                "alt": "A woman holding up an ID card",
+                "answer": "A",
+                "key": "4a-01-warm-b02-i5"
+              },
+              {
+                "src": "4a/01/warmup-6.webp",
+                "alt": "A graduate in a doctoral gown",
+                "answer": "B",
+                "key": "4a-01-warm-b02-i6"
+              }
+            ],
+            "options": [
+              {
+                "label": "A",
+                "text": {
+                  "zh": "证件",
+                  "py": "zhèng jiàn"
+                }
+              },
+              {
+                "label": "B",
+                "text": {
+                  "zh": "博士",
+                  "py": "bó shì"
+                }
+              },
+              {
+                "label": "C",
+                "text": {
+                  "zh": "食堂",
+                  "py": "shí táng"
+                }
+              },
+              {
+                "label": "D",
+                "text": {
+                  "zh": "材料",
+                  "py": "cái liào"
+                }
+              },
+              {
+                "label": "E",
+                "text": {
+                  "zh": "教师",
+                  "py": "jiào shī"
+                }
+              },
+              {
+                "label": "F",
+                "text": {
+                  "zh": "加油",
+                  "py": "jiā yóu"
+                }
+              }
+            ],
+            "answer_source": "moink"
+          }
+        },
+        {
+          "key": "4a-01-warm-b03",
+          "type": "instruction",
+          "page": 1,
+          "source": "book",
+          "data": {
+            "num": "2",
+            "text": {
+              "zh": "两人一组，根据实际情况互相问答。",
+              "py": "liǎng rén yì zǔ gēn jù shí jì qíng kuàng hù xiāng wèn dá"
+            },
+            "en": "Work in pairs and ask each other questions based on real-life situations.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-01-warm-b04",
+          "type": "prompts",
+          "page": 1,
+          "source": "book",
+          "data": {
+            "answer_mode": "text",
+            "items": [
+              {
+                "num": "1",
+                "text": {
+                  "zh": "到中国留学，需要准备什么证件和材料？",
+                  "py": "dào zhōng guó liú xué xū yào zhǔn bèi shén me zhèng jiàn hé cái liào"
+                },
+                "key": "4a-01-warm-b04-i1"
+              },
+              {
+                "num": "2",
+                "text": {
+                  "zh": "你打算学习什么专业？为什么？",
+                  "py": "nǐ dǎ suàn xué xí shén me zhuān yè wèi shén me"
+                },
+                "key": "4a-01-warm-b04-i2"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "4a-01-t1",
+      "kind": "text",
+      "label_zh": "课文 1",
+      "label_en": "Text 1",
+      "page": 2,
+      "blocks": [
+        {
+          "key": "4a-01-t1-b01",
+          "type": "scene",
+          "page": 2,
+          "source": "book",
+          "data": {
+            "icon": "pin",
+            "text": {
+              "zh": "在学院办公室，白家月和陈天中在办理入学手续。",
+              "py": "zài xué yuàn bàn gōng shì bái jiā yuè hé chén tiān zhōng zài bàn lǐ rù xué shǒu xù"
+            },
+            "en": "At the college office, Bai Jiayue and Chen Tianzhong were going through the enrollment procedures."
+          }
+        },
+        {
+          "key": "4a-01-t1-b02",
+          "type": "instruction",
+          "page": 2,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "听对话，选择正确答案。",
+              "py": "tīng duì huà xuǎn zé zhèng què dá àn"
+            },
+            "en": "Listen to the dialogue and choose the correct answer.",
+            "audio": "1-1"
+          }
+        },
+        {
+          "key": "4a-01-t1-b03",
+          "type": "choice",
+          "page": 2,
+          "source": "book",
+          "data": {
+            "items": [
+              {
+                "num": "1",
+                "text": {
+                  "zh": "老师给白家月什么了？",
+                  "py": "lǎo shī gěi bái jiā yuè shén me le"
+                },
+                "options": [
+                  {
+                    "label": "A",
+                    "text": {
+                      "zh": "护照",
+                      "py": "hù zhào"
+                    }
+                  },
+                  {
+                    "label": "B",
+                    "text": {
+                      "zh": "签证",
+                      "py": "qiān zhèng"
+                    }
+                  },
+                  {
+                    "label": "C",
+                    "text": {
+                      "zh": "学生证",
+                      "py": "xué sheng zhèng"
+                    }
+                  },
+                  {
+                    "label": "D",
+                    "text": {
+                      "zh": "入学通知书",
+                      "py": "rù xué tōng zhī shū"
+                    }
+                  }
+                ],
+                "answer": "C",
+                "answer_source": "moink",
+                "key": "4a-01-t1-b03-i1"
+              },
+              {
+                "num": "2",
+                "text": {
+                  "zh": "他们什么时候开始上课？",
+                  "py": "tā men shén me shí hou kāi shǐ shàng kè"
+                },
+                "options": [
+                  {
+                    "label": "A",
+                    "text": {
+                      "zh": "今天",
+                      "py": "jīn tiān"
+                    }
+                  },
+                  {
+                    "label": "B",
+                    "text": {
+                      "zh": "明天",
+                      "py": "míng tiān"
+                    }
+                  },
+                  {
+                    "label": "C",
+                    "text": {
+                      "zh": "下周一",
+                      "py": "xià zhōu yī"
+                    }
+                  },
+                  {
+                    "label": "D",
+                    "text": {
+                      "zh": "两周后",
+                      "py": "liǎng zhōu hòu"
+                    }
+                  }
+                ],
+                "answer": "C",
+                "answer_source": "moink",
+                "key": "4a-01-t1-b03-i2"
+              }
+            ]
+          }
+        },
+        {
+          "key": "4a-01-t1-b04",
+          "type": "dialogue",
+          "page": 2,
+          "source": "book",
+          "data": {
+            "image": {
+              "src": "4a/01/text1.webp",
+              "alt": "Two students handing documents to a teacher at a desk"
+            },
+            "lines": [
+              {
+                "speaker": [
+                  "老师"
+                ],
+                "text": {
+                  "zh": "你们好，欢迎来到中国留学！请把护照、签证和入学通知书给我。",
+                  "py": "nǐ men hǎo huān yíng lái dào zhōng guó liú xué qǐng bǎ hù zhào qiān zhèng hé rù xué tōng zhī shū gěi wǒ"
+                },
+                "en": "Hello, and welcome to China to study! Please give me your passports, visas and admission letters.",
+                "en_source": "moink",
+                "key": "4a-01-t1-b04-l1"
+              },
+              {
+                "speaker": [
+                  "白家月"
+                ],
+                "text": {
+                  "zh": "好的。这是我们的证件和材料。",
+                  "py": "hǎo de zhè shì wǒ men de zhèng jiàn hé cái liào"
+                },
+                "en": "Sure. Here are our documents and papers.",
+                "en_source": "moink",
+                "key": "4a-01-t1-b04-l2"
+              },
+              {
+                "speaker": null,
+                "text": {
+                  "zh": "（几分钟后。）",
+                  "py": "jǐ fēn zhōng hòu"
+                },
+                "en": "(A few minutes later.)",
+                "en_source": "moink",
+                "key": "4a-01-t1-b04-l3"
+              },
+              {
+                "speaker": [
+                  "老师"
+                ],
+                "text": {
+                  "zh": "办好了，这是你们的学生证，下周一开始上课。先试听两周，然后在网上选课。",
+                  "py": "bàn hǎo le zhè shì nǐ men de xué sheng zhèng xià zhōu yī kāi shǐ shàng kè xiān shì tīng liǎng zhōu rán hòu zài wǎng shàng xuǎn kè"
+                },
+                "en": "All done. Here are your student IDs. Classes start next Monday. You'll sit in on classes for two weeks first, then choose your courses online.",
+                "en_source": "moink",
+                "key": "4a-01-t1-b04-l4"
+              },
+              {
+                "speaker": [
+                  "白家月",
+                  "陈天中"
+                ],
+                "text": {
+                  "zh": "谢谢老师。",
+                  "py": "xiè xie lǎo shī"
+                },
+                "en": "Thank you.",
+                "en_source": "moink",
+                "key": "4a-01-t1-b04-l5"
+              },
+              {
+                "speaker": [
+                  "老师"
+                ],
+                "text": {
+                  "zh": "不客气，你们以后有任何问题都可以来找我。",
+                  "py": "bú kè qi nǐ men yǐ hòu yǒu rèn hé wèn tí dōu kě yǐ lái zhǎo wǒ"
+                },
+                "en": "You're welcome. If you have any questions later on, you can always come to me.",
+                "en_source": "moink",
+                "key": "4a-01-t1-b04-l6"
+              }
+            ]
+          }
+        },
+        {
+          "key": "4a-01-t1-b05",
+          "type": "vocab",
+          "page": 2,
+          "source": "book",
+          "data": {
+            "audio": "1-2",
+            "items": [
+              {
+                "num": "1",
+                "hanzi": "签证",
+                "pinyin": "qiānzhèng",
+                "pos": "n.",
+                "en": "visa",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "办签证",
+                    "py": "bàn qiān zhèng"
+                  },
+                  "en": "get a visa"
+                },
+                "key": "4a-01-t1-b05-i1"
+              },
+              {
+                "num": "2",
+                "hanzi": "入学",
+                "pinyin": "rùxué",
+                "pos": "v.",
+                "en": "enter a school/college",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "入学考试",
+                    "py": "rù xué kǎo shì"
+                  },
+                  "en": "entrance exam"
+                },
+                "key": "4a-01-t1-b05-i2"
+              },
+              {
+                "num": "3",
+                "hanzi": "通知",
+                "pinyin": "tōngzhī",
+                "pos": "v./n.",
+                "en": "notify (sb of sth); notice",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "通知大家",
+                    "py": "tōng zhī dà jiā"
+                  },
+                  "en": "let everyone know"
+                },
+                "key": "4a-01-t1-b05-i3"
+              },
+              {
+                "num": "4",
+                "hanzi": "证件",
+                "pinyin": "zhèngjiàn",
+                "pos": "n.",
+                "en": "papers",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "带好证件",
+                    "py": "dài hǎo zhèng jiàn"
+                  },
+                  "en": "bring your ID"
+                },
+                "key": "4a-01-t1-b05-i4"
+              },
+              {
+                "num": "5",
+                "hanzi": "材料",
+                "pinyin": "cáiliào",
+                "pos": "n.",
+                "en": "reference material; material",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "准备材料",
+                    "py": "zhǔn bèi cái liào"
+                  },
+                  "en": "prepare the documents"
+                },
+                "key": "4a-01-t1-b05-i5"
+              },
+              {
+                "num": "6",
+                "hanzi": "证",
+                "pinyin": "zhèng",
+                "pos": "n.",
+                "en": "certificate",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "工作证",
+                    "py": "gōng zuò zhèng"
+                  },
+                  "en": "work ID"
+                },
+                "key": "4a-01-t1-b05-i6"
+              },
+              {
+                "num": "7",
+                "hanzi": "任何",
+                "pinyin": "rènhé",
+                "pos": "pron.",
+                "en": "any",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "任何时候",
+                    "py": "rèn hé shí hou"
+                  },
+                  "en": "any time"
+                },
+                "key": "4a-01-t1-b05-i7"
+              }
+            ]
+          }
+        },
+        {
+          "key": "4a-01-t1-b06",
+          "type": "instruction",
+          "page": 2,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "分角色朗读对话。",
+              "py": "fēn jué sè lǎng dú duì huà"
+            },
+            "en": "Role-play the dialogue.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-01-t1-b07",
+          "type": "instruction",
+          "page": 2,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "根据课文内容回答问题。",
+              "py": "gēn jù kè wén nèi róng huí dá wèn tí"
+            },
+            "en": "Answer the questions according to the text.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-01-t1-b08",
+          "type": "prompts",
+          "page": 2,
+          "source": "book",
+          "data": {
+            "answer_mode": "text",
+            "items": [
+              {
+                "num": "1",
+                "text": {
+                  "zh": "他们要给老师什么证件和材料？",
+                  "py": "tā men yào gěi lǎo shī shén me zhèng jiàn hé cái liào"
+                },
+                "sample": [
+                  {
+                    "zh": "护照、签证和入学通知书。",
+                    "py": "hù zhào qiān zhèng hé rù xué tōng zhī shū"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-01-t1-b08-i1"
+              },
+              {
+                "num": "2",
+                "text": {
+                  "zh": "他们在哪儿选课？",
+                  "py": "tā men zài nǎ r xuǎn kè"
+                },
+                "sample": [
+                  {
+                    "zh": "在网上选课。",
+                    "py": "zài wǎng shàng xuǎn kè"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-01-t1-b08-i2"
+              }
+            ]
+          }
+        },
+        {
+          "key": "4a-01-t1-b09",
+          "type": "instruction",
+          "page": 3,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "根据给出的提示复述课文。",
+              "py": "gēn jù gěi chū de tí shì fù shù kè wén"
+            },
+            "en": "Retell the text using the provided prompts.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-01-t1-b10",
+          "type": "retell",
+          "page": 3,
+          "source": "book",
+          "data": {
+            "text": {
+              "zh": "白家月和陈天中来中国……。他们把……给老师，老师给他们办了……。老师告诉他们，下周一……，先……，然后……。以后如果有……，都可以……。",
+              "py": "bái jiā yuè hé chén tiān zhōng lái zhōng guó tā men bǎ gěi lǎo shī lǎo shī gěi tā men bàn le lǎo shī gào su tā men xià zhōu yī xiān rán hòu yǐ hòu rú guǒ yǒu dōu kě yǐ"
+            },
+            "answer_key": "4a-01-t1-b10-a"
+          }
+        }
+      ]
+    },
+    {
+      "key": "4a-01-g1",
+      "kind": "grammar",
+      "label_zh": "小语讲堂 1",
+      "label_en": "Xiaoyu's Classroom",
+      "page": 3,
+      "blocks": [
+        {
+          "key": "4a-01-g1-b01",
+          "type": "grammar",
+          "page": 3,
+          "source": "book",
+          "data": {
+            "num": "1",
+            "title": {
+              "zh": "指示代词“任何”",
+              "py": "zhǐ shì dài cí rèn hé"
+            },
+            "title_en": "Demonstrative Pronoun “任何”",
+            "explain": {
+              "zh": "指示代词“任何”表示“无论什么”的意思，修饰名词时一般不带“的”，后面常有“都”或“也”与之搭配。例如：",
+              "py": "zhǐ shì dài cí rèn hé biǎo shì wú lùn shén me de yì si xiū shì míng cí shí yì bān bú dài de hòu miàn cháng yǒu dōu huò yě yǔ zhī dā pèi lì rú"
+            },
+            "explain_en": "The demonstrative pronoun “任何” means “whatever; any”. When modifying nouns, it generally does not take “的”, and is often followed by “都” or “也”. For example:",
+            "examples": [
+              {
+                "text": {
+                  "zh": "你们以后有任何问题都可以来找我。",
+                  "py": "nǐ men yǐ hòu yǒu rèn hé wèn tí dōu kě yǐ lái zhǎo wǒ"
+                },
+                "en": "If you have any questions later, you can come to me.",
+                "en_source": "moink"
+              },
+              {
+                "text": {
+                  "zh": "明天我们8点出发，任何人也不能迟到。",
+                  "py": "míng tiān wǒ men diǎn chū fā rèn hé rén yě bù néng chí dào"
+                },
+                "en": "We set off at 8 tomorrow. Nobody can be late.",
+                "en_source": "moink"
+              },
+              {
+                "text": {
+                  "zh": "学校有任何通知，我都会第一时间告诉你。",
+                  "py": "xué xiào yǒu rèn hé tōng zhī wǒ dōu huì dì yī shí jiān gào su nǐ"
+                },
+                "en": "Whenever the school sends out a notice, I'll tell you right away.",
+                "en_source": "moink"
+              }
+            ],
+            "extra": {
+              "source": "moink",
+              "examples": [
+                {
+                  "text": {
+                    "zh": "任何时候都可以给我打电话。",
+                    "py": "rèn hé shí hou dōu kě yǐ gěi wǒ dǎ diàn huà"
+                  },
+                  "en": "You can call me any time.",
+                  "en_source": "moink"
+                },
+                {
+                  "text": {
+                    "zh": "这件事我没告诉任何人。",
+                    "py": "zhè jiàn shì wǒ méi gào su rèn hé rén"
+                  },
+                  "en": "I didn't tell anyone about this.",
+                  "en_source": "moink"
+                }
+              ],
+              "related": [
+                "question-word-any"
+              ]
+            }
+          }
+        },
+        {
+          "key": "4a-01-g1-b02",
+          "type": "instruction",
+          "page": 3,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "完成对话。",
+              "py": "wán chéng duì huà"
+            },
+            "en": "Complete the dialogues.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-01-g1-b03",
+          "type": "dialogue_fill",
+          "page": 3,
+          "source": "book",
+          "data": {
+            "items": [
+              {
+                "num": "1",
+                "lines": [
+                  {
+                    "speaker": "A",
+                    "text": {
+                      "zh": "听说王老师特别热情？",
+                      "py": "tīng shuō wáng lǎo shī tè bié rè qíng"
+                    }
+                  },
+                  {
+                    "speaker": "B",
+                    "text": {
+                      "zh": "{_}。",
+                      "py": ""
+                    }
+                  }
+                ],
+                "sample": [
+                  {
+                    "zh": "是啊，你有任何问题，他都会帮你",
+                    "py": "shì a nǐ yǒu rèn hé wèn tí tā dōu huì bāng nǐ"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-01-g1-b03-i1"
+              },
+              {
+                "num": "2",
+                "lines": [
+                  {
+                    "speaker": "A",
+                    "text": {
+                      "zh": "外国学生能参加学校运动会吗？",
+                      "py": "wài guó xué sheng néng cān jiā xué xiào yùn dòng huì ma"
+                    }
+                  },
+                  {
+                    "speaker": "B",
+                    "text": {
+                      "zh": "{_}。",
+                      "py": ""
+                    }
+                  }
+                ],
+                "sample": [
+                  {
+                    "zh": "能，任何学生都可以参加",
+                    "py": "néng rèn hé xué sheng dōu kě yǐ cān jiā"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-01-g1-b03-i2"
+              },
+              {
+                "num": "3",
+                "lines": [
+                  {
+                    "speaker": "A",
+                    "text": {
+                      "zh": "明天的会议，不会有变化了吧？",
+                      "py": "míng tiān de huì yì bú huì yǒu biàn huà le ba"
+                    }
+                  },
+                  {
+                    "speaker": "B",
+                    "text": {
+                      "zh": "{_}。",
+                      "py": ""
+                    }
+                  }
+                ],
+                "sample": [
+                  {
+                    "zh": "放心吧，要是有任何变化，我都会通知你",
+                    "py": "fàng xīn ba yào shi yǒu rèn hé biàn huà wǒ dōu huì tōng zhī nǐ"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-01-g1-b03-i3"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "4a-01-t2",
+      "kind": "text",
+      "label_zh": "课文 2",
+      "label_en": "Text 2",
+      "page": 3,
+      "blocks": [
+        {
+          "key": "4a-01-t2-b01",
+          "type": "scene",
+          "page": 3,
+          "source": "book",
+          "data": {
+            "icon": "pin",
+            "text": {
+              "zh": "在大学校园，白家月和陈天中边逛边聊。",
+              "py": "zài dà xué xiào yuán bái jiā yuè hé chén tiān zhōng biān guàng biān liáo"
+            },
+            "en": "On the university campus, Bai Jiayue and Chen Tianzhong were strolling and chatting."
+          }
+        },
+        {
+          "key": "4a-01-t2-b02",
+          "type": "instruction",
+          "page": 3,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "听对话，选择正确答案。",
+              "py": "tīng duì huà xuǎn zé zhèng què dá àn"
+            },
+            "en": "Listen to the dialogue and choose the correct answer.",
+            "audio": "1-3"
+          }
+        },
+        {
+          "key": "4a-01-t2-b03",
+          "type": "choice",
+          "page": 3,
+          "source": "book",
+          "data": {
+            "items": [
+              {
+                "num": "1",
+                "text": {
+                  "zh": "白家月觉得学校怎么样？",
+                  "py": "bái jiā yuè jué de xué xiào zěn me yàng"
+                },
+                "options": [
+                  {
+                    "label": "A",
+                    "text": {
+                      "zh": "不太大",
+                      "py": "bú tài dà"
+                    }
+                  },
+                  {
+                    "label": "B",
+                    "text": {
+                      "zh": "很安静",
+                      "py": "hěn ān jìng"
+                    }
+                  },
+                  {
+                    "label": "C",
+                    "text": {
+                      "zh": "非常不方便",
+                      "py": "fēi cháng bù fāng biàn"
+                    }
+                  },
+                  {
+                    "label": "D",
+                    "text": {
+                      "zh": "像座小城市",
+                      "py": "xiàng zuò xiǎo chéng shì"
+                    }
+                  }
+                ],
+                "answer": "D",
+                "answer_source": "moink",
+                "key": "4a-01-t2-b03-i1"
+              },
+              {
+                "num": "2",
+                "text": {
+                  "zh": "陈天中为什么想申请奖学金？",
+                  "py": "chén tiān zhōng wèi shén me xiǎng shēn qǐng jiǎng xué jīn"
+                },
+                "options": [
+                  {
+                    "label": "A",
+                    "text": {
+                      "zh": "想提高成绩",
+                      "py": "xiǎng tí gāo chéng jì"
+                    }
+                  },
+                  {
+                    "label": "B",
+                    "text": {
+                      "zh": "想让家人高兴",
+                      "py": "xiǎng ràng jiā rén gāo xìng"
+                    }
+                  },
+                  {
+                    "label": "C",
+                    "text": {
+                      "zh": "为了减轻经济压力",
+                      "py": "wèi le jiǎn qīng jīng jì yā lì"
+                    }
+                  },
+                  {
+                    "label": "D",
+                    "text": {
+                      "zh": "为了认识表现好的同学",
+                      "py": "wèi le rèn shi biǎo xiàn hǎo de tóng xué"
+                    }
+                  }
+                ],
+                "answer": "C",
+                "answer_source": "moink",
+                "key": "4a-01-t2-b03-i2"
+              }
+            ]
+          }
+        },
+        {
+          "key": "4a-01-t2-b04",
+          "type": "dialogue",
+          "page": 4,
+          "source": "book",
+          "data": {
+            "image": {
+              "src": "4a/01/text2.webp",
+              "alt": "Two students walking and talking on campus"
+            },
+            "lines": [
+              {
+                "speaker": [
+                  "陈天中"
+                ],
+                "text": {
+                  "zh": "你看，咱们的校园真大！有图书馆、体育馆、超市，还有好几个食堂。",
+                  "py": "nǐ kàn zán men de xiào yuán zhēn dà yǒu tú shū guǎn tǐ yù guǎn chāo shì hái yǒu hǎo jǐ gè shí táng"
+                },
+                "en": "Look, our campus is so big! There's a library, a gym, a supermarket, and quite a few dining halls.",
+                "en_source": "moink",
+                "key": "4a-01-t2-b04-l1"
+              },
+              {
+                "speaker": [
+                  "白家月"
+                ],
+                "text": {
+                  "zh": "是啊，我觉得学校就像一座小城市，什么都有，方便极了。",
+                  "py": "shì a wǒ jué de xué xiào jiù xiàng yí zuò xiǎo chéng shì shén me dōu yǒu fāng biàn jí le"
+                },
+                "en": "Yes, I think the school is like a small city. It has everything, it's so convenient.",
+                "en_source": "moink",
+                "key": "4a-01-t2-b04-l2"
+              },
+              {
+                "speaker": [
+                  "陈天中"
+                ],
+                "text": {
+                  "zh": "刚才老师说，咱们可以申请奖学金，你了解过吗？",
+                  "py": "gāng cái lǎo shī shuō zán men kě yǐ shēn qǐng jiǎng xué jīn nǐ liǎo jiě guo ma"
+                },
+                "en": "The teacher just said we can apply for scholarships. Have you looked into it?",
+                "en_source": "moink",
+                "key": "4a-01-t2-b04-l3"
+              },
+              {
+                "speaker": [
+                  "白家月"
+                ],
+                "text": {
+                  "zh": "我听说过一点儿，好像成绩好、表现好的学生都有机会获得奖学金。",
+                  "py": "wǒ tīng shuō guo yì diǎn r hǎo xiàng chéng jì hǎo biǎo xiàn hǎo de xué sheng dōu yǒu jī huì huò dé jiǎng xué jīn"
+                },
+                "en": "I've heard a little. It seems students with good grades and good performance all have a chance to get one.",
+                "en_source": "moink",
+                "key": "4a-01-t2-b04-l4"
+              },
+              {
+                "speaker": [
+                  "陈天中"
+                ],
+                "text": {
+                  "zh": "那太好了，要是申请到奖学金，就能减轻不少经济压力。",
+                  "py": "nà tài hǎo le yào shi shēn qǐng dào jiǎng xué jīn jiù néng jiǎn qīng bù shǎo jīng jì yā lì"
+                },
+                "en": "That's great. If we get a scholarship, it'll take a lot of financial pressure off.",
+                "en_source": "moink",
+                "key": "4a-01-t2-b04-l5"
+              },
+              {
+                "speaker": [
+                  "白家月"
+                ],
+                "text": {
+                  "zh": "没错，我们一起加油吧！",
+                  "py": "méi cuò wǒ men yì qǐ jiā yóu ba"
+                },
+                "en": "Exactly. Let's both go for it!",
+                "en_source": "moink",
+                "key": "4a-01-t2-b04-l6"
+              }
+            ]
+          }
+        },
+        {
+          "key": "4a-01-t2-b05",
+          "type": "vocab",
+          "page": 4,
+          "source": "book",
+          "data": {
+            "audio": "1-4",
+            "items": [
+              {
+                "num": "8",
+                "hanzi": "食堂",
+                "pinyin": "shítáng",
+                "pos": "n.",
+                "en": "dining hall",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "学校食堂",
+                    "py": "xué xiào shí táng"
+                  },
+                  "en": "school canteen"
+                },
+                "key": "4a-01-t2-b05-i1"
+              },
+              {
+                "num": "9",
+                "hanzi": "座",
+                "pinyin": "zuò",
+                "pos": "m.",
+                "en": "for mountains, buildings, and other similar immovable objects",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "一座大楼",
+                    "py": "yí zuò dà lóu"
+                  },
+                  "en": "a tall building"
+                },
+                "key": "4a-01-t2-b05-i2"
+              },
+              {
+                "num": "10",
+                "hanzi": "申请",
+                "pinyin": "shēnqǐng",
+                "pos": "v.",
+                "en": "apply for",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "申请签证",
+                    "py": "shēn qǐng qiān zhèng"
+                  },
+                  "en": "apply for a visa"
+                },
+                "key": "4a-01-t2-b05-i3"
+              },
+              {
+                "num": "11",
+                "hanzi": "奖学金",
+                "pinyin": "jiǎngxuéjīn",
+                "pos": "n.",
+                "en": "scholarship",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "拿到奖学金",
+                    "py": "ná dào jiǎng xué jīn"
+                  },
+                  "en": "get a scholarship"
+                },
+                "key": "4a-01-t2-b05-i4"
+              },
+              {
+                "num": "12",
+                "hanzi": "表现",
+                "pinyin": "biǎoxiàn",
+                "pos": "v.",
+                "en": "perform; behave",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "表现很好",
+                    "py": "biǎo xiàn hěn hǎo"
+                  },
+                  "en": "do well, behave well"
+                },
+                "key": "4a-01-t2-b05-i5"
+              },
+              {
+                "num": "13",
+                "hanzi": "获得",
+                "pinyin": "huòdé",
+                "pos": "v.",
+                "en": "win; obtain",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "获得机会",
+                    "py": "huò dé jī huì"
+                  },
+                  "en": "get a chance"
+                },
+                "key": "4a-01-t2-b05-i6"
+              },
+              {
+                "num": "14",
+                "hanzi": "要是",
+                "pinyin": "yàoshi",
+                "pos": "conj.",
+                "en": "if; suppose",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "要是下雨",
+                    "py": "yào shi xià yǔ"
+                  },
+                  "en": "if it rains"
+                },
+                "key": "4a-01-t2-b05-i7"
+              },
+              {
+                "num": "15",
+                "hanzi": "减轻",
+                "pinyin": "jiǎnqīng",
+                "pos": "v.",
+                "en": "ease; lighten",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "减轻压力",
+                    "py": "jiǎn qīng yā lì"
+                  },
+                  "en": "relieve stress"
+                },
+                "key": "4a-01-t2-b05-i8"
+              },
+              {
+                "num": "16",
+                "hanzi": "经济",
+                "pinyin": "jīngjì",
+                "pos": "n.",
+                "en": "financial condition; economy",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "经济发展",
+                    "py": "jīng jì fā zhǎn"
+                  },
+                  "en": "economic development"
+                },
+                "key": "4a-01-t2-b05-i9"
+              },
+              {
+                "num": "17",
+                "hanzi": "压力",
+                "pinyin": "yālì",
+                "pos": "n.",
+                "en": "pressure",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "工作压力",
+                    "py": "gōng zuò yā lì"
+                  },
+                  "en": "work pressure"
+                },
+                "key": "4a-01-t2-b05-i10"
+              },
+              {
+                "num": "18",
+                "hanzi": "加油",
+                "pinyin": "jiāyóu",
+                "pos": "v.",
+                "en": "cheer; step up efforts",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "为他加油",
+                    "py": "wèi tā jiā yóu"
+                  },
+                  "en": "cheer him on"
+                },
+                "key": "4a-01-t2-b05-i11"
+              }
+            ]
+          }
+        },
+        {
+          "key": "4a-01-t2-b06",
+          "type": "instruction",
+          "page": 5,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "分角色朗读对话。",
+              "py": "fēn jué sè lǎng dú duì huà"
+            },
+            "en": "Role-play the dialogue.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-01-t2-b07",
+          "type": "instruction",
+          "page": 5,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "根据课文内容回答问题。",
+              "py": "gēn jù kè wén nèi róng huí dá wèn tí"
+            },
+            "en": "Answer the questions according to the text.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-01-t2-b08",
+          "type": "prompts",
+          "page": 5,
+          "source": "book",
+          "data": {
+            "answer_mode": "text",
+            "items": [
+              {
+                "num": "1",
+                "text": {
+                  "zh": "他们的校园里有什么？",
+                  "py": "tā men de xiào yuán li yǒu shén me"
+                },
+                "sample": [
+                  {
+                    "zh": "有图书馆、体育馆、超市，还有好几个食堂。",
+                    "py": "yǒu tú shū guǎn tǐ yù guǎn chāo shì hái yǒu hǎo jǐ gè shí táng"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-01-t2-b08-i1"
+              },
+              {
+                "num": "2",
+                "text": {
+                  "zh": "什么样的学生有机会获得奖学金？",
+                  "py": "shén me yàng de xué sheng yǒu jī huì huò dé jiǎng xué jīn"
+                },
+                "sample": [
+                  {
+                    "zh": "成绩好、表现好的学生。",
+                    "py": "chéng jì hǎo biǎo xiàn hǎo de xué sheng"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-01-t2-b08-i2"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "4a-01-g2",
+      "kind": "grammar",
+      "label_zh": "小语讲堂 2",
+      "label_en": "Xiaoyu's Classroom",
+      "page": 5,
+      "blocks": [
+        {
+          "key": "4a-01-g2-b01",
+          "type": "grammar",
+          "page": 5,
+          "source": "book",
+          "data": {
+            "num": "2",
+            "title": {
+              "zh": "假设复句“要是……，就……”",
+              "py": "jiǎ shè fù jù yào shi jiù"
+            },
+            "title_en": "Hypothetical Complex Sentence “要是……，就……”",
+            "explain": {
+              "zh": "前一分句提出假设，后一分句表示假设实现后产生的结果。例如：",
+              "py": "qián yì fēn jù tí chū jiǎ shè hòu yì fēn jù biǎo shì jiǎ shè shí xiàn hòu chǎn shēng de jié guǒ lì rú"
+            },
+            "explain_en": "The first clause proposes a hypothetical condition, while the second clause indicates the resulting outcome if the condition is fulfilled. For example:",
+            "examples": [
+              {
+                "text": {
+                  "zh": "要是申请到奖学金，就能减轻不少经济压力。",
+                  "py": "yào shi shēn qǐng dào jiǎng xué jīn jiù néng jiǎn qīng bù shǎo jīng jì yā lì"
+                },
+                "en": "If we get a scholarship, it will ease a lot of financial pressure.",
+                "en_source": "moink"
+              },
+              {
+                "text": {
+                  "zh": "你要是明天有时间，就跟我一起去爬山吧。",
+                  "py": "nǐ yào shi míng tiān yǒu shí jiān jiù gēn wǒ yì qǐ qù pá shān ba"
+                },
+                "en": "If you have time tomorrow, come hiking with me.",
+                "en_source": "moink"
+              },
+              {
+                "text": {
+                  "zh": "要是她不愿意参加比赛，我们就再问问别人。",
+                  "py": "yào shi tā bú yuàn yì cān jiā bǐ sài wǒ men jiù zài wèn wen bié rén"
+                },
+                "en": "If she doesn't want to enter the competition, we'll ask someone else.",
+                "en_source": "moink"
+              }
+            ],
+            "extra": {
+              "source": "moink",
+              "examples": [
+                {
+                  "text": {
+                    "zh": "要是你累了，就休息一下吧。",
+                    "py": "yào shi nǐ lèi le jiù xiū xi yí xià ba"
+                  },
+                  "en": "If you're tired, take a break.",
+                  "en_source": "moink"
+                },
+                {
+                  "text": {
+                    "zh": "要是下雨，我们就在家看电影。",
+                    "py": "yào shi xià yǔ wǒ men jiù zài jiā kàn diàn yǐng"
+                  },
+                  "en": "If it rains, we'll watch a movie at home.",
+                  "en_source": "moink"
+                }
+              ],
+              "related": [
+                "yaoshi-jiu",
+                "ruguo-jiu"
+              ]
+            }
+          }
+        },
+        {
+          "key": "4a-01-g2-b02",
+          "type": "instruction",
+          "page": 5,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "完成对话。",
+              "py": "wán chéng duì huà"
+            },
+            "en": "Complete the dialogues.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-01-g2-b03",
+          "type": "dialogue_fill",
+          "page": 5,
+          "source": "book",
+          "data": {
+            "items": [
+              {
+                "num": "1",
+                "lines": [
+                  {
+                    "speaker": "A",
+                    "text": {
+                      "zh": "你不开心的时候会做什么？",
+                      "py": "nǐ bù kāi xīn de shí hou huì zuò shén me"
+                    }
+                  },
+                  {
+                    "speaker": "B",
+                    "text": {
+                      "zh": "我要是不开心，{_}。",
+                      "py": "wǒ yào shi bù kāi xīn"
+                    }
+                  }
+                ],
+                "sample": [
+                  {
+                    "zh": "就去跑步",
+                    "py": "jiù qù pǎo bù"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-01-g2-b03-i1"
+              },
+              {
+                "num": "2",
+                "lines": [
+                  {
+                    "speaker": "A",
+                    "text": {
+                      "zh": "{_}，咱们就去看电影。",
+                      "py": "zán men jiù qù kàn diàn yǐng"
+                    }
+                  },
+                  {
+                    "speaker": "B",
+                    "text": {
+                      "zh": "好啊，没问题。",
+                      "py": "hǎo a méi wèn tí"
+                    }
+                  }
+                ],
+                "sample": [
+                  {
+                    "zh": "要是明天不下雨",
+                    "py": "yào shi míng tiān bú xià yǔ"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-01-g2-b03-i2"
+              },
+              {
+                "num": "3",
+                "lines": [
+                  {
+                    "speaker": "A",
+                    "text": {
+                      "zh": "谢谢你帮助了我。要是{_}，{_}。",
+                      "py": "xiè xie nǐ bāng zhù le wǒ yào shi"
+                    }
+                  },
+                  {
+                    "speaker": "B",
+                    "text": {
+                      "zh": "不客气。",
+                      "py": "bú kè qi"
+                    }
+                  }
+                ],
+                "sample": [
+                  {
+                    "zh": "你以后需要帮忙",
+                    "py": "nǐ yǐ hòu xū yào bāng máng"
+                  },
+                  {
+                    "zh": "就告诉我",
+                    "py": "jiù gào su wǒ"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-01-g2-b03-i3"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "4a-01-t3",
+      "kind": "text",
+      "label_zh": "课文 3",
+      "label_en": "Text 3",
+      "page": 5,
+      "blocks": [
+        {
+          "key": "4a-01-t3-b01",
+          "type": "scene",
+          "page": 5,
+          "source": "book",
+          "data": {
+            "icon": "reading",
+            "text": {
+              "zh": "外国学生在中国大学的学习和生活",
+              "py": "wài guó xué sheng zài zhōng guó dà xué de xué xí hé shēng huó"
+            },
+            "en": "The Study and Life of International Students at Chinese Universities"
+          }
+        },
+        {
+          "key": "4a-01-t3-b02",
+          "type": "instruction",
+          "page": 5,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "听课文，选择正确答案。",
+              "py": "tīng kè wén xuǎn zé zhèng què dá àn"
+            },
+            "en": "Listen to the text and choose the correct answer.",
+            "audio": "1-5"
+          }
+        },
+        {
+          "key": "4a-01-t3-b03",
+          "type": "choice",
+          "page": 5,
+          "source": "book",
+          "data": {
+            "items": [
+              {
+                "num": "1",
+                "text": {
+                  "zh": "外国学生可以根据什么选择专业？",
+                  "py": "wài guó xué sheng kě yǐ gēn jù shén me xuǎn zé zhuān yè"
+                },
+                "options": [
+                  {
+                    "label": "A",
+                    "text": {
+                      "zh": "中文水平",
+                      "py": "zhōng wén shuǐ píng"
+                    }
+                  },
+                  {
+                    "label": "B",
+                    "text": {
+                      "zh": "自己的兴趣",
+                      "py": "zì jǐ de xìng qù"
+                    }
+                  },
+                  {
+                    "label": "C",
+                    "text": {
+                      "zh": "学校的要求",
+                      "py": "xué xiào de yāo qiú"
+                    }
+                  },
+                  {
+                    "label": "D",
+                    "text": {
+                      "zh": "家人的需要",
+                      "py": "jiā rén de xū yào"
+                    }
+                  }
+                ],
+                "answer": "B",
+                "answer_source": "moink",
+                "key": "4a-01-t3-b03-i1"
+              },
+              {
+                "num": "2",
+                "text": {
+                  "zh": "外国学生怎么能更快地适应中国的大学生活？",
+                  "py": "wài guó xué sheng zěn me néng gèng kuài de shì yìng zhōng guó de dà xué shēng huó"
+                },
+                "options": [
+                  {
+                    "label": "A",
+                    "text": {
+                      "zh": "多上中文课程",
+                      "py": "duō shàng zhōng wén kè chéng"
+                    }
+                  },
+                  {
+                    "label": "B",
+                    "text": {
+                      "zh": "多去图书馆学习",
+                      "py": "duō qù tú shū guǎn xué xí"
+                    }
+                  },
+                  {
+                    "label": "C",
+                    "text": {
+                      "zh": "多研究中国文化",
+                      "py": "duō yán jiū zhōng guó wén huà"
+                    }
+                  },
+                  {
+                    "label": "D",
+                    "text": {
+                      "zh": "多跟中国学生交流",
+                      "py": "duō gēn zhōng guó xué sheng jiāo liú"
+                    }
+                  }
+                ],
+                "answer": "D",
+                "answer_source": "moink",
+                "key": "4a-01-t3-b03-i2"
+              }
+            ]
+          }
+        },
+        {
+          "key": "4a-01-t3-b04",
+          "type": "passage",
+          "page": 6,
+          "source": "book",
+          "data": {
+            "image": {
+              "src": "4a/01/text3.webp",
+              "alt": "A group of international students looking at a laptop together"
+            },
+            "paragraphs": [
+              {
+                "text": {
+                  "zh": "随着中国的发展，越来越多的外国学生来到中国的大学学习。他们可以先上一年的中文课程，然后根据自己的兴趣和需要选择专业。除了读本科课程，他们还可以申请读硕士研究生或者博士研究生。",
+                  "py": "suí zhe zhōng guó de fā zhǎn yuè lái yuè duō de wài guó xué sheng lái dào zhōng guó de dà xué xué xí tā men kě yǐ xiān shàng yì nián de zhōng wén kè chéng rán hòu gēn jù zì jǐ de xìng qù hé xū yào xuǎn zé zhuān yè chú le dú běn kē kè chéng tā men hái kě yǐ shēn qǐng dú shuò shì yán jiū shēng huò zhě bó shì yán jiū shēng"
+                },
+                "en": "With China's development, more and more international students are coming to study at Chinese universities. They can first take a one-year Chinese course, then choose a major based on their own interests and needs. Besides undergraduate programs, they can also apply for master's or doctoral programs.",
+                "en_source": "moink"
+              },
+              {
+                "text": {
+                  "zh": "在大学里，外国学生可以和中国学生一起学习、做研究、参加校园活动。通过这些交流，外国学生能更快地适应中国的大学生活。",
+                  "py": "zài dà xué li wài guó xué sheng kě yǐ hé zhōng guó xué sheng yì qǐ xué xí zuò yán jiū cān jiā xiào yuán huó dòng tōng guò zhè xiē jiāo liú wài guó xué sheng néng gèng kuài de shì yìng zhōng guó de dà xué shēng huó"
+                },
+                "en": "At university, international students can study, do research and take part in campus activities together with Chinese students. Through these exchanges, they can adapt to Chinese university life more quickly.",
+                "en_source": "moink"
+              }
+            ]
+          }
+        },
+        {
+          "key": "4a-01-t3-b05",
+          "type": "vocab",
+          "page": 6,
+          "source": "book",
+          "data": {
+            "audio": "1-6",
+            "items": [
+              {
+                "num": "19",
+                "hanzi": "随着",
+                "pinyin": "suízhe",
+                "pos": "prep.",
+                "en": "along with",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "随着时间",
+                    "py": "suí zhe shí jiān"
+                  },
+                  "en": "as time goes by"
+                },
+                "key": "4a-01-t3-b05-i1"
+              },
+              {
+                "num": "20",
+                "hanzi": "课程",
+                "pinyin": "kèchéng",
+                "pos": "n.",
+                "en": "course",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "中文课程",
+                    "py": "zhōng wén kè chéng"
+                  },
+                  "en": "Chinese course"
+                },
+                "key": "4a-01-t3-b05-i2"
+              },
+              {
+                "num": "21",
+                "hanzi": "专业",
+                "pinyin": "zhuānyè",
+                "pos": "n./adj.",
+                "en": "major; professional",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "选专业",
+                    "py": "xuǎn zhuān yè"
+                  },
+                  "en": "choose a major"
+                },
+                "key": "4a-01-t3-b05-i3"
+              },
+              {
+                "num": "22",
+                "hanzi": "本科",
+                "pinyin": "běnkē",
+                "pos": "n.",
+                "en": "undergraduate course",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "本科学生",
+                    "py": "běn kē xué sheng"
+                  },
+                  "en": "undergraduate student"
+                },
+                "key": "4a-01-t3-b05-i4"
+              },
+              {
+                "num": "23",
+                "hanzi": "硕士",
+                "pinyin": "shuòshì",
+                "pos": "n.",
+                "en": "master",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "读硕士",
+                    "py": "dú shuò shì"
+                  },
+                  "en": "study for a master's"
+                },
+                "key": "4a-01-t3-b05-i5"
+              },
+              {
+                "num": "24",
+                "hanzi": "研究生",
+                "pinyin": "yánjiūshēng",
+                "pos": "n.",
+                "en": "postgraduate; graduate",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "考研究生",
+                    "py": "kǎo yán jiū shēng"
+                  },
+                  "en": "take the postgraduate entrance exam"
+                },
+                "key": "4a-01-t3-b05-i6"
+              },
+              {
+                "num": "25",
+                "hanzi": "博士",
+                "pinyin": "bóshì",
+                "pos": "n.",
+                "en": "doctor",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "博士研究生",
+                    "py": "bó shì yán jiū shēng"
+                  },
+                  "en": "PhD student"
+                },
+                "key": "4a-01-t3-b05-i7"
+              },
+              {
+                "num": "26",
+                "hanzi": "研究",
+                "pinyin": "yánjiū",
+                "pos": "v.",
+                "en": "study; research",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "研究历史",
+                    "py": "yán jiū lì shǐ"
+                  },
+                  "en": "study history"
+                },
+                "key": "4a-01-t3-b05-i8"
+              },
+              {
+                "num": "27",
+                "hanzi": "活动",
+                "pinyin": "huódòng",
+                "pos": "n./v.",
+                "en": "activity; move about",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "校园活动",
+                    "py": "xiào yuán huó dòng"
+                  },
+                  "en": "campus activities"
+                },
+                "key": "4a-01-t3-b05-i9"
+              },
+              {
+                "num": "28",
+                "hanzi": "通过",
+                "pinyin": "tōngguò",
+                "pos": "prep./v.",
+                "en": "through; pass",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "通过考试",
+                    "py": "tōng guò kǎo shì"
+                  },
+                  "en": "pass an exam"
+                },
+                "key": "4a-01-t3-b05-i10"
+              },
+              {
+                "num": "29",
+                "hanzi": "交流",
+                "pinyin": "jiāoliú",
+                "pos": "v.",
+                "en": "exchange",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "文化交流",
+                    "py": "wén huà jiāo liú"
+                  },
+                  "en": "cultural exchange"
+                },
+                "key": "4a-01-t3-b05-i11"
+              },
+              {
+                "num": "30",
+                "hanzi": "适应",
+                "pinyin": "shìyìng",
+                "pos": "v.",
+                "en": "adapt to",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "适应环境",
+                    "py": "shì yìng huán jìng"
+                  },
+                  "en": "adapt to the environment"
+                },
+                "key": "4a-01-t3-b05-i12"
+              }
+            ]
+          }
+        },
+        {
+          "key": "4a-01-t3-b06",
+          "type": "instruction",
+          "page": 6,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "大声朗读课文。",
+              "py": "dà shēng lǎng dú kè wén"
+            },
+            "en": "Read the text aloud.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-01-t3-b07",
+          "type": "instruction",
+          "page": 6,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "根据课文内容回答问题。",
+              "py": "gēn jù kè wén nèi róng huí dá wèn tí"
+            },
+            "en": "Answer the questions according to the text.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-01-t3-b08",
+          "type": "prompts",
+          "page": 6,
+          "source": "book",
+          "data": {
+            "answer_mode": "text",
+            "items": [
+              {
+                "num": "1",
+                "text": {
+                  "zh": "为什么很多外国学生来中国学习？",
+                  "py": "wèi shén me hěn duō wài guó xué sheng lái zhōng guó xué xí"
+                },
+                "sample": [
+                  {
+                    "zh": "因为随着中国的发展，越来越多的外国学生想来中国的大学学习。",
+                    "py": "yīn wèi suí zhe zhōng guó de fā zhǎn yuè lái yuè duō de wài guó xué sheng xiǎng lái zhōng guó de dà xué xué xí"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-01-t3-b08-i1"
+              },
+              {
+                "num": "2",
+                "text": {
+                  "zh": "除了学习，外国学生还可以和中国学生一起做什么？",
+                  "py": "chú le xué xí wài guó xué sheng hái kě yǐ hé zhōng guó xué sheng yì qǐ zuò shén me"
+                },
+                "sample": [
+                  {
+                    "zh": "还可以一起做研究、参加校园活动。",
+                    "py": "hái kě yǐ yì qǐ zuò yán jiū cān jiā xiào yuán huó dòng"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-01-t3-b08-i2"
+              }
+            ]
+          }
+        },
+        {
+          "key": "4a-01-t3-b09",
+          "type": "instruction",
+          "page": 7,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "根据给出的提示复述课文。",
+              "py": "gēn jù gěi chū de tí shì fù shù kè wén"
+            },
+            "en": "Retell the text using the provided prompts.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-01-t3-b10",
+          "type": "retell",
+          "page": 7,
+          "source": "book",
+          "data": {
+            "text": {
+              "zh": "随着……，越来越多的外国学生……。他们可以先……，然后根据自己的兴趣和需要……。除了读……，他们还可以申请读……。在大学里，他们可以和中国学生一起……。通过这些交流，外国学生能……。",
+              "py": "suí zhe yuè lái yuè duō de wài guó xué sheng tā men kě yǐ xiān rán hòu gēn jù zì jǐ de xìng qù hé xū yào chú le dú tā men hái kě yǐ shēn qǐng dú zài dà xué li tā men kě yǐ hé zhōng guó xué sheng yì qǐ tōng guò zhè xiē jiāo liú wài guó xué sheng néng"
+            },
+            "answer_key": "4a-01-t3-b10-a"
+          }
+        }
+      ]
+    },
+    {
+      "key": "4a-01-g3",
+      "kind": "grammar",
+      "label_zh": "小语讲堂 3",
+      "label_en": "Xiaoyu's Classroom",
+      "page": 7,
+      "blocks": [
+        {
+          "key": "4a-01-g3-b01",
+          "type": "grammar",
+          "page": 7,
+          "source": "book",
+          "data": {
+            "num": "3",
+            "title": {
+              "zh": "介词“随着”",
+              "py": "jiè cí suí zhe"
+            },
+            "title_en": "Preposition “随着”",
+            "explain": {
+              "zh": "介词“随着”后面一般是表示变化的词语或小句，表示一件事是另一件事发生的条件。例如：",
+              "py": "jiè cí suí zhe hòu miàn yì bān shì biǎo shì biàn huà de cí yǔ huò xiǎo jù biǎo shì yí jiàn shì shì lìng yí jiàn shì fā shēng de tiáo jiàn lì rú"
+            },
+            "explain_en": "The preposition “随着” is generally followed by phrases or clauses indicating change, expressing that one event serves as the condition for another to happen. For example:",
+            "examples": [
+              {
+                "text": {
+                  "zh": "随着中国的发展，越来越多的外国学生来到中国的大学学习。",
+                  "py": "suí zhe zhōng guó de fā zhǎn yuè lái yuè duō de wài guó xué sheng lái dào zhōng guó de dà xué xué xí"
+                },
+                "en": "With China's development, more and more international students are coming to study at Chinese universities.",
+                "en_source": "moink"
+              },
+              {
+                "text": {
+                  "zh": "随着中文水平的提高，我现在能看懂中文报纸了。",
+                  "py": "suí zhe zhōng wén shuǐ píng de tí gāo wǒ xiàn zài néng kàn dǒng zhōng wén bào zhǐ le"
+                },
+                "en": "As my Chinese has improved, I can now read Chinese newspapers.",
+                "en_source": "moink"
+              },
+              {
+                "text": {
+                  "zh": "随着小区的环境越来越好，来这里买房子的人也变多了。",
+                  "py": "suí zhe xiǎo qū de huán jìng yuè lái yuè hǎo lái zhè lǐ mǎi fáng zi de rén yě biàn duō le"
+                },
+                "en": "As the neighborhood got nicer, more people came here to buy homes.",
+                "en_source": "moink"
+              }
+            ],
+            "extra": {
+              "source": "moink",
+              "examples": [
+                {
+                  "text": {
+                    "zh": "随着天气变冷，感冒的人越来越多。",
+                    "py": "suí zhe tiān qì biàn lěng gǎn mào de rén yuè lái yuè duō"
+                  },
+                  "en": "As the weather gets colder, more and more people catch colds.",
+                  "en_source": "moink"
+                },
+                {
+                  "text": {
+                    "zh": "随着年龄的增长，他越来越喜欢安静。",
+                    "py": "suí zhe nián líng de zēng zhǎng tā yuè lái yuè xǐ huan ān jìng"
+                  },
+                  "en": "As he gets older, he likes peace and quiet more and more.",
+                  "en_source": "moink"
+                }
+              ],
+              "related": [
+                "yuelaiyue"
+              ]
+            }
+          }
+        },
+        {
+          "key": "4a-01-g3-b02",
+          "type": "instruction",
+          "page": 7,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "完成句子。",
+              "py": "wán chéng jù zi"
+            },
+            "en": "Complete the sentences.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-01-g3-b03",
+          "type": "sentence_fill",
+          "page": 7,
+          "source": "book",
+          "data": {
+            "items": [
+              {
+                "num": "1",
+                "lines": [
+                  {
+                    "speaker": null,
+                    "text": {
+                      "zh": "随着{_}，人们越来越关注身体健康。",
+                      "py": "suí zhe rén men yuè lái yuè guān zhù shēn tǐ jiàn kāng"
+                    }
+                  }
+                ],
+                "hint": {
+                  "zh": "提高",
+                  "py": "tí gāo"
+                },
+                "sample": [
+                  {
+                    "zh": "生活水平的提高",
+                    "py": "shēng huó shuǐ píng de tí gāo"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-01-g3-b03-i1"
+              },
+              {
+                "num": "2",
+                "lines": [
+                  {
+                    "speaker": null,
+                    "text": {
+                      "zh": "随着来中国留学的人越来越多，{_}。",
+                      "py": "suí zhe lái zhōng guó liú xué de rén yuè lái yuè duō"
+                    }
+                  }
+                ],
+                "hint": {
+                  "zh": "交流",
+                  "py": "jiāo liú"
+                },
+                "sample": [
+                  {
+                    "zh": "中外学生的交流也越来越多",
+                    "py": "zhōng wài xué sheng de jiāo liú yě yuè lái yuè duō"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-01-g3-b03-i2"
+              },
+              {
+                "num": "3",
+                "lines": [
+                  {
+                    "speaker": null,
+                    "text": {
+                      "zh": "随着{_}，人们都换上了凉快的衣服。",
+                      "py": "suí zhe rén men dōu huàn shàng le liáng kuai de yī fu"
+                    }
+                  }
+                ],
+                "hint": {
+                  "zh": "天气",
+                  "py": "tiān qì"
+                },
+                "sample": [
+                  {
+                    "zh": "天气越来越热",
+                    "py": "tiān qì yuè lái yuè rè"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-01-g3-b03-i3"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "4a-01-t4",
+      "kind": "text",
+      "label_zh": "课文 4",
+      "label_en": "Text 4",
+      "page": 7,
+      "blocks": [
+        {
+          "key": "4a-01-t4-b01",
+          "type": "scene",
+          "page": 7,
+          "source": "book",
+          "data": {
+            "icon": "reading",
+            "text": {
+              "zh": "专业选择与职业发展",
+              "py": "zhuān yè xuǎn zé yǔ zhí yè fā zhǎn"
+            },
+            "en": "Major Selection and Career Development",
+            "audio": "1-7"
+          }
+        },
+        {
+          "key": "4a-01-t4-b02",
+          "type": "instruction",
+          "page": 7,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "快速阅读短文，选择正确答案。",
+              "py": "kuài sù yuè dú duǎn wén xuǎn zé zhèng què dá àn"
+            },
+            "en": "Read the passage quickly and choose the correct answer.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-01-t4-b03",
+          "type": "choice",
+          "page": 7,
+          "source": "book",
+          "data": {
+            "items": [
+              {
+                "num": "1",
+                "text": {
+                  "zh": "很多外国学生来中国学习以前，做了什么准备？",
+                  "py": "hěn duō wài guó xué sheng lái zhōng guó xué xí yǐ qián zuò le shén me zhǔn bèi"
+                },
+                "options": [
+                  {
+                    "label": "A",
+                    "text": {
+                      "zh": "学会了中文",
+                      "py": "xué huì le zhōng wén"
+                    }
+                  },
+                  {
+                    "label": "B",
+                    "text": {
+                      "zh": "找好了工作",
+                      "py": "zhǎo hǎo le gōng zuò"
+                    }
+                  },
+                  {
+                    "label": "C",
+                    "text": {
+                      "zh": "想好了发展方向",
+                      "py": "xiǎng hǎo le fā zhǎn fāng xiàng"
+                    }
+                  },
+                  {
+                    "label": "D",
+                    "text": {
+                      "zh": "认识了很多中国朋友",
+                      "py": "rèn shi le hěn duō zhōng guó péng you"
+                    }
+                  }
+                ],
+                "answer": "C",
+                "answer_source": "moink",
+                "key": "4a-01-t4-b03-i1"
+              },
+              {
+                "num": "2",
+                "text": {
+                  "zh": "安妮以后想做什么？",
+                  "py": "ān nī yǐ hòu xiǎng zuò shén me"
+                },
+                "options": [
+                  {
+                    "label": "A",
+                    "text": {
+                      "zh": "当医生",
+                      "py": "dāng yī shēng"
+                    }
+                  },
+                  {
+                    "label": "B",
+                    "text": {
+                      "zh": "成为老师",
+                      "py": "chéng wéi lǎo shī"
+                    }
+                  },
+                  {
+                    "label": "C",
+                    "text": {
+                      "zh": "自己开公司",
+                      "py": "zì jǐ kāi gōng sī"
+                    }
+                  },
+                  {
+                    "label": "D",
+                    "text": {
+                      "zh": "做国际贸易",
+                      "py": "zuò guó jì mào yì"
+                    }
+                  }
+                ],
+                "answer": "B",
+                "answer_source": "moink",
+                "key": "4a-01-t4-b03-i2"
+              }
+            ]
+          }
+        },
+        {
+          "key": "4a-01-t4-b04",
+          "type": "passage",
+          "page": 8,
+          "source": "book",
+          "data": {
+            "image": {
+              "src": "4a/01/text4.webp",
+              "alt": "A young woman thinking, with a speech bubble saying 专业"
+            },
+            "paragraphs": [
+              {
+                "text": {
+                  "zh": "很多外国学生来中国学习以前，就已经想好了自己的发展方向。有人对经济感兴趣，希望将来在国际公司工作；有人喜欢学医，打算回国后当一名医生；还有人对教育有热情，想要成为一名教师。",
+                  "py": "hěn duō wài guó xué sheng lái zhōng guó xué xí yǐ qián jiù yǐ jīng xiǎng hǎo le zì jǐ de fā zhǎn fāng xiàng yǒu rén duì jīng jì gǎn xìng qù xī wàng jiāng lái zài guó jì gōng sī gōng zuò yǒu rén xǐ huan xué yī dǎ suàn huí guó hòu dāng yì míng yī shēng hái yǒu rén duì jiào yù yǒu rè qíng xiǎng yào chéng wéi yì míng jiào shī"
+                },
+                "en": "Before coming to study in China, many international students have already decided on their direction. Some are interested in economics and hope to work for an international company; some like medicine and plan to become doctors after going home; others are passionate about education and want to become teachers.",
+                "en_source": "moink"
+              },
+              {
+                "text": {
+                  "zh": "陈天中想选择跟经济有关的专业，希望通过学习，了解更多国际贸易方面的知识。安妮以后想做一名中文老师，所以要选择国际中文教育专业。对他们来说，来到中国留学，一方面是为了学习语言和知识，另一方面也是为将来的工作和生活做准备。",
+                  "py": "chén tiān zhōng xiǎng xuǎn zé gēn jīng jì yǒu guān de zhuān yè xī wàng tōng guò xué xí liǎo jiě gèng duō guó jì mào yì fāng miàn de zhī shi ān nī yǐ hòu xiǎng zuò yì míng zhōng wén lǎo shī suǒ yǐ yào xuǎn zé guó jì zhōng wén jiào yù zhuān yè duì tā men lái shuō lái dào zhōng guó liú xué yì fāng miàn shì wèi le xué xí yǔ yán hé zhī shi lìng yì fāng miàn yě shì wèi jiāng lái de gōng zuò hé shēng huó zuò zhǔn bèi"
+                },
+                "en": "Chen Tianzhong wants to choose a major related to economics, hoping to learn more about international trade through his studies. Annie wants to be a Chinese teacher in the future, so she'll choose International Chinese Education. For them, coming to study in China is partly about learning the language and gaining knowledge, and partly about preparing for their future work and life.",
+                "en_source": "moink"
+              }
+            ]
+          }
+        },
+        {
+          "key": "4a-01-t4-b05",
+          "type": "vocab",
+          "page": 8,
+          "source": "book",
+          "data": {
+            "audio": "1-8",
+            "items": [
+              {
+                "num": "31",
+                "hanzi": "将来",
+                "pinyin": "jiānglái",
+                "pos": "n.",
+                "en": "future",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "将来的工作",
+                    "py": "jiāng lái de gōng zuò"
+                  },
+                  "en": "future job"
+                },
+                "key": "4a-01-t4-b05-i1"
+              },
+              {
+                "num": "32",
+                "hanzi": "国际",
+                "pinyin": "guójì",
+                "pos": "adj./n.",
+                "en": "international; world",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "国际学生",
+                    "py": "guó jì xué sheng"
+                  },
+                  "en": "international students"
+                },
+                "key": "4a-01-t4-b05-i2"
+              },
+              {
+                "num": "33",
+                "hanzi": "当",
+                "pinyin": "dāng",
+                "pos": "v.",
+                "en": "work as",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "当老师",
+                    "py": "dāng lǎo shī"
+                  },
+                  "en": "be a teacher"
+                },
+                "key": "4a-01-t4-b05-i3"
+              },
+              {
+                "num": "34",
+                "hanzi": "教育",
+                "pinyin": "jiàoyù",
+                "pos": "n./v.",
+                "en": "education; educate",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "教育孩子",
+                    "py": "jiào yù hái zi"
+                  },
+                  "en": "raise and educate children"
+                },
+                "key": "4a-01-t4-b05-i4"
+              },
+              {
+                "num": "35",
+                "hanzi": "成为",
+                "pinyin": "chéngwéi",
+                "pos": "v.",
+                "en": "become",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "成为朋友",
+                    "py": "chéng wéi péng you"
+                  },
+                  "en": "become friends"
+                },
+                "key": "4a-01-t4-b05-i5"
+              },
+              {
+                "num": "36",
+                "hanzi": "教师",
+                "pinyin": "jiàoshī",
+                "pos": "n.",
+                "en": "teacher",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "中文教师",
+                    "py": "zhōng wén jiào shī"
+                  },
+                  "en": "Chinese teacher"
+                },
+                "key": "4a-01-t4-b05-i6"
+              },
+              {
+                "num": "37",
+                "hanzi": "贸易",
+                "pinyin": "màoyì",
+                "pos": "n.",
+                "en": "trade",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "国际贸易",
+                    "py": "guó jì mào yì"
+                  },
+                  "en": "international trade"
+                },
+                "key": "4a-01-t4-b05-i7"
+              },
+              {
+                "num": "38",
+                "hanzi": "方面",
+                "pinyin": "fāngmiàn",
+                "pos": "n.",
+                "en": "aspect; respect",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "学习方面",
+                    "py": "xué xí fāng miàn"
+                  },
+                  "en": "in terms of study"
+                },
+                "key": "4a-01-t4-b05-i8"
+              },
+              {
+                "num": "39",
+                "hanzi": "知识",
+                "pinyin": "zhīshi",
+                "pos": "n.",
+                "en": "knowledge",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "学习知识",
+                    "py": "xué xí zhī shi"
+                  },
+                  "en": "gain knowledge"
+                },
+                "key": "4a-01-t4-b05-i9"
+              },
+              {
+                "num": "40",
+                "hanzi": "另",
+                "pinyin": "lìng",
+                "pos": "pron.",
+                "en": "another; other",
+                "extra": {
+                  "source": "moink",
+                  "text": {
+                    "zh": "另一个人",
+                    "py": "lìng yí gè rén"
+                  },
+                  "en": "another person"
+                },
+                "key": "4a-01-t4-b05-i10"
+              }
+            ]
+          }
+        },
+        {
+          "key": "4a-01-t4-b06",
+          "type": "instruction",
+          "page": 8,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "大声朗读课文。",
+              "py": "dà shēng lǎng dú kè wén"
+            },
+            "en": "Read the text aloud.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-01-t4-b07",
+          "type": "instruction",
+          "page": 8,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "根据课文内容回答问题。",
+              "py": "gēn jù kè wén nèi róng huí dá wèn tí"
+            },
+            "en": "Answer the questions according to the text.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-01-t4-b08",
+          "type": "prompts",
+          "page": 8,
+          "source": "book",
+          "data": {
+            "answer_mode": "text",
+            "items": [
+              {
+                "num": "1",
+                "text": {
+                  "zh": "陈天中想选择什么专业？为什么？",
+                  "py": "chén tiān zhōng xiǎng xuǎn zé shén me zhuān yè wèi shén me"
+                },
+                "sample": [
+                  {
+                    "zh": "他想选择跟经济有关的专业，因为他希望了解更多国际贸易方面的知识。",
+                    "py": "tā xiǎng xuǎn zé gēn jīng jì yǒu guān de zhuān yè yīn wèi tā xī wàng liǎo jiě gèng duō guó jì mào yì fāng miàn de zhī shi"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-01-t4-b08-i1"
+              },
+              {
+                "num": "2",
+                "text": {
+                  "zh": "陈天中和安妮来到中国留学是为了什么？",
+                  "py": "chén tiān zhōng hé ān nī lái dào zhōng guó liú xué shì wèi le shén me"
+                },
+                "sample": [
+                  {
+                    "zh": "一方面是为了学习语言和知识，另一方面也是为将来的工作和生活做准备。",
+                    "py": "yì fāng miàn shì wèi le xué xí yǔ yán hé zhī shi lìng yì fāng miàn yě shì wèi jiāng lái de gōng zuò hé shēng huó zuò zhǔn bèi"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-01-t4-b08-i2"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "4a-01-g4",
+      "kind": "grammar",
+      "label_zh": "小语讲堂 4",
+      "label_en": "Xiaoyu's Classroom",
+      "page": 8,
+      "blocks": [
+        {
+          "key": "4a-01-g4-b01",
+          "type": "grammar",
+          "page": 8,
+          "source": "book",
+          "data": {
+            "num": "4",
+            "title": {
+              "zh": "并列复句“一方面……，另一方面……”",
+              "py": "bìng liè fù jù yì fāng miàn lìng yì fāng miàn"
+            },
+            "title_en": "Coordinate Complex Sentence “一方面……，另一方面……”",
+            "explain": {
+              "zh": "并列复句“一方面……，另一方面……”一般用于说明同时存在的两个方面的原因、情况等。例如：",
+              "py": "bìng liè fù jù yì fāng miàn lìng yì fāng miàn yì bān yòng yú shuō míng tóng shí cún zài de liǎng gè fāng miàn de yuán yīn qíng kuàng děng lì rú"
+            },
+            "explain_en": "The coordinate complex sentence “一方面……，另一方面……” is generally used to explain two simultaneous aspects, such as reasons and situations. For example:",
+            "examples_page": 9,
+            "examples": [
+              {
+                "text": {
+                  "zh": "来到中国留学，一方面是为了学习语言和知识，另一方面也是为将来的工作和生活做准备。",
+                  "py": "lái dào zhōng guó liú xué yì fāng miàn shì wèi le xué xí yǔ yán hé zhī shi lìng yì fāng miàn yě shì wèi jiāng lái de gōng zuò hé shēng huó zuò zhǔn bèi"
+                },
+                "en": "Coming to study in China is partly about learning the language and gaining knowledge, and partly about preparing for future work and life.",
+                "en_source": "moink"
+              },
+              {
+                "text": {
+                  "zh": "他经常在网上买东西，一方面因为便宜，另一方面因为方便。",
+                  "py": "tā jīng cháng zài wǎng shàng mǎi dōng xi yì fāng miàn yīn wèi pián yi lìng yì fāng miàn yīn wèi fāng biàn"
+                },
+                "en": "He often shops online, partly because it's cheap and partly because it's convenient.",
+                "en_source": "moink"
+              },
+              {
+                "text": {
+                  "zh": "多做运动一方面能让身体更健康，另一方面也能减轻压力。",
+                  "py": "duō zuò yùn dòng yì fāng miàn néng ràng shēn tǐ gèng jiàn kāng lìng yì fāng miàn yě néng jiǎn qīng yā lì"
+                },
+                "en": "Exercising more keeps you healthier and also relieves stress.",
+                "en_source": "moink"
+              }
+            ],
+            "extra": {
+              "source": "moink",
+              "examples": [
+                {
+                  "text": {
+                    "zh": "我学汉语，一方面是为了工作，另一方面是因为喜欢。",
+                    "py": "wǒ xué hàn yǔ yì fāng miàn shì wèi le gōng zuò lìng yì fāng miàn shì yīn wèi xǐ huan"
+                  },
+                  "en": "I'm learning Chinese partly for work and partly because I like it.",
+                  "en_source": "moink"
+                },
+                {
+                  "text": {
+                    "zh": "住在学校里一方面很方便，另一方面也很便宜。",
+                    "py": "zhù zài xué xiào li yì fāng miàn hěn fāng biàn lìng yì fāng miàn yě hěn pián yi"
+                  },
+                  "en": "Living on campus is convenient, and it's cheap too.",
+                  "en_source": "moink"
+                }
+              ],
+              "related": [
+                "yifangmian"
+              ]
+            }
+          }
+        },
+        {
+          "key": "4a-01-g4-b02",
+          "type": "instruction",
+          "page": 9,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "完成句子。",
+              "py": "wán chéng jù zi"
+            },
+            "en": "Complete the sentences.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-01-g4-b03",
+          "type": "sentence_fill",
+          "page": 9,
+          "source": "book",
+          "data": {
+            "items": [
+              {
+                "num": "1",
+                "lines": [
+                  {
+                    "speaker": null,
+                    "text": {
+                      "zh": "我很喜欢旅游，因为{_}，{_}。",
+                      "py": "wǒ hěn xǐ huan lǚ yóu yīn wèi"
+                    }
+                  }
+                ],
+                "sample": [
+                  {
+                    "zh": "一方面可以放松",
+                    "py": "yì fāng miàn kě yǐ fàng sōng"
+                  },
+                  {
+                    "zh": "另一方面能认识新朋友",
+                    "py": "lìng yì fāng miàn néng rèn shi xīn péng you"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-01-g4-b03-i1"
+              },
+              {
+                "num": "2",
+                "lines": [
+                  {
+                    "speaker": null,
+                    "text": {
+                      "zh": "要想学好中文，{_}，{_}。",
+                      "py": "yào xiǎng xué hǎo zhōng wén"
+                    }
+                  }
+                ],
+                "sample": [
+                  {
+                    "zh": "一方面要多听多说",
+                    "py": "yì fāng miàn yào duō tīng duō shuō"
+                  },
+                  {
+                    "zh": "另一方面要多跟中国人交流",
+                    "py": "lìng yì fāng miàn yào duō gēn zhōng guó rén jiāo liú"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-01-g4-b03-i2"
+              },
+              {
+                "num": "3",
+                "lines": [
+                  {
+                    "speaker": null,
+                    "text": {
+                      "zh": "我每天骑自行车上下班，{_}，{_}。",
+                      "py": "wǒ měi tiān qí zì xíng chē shàng xià bān"
+                    }
+                  }
+                ],
+                "sample": [
+                  {
+                    "zh": "一方面能锻炼身体",
+                    "py": "yì fāng miàn néng duàn liàn shēn tǐ"
+                  },
+                  {
+                    "zh": "另一方面也很方便",
+                    "py": "lìng yì fāng miàn yě hěn fāng biàn"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-01-g4-b03-i3"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "4a-01-ex",
+      "kind": "exercises",
+      "label_zh": "综合练习",
+      "label_en": "Comprehensive Exercises",
+      "page": 9,
+      "blocks": [
+        {
+          "key": "4a-01-ex-b01",
+          "type": "instruction",
+          "page": 9,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "选词填空。",
+              "py": "xuǎn cí tián kòng"
+            },
+            "en": "Choose the proper words to fill in the blanks.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-01-ex-b02",
+          "type": "word_bank",
+          "page": 9,
+          "source": "book",
+          "data": {
+            "bank": [
+              {
+                "label": "A",
+                "text": {
+                  "zh": "入学",
+                  "py": "rù xué"
+                }
+              },
+              {
+                "label": "B",
+                "text": {
+                  "zh": "签证",
+                  "py": "qiān zhèng"
+                }
+              },
+              {
+                "label": "C",
+                "text": {
+                  "zh": "获得",
+                  "py": "huò dé"
+                }
+              },
+              {
+                "label": "D",
+                "text": {
+                  "zh": "专业",
+                  "py": "zhuān yè"
+                }
+              },
+              {
+                "label": "E",
+                "text": {
+                  "zh": "食堂",
+                  "py": "shí táng"
+                }
+              }
+            ],
+            "items": [
+              {
+                "num": "1",
+                "lines": [
+                  {
+                    "speaker": null,
+                    "text": {
+                      "zh": "她{_}了三年的奖学金，高兴极了。",
+                      "py": "tā le sān nián de jiǎng xué jīn gāo xìng jí le"
+                    }
+                  }
+                ],
+                "answer": "C",
+                "answer_source": "moink",
+                "key": "4a-01-ex-b02-i1"
+              },
+              {
+                "num": "2",
+                "lines": [
+                  {
+                    "speaker": null,
+                    "text": {
+                      "zh": "我是2024年{_}的，学的是国际经济专业。",
+                      "py": "wǒ shì nián de xué de shì guó jì jīng jì zhuān yè"
+                    }
+                  }
+                ],
+                "answer": "A",
+                "answer_source": "moink",
+                "key": "4a-01-ex-b02-i2"
+              },
+              {
+                "num": "3",
+                "lines": [
+                  {
+                    "speaker": null,
+                    "text": {
+                      "zh": "我打算考研究生，提高自己的{_}水平。",
+                      "py": "wǒ dǎ suàn kǎo yán jiū shēng tí gāo zì jǐ de shuǐ píng"
+                    }
+                  }
+                ],
+                "answer": "D",
+                "answer_source": "moink",
+                "key": "4a-01-ex-b02-i3"
+              },
+              {
+                "num": "4",
+                "lines": [
+                  {
+                    "speaker": null,
+                    "text": {
+                      "zh": "咱们晚上别去{_}吃饭了，我请你出去吃饭吧。",
+                      "py": "zán men wǎn shang bié qù chī fàn le wǒ qǐng nǐ chū qù chī fàn ba"
+                    }
+                  }
+                ],
+                "answer": "E",
+                "answer_source": "moink",
+                "key": "4a-01-ex-b02-i4"
+              },
+              {
+                "num": "5",
+                "lines": [
+                  {
+                    "speaker": null,
+                    "text": {
+                      "zh": "王经理今天下午去办{_}了，您明天再来找他吧。",
+                      "py": "wáng jīng lǐ jīn tiān xià wǔ qù bàn le nín míng tiān zài lái zhǎo tā ba"
+                    }
+                  }
+                ],
+                "answer": "B",
+                "answer_source": "moink",
+                "key": "4a-01-ex-b02-i5"
+              }
+            ]
+          }
+        },
+        {
+          "key": "4a-01-ex-b03",
+          "type": "word_bank",
+          "page": 9,
+          "source": "book",
+          "data": {
+            "bank": [
+              {
+                "label": "A",
+                "text": {
+                  "zh": "加油",
+                  "py": "jiā yóu"
+                }
+              },
+              {
+                "label": "B",
+                "text": {
+                  "zh": "研究",
+                  "py": "yán jiū"
+                }
+              },
+              {
+                "label": "C",
+                "text": {
+                  "zh": "活动",
+                  "py": "huó dòng"
+                }
+              },
+              {
+                "label": "D",
+                "text": {
+                  "zh": "任何",
+                  "py": "rèn hé"
+                }
+              },
+              {
+                "label": "E",
+                "text": {
+                  "zh": "将来",
+                  "py": "jiāng lái"
+                }
+              }
+            ],
+            "items": [
+              {
+                "num": "6",
+                "lines": [
+                  {
+                    "speaker": "A",
+                    "text": {
+                      "zh": "你{_}想做什么工作？",
+                      "py": "nǐ xiǎng zuò shén me gōng zuò"
+                    }
+                  },
+                  {
+                    "speaker": "B",
+                    "text": {
+                      "zh": "我想在国际公司工作，有更多的发展机会。",
+                      "py": "wǒ xiǎng zài guó jì gōng sī gōng zuò yǒu gèng duō de fā zhǎn jī huì"
+                    }
+                  }
+                ],
+                "answer": "E",
+                "answer_source": "moink",
+                "key": "4a-01-ex-b03-i1"
+              },
+              {
+                "num": "7",
+                "lines": [
+                  {
+                    "speaker": "A",
+                    "text": {
+                      "zh": "你为什么选择这门（m. for subjects of study, etc.）课程？",
+                      "py": "nǐ wèi shén me xuǎn zé zhè mén kè chéng"
+                    }
+                  },
+                  {
+                    "speaker": "B",
+                    "text": {
+                      "zh": "因为我想认真{_}中国的历史和文化。",
+                      "py": "yīn wèi wǒ xiǎng rèn zhēn zhōng guó de lì shǐ hé wén huà"
+                    }
+                  }
+                ],
+                "answer": "B",
+                "answer_source": "moink",
+                "key": "4a-01-ex-b03-i2"
+              },
+              {
+                "num": "8",
+                "lines": [
+                  {
+                    "speaker": "A",
+                    "text": {
+                      "zh": "今天下午公司有{_}，我晚点儿回家。",
+                      "py": "jīn tiān xià wǔ gōng sī yǒu wǒ wǎn diǎn r huí jiā"
+                    }
+                  },
+                  {
+                    "speaker": "B",
+                    "text": {
+                      "zh": "好。大概几点结束？需要我去接你吗？",
+                      "py": "hǎo dà gài jǐ diǎn jié shù xū yào wǒ qù jiē nǐ ma"
+                    }
+                  }
+                ],
+                "answer": "C",
+                "answer_source": "moink",
+                "key": "4a-01-ex-b03-i3"
+              },
+              {
+                "num": "9",
+                "lines": [
+                  {
+                    "speaker": "A",
+                    "text": {
+                      "zh": "你们要去哪儿？",
+                      "py": "nǐ men yào qù nǎ r"
+                    }
+                  },
+                  {
+                    "speaker": "B",
+                    "text": {
+                      "zh": "我们要去给参加比赛的同学{_}，你去吗？",
+                      "py": "wǒ men yào qù gěi cān jiā bǐ sài de tóng xué nǐ qù ma"
+                    }
+                  }
+                ],
+                "answer": "A",
+                "answer_source": "moink",
+                "key": "4a-01-ex-b03-i4"
+              },
+              {
+                "num": "10",
+                "lines": [
+                  {
+                    "speaker": "A",
+                    "text": {
+                      "zh": "你们这次旅游怎么样？",
+                      "py": "nǐ men zhè cì lǚ yóu zěn me yàng"
+                    }
+                  },
+                  {
+                    "speaker": "B",
+                    "text": {
+                      "zh": "虽然天气不太好，但是和朋友在一起，做{_}事情都很有意思。",
+                      "py": "suī rán tiān qì bú tài hǎo dàn shì hé péng you zài yì qǐ zuò shì qing dōu hěn yǒu yì si"
+                    }
+                  }
+                ],
+                "answer": "D",
+                "answer_source": "moink",
+                "key": "4a-01-ex-b03-i5"
+              }
+            ]
+          }
+        },
+        {
+          "key": "4a-01-ex-b04",
+          "type": "instruction",
+          "page": 10,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "选择合适的内容完成短文。",
+              "py": "xuǎn zé hé shì de nèi róng wán chéng duǎn wén"
+            },
+            "en": "Choose the appropriate options to complete the passage.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-01-ex-b05",
+          "type": "passage_fill",
+          "page": 10,
+          "source": "book",
+          "data": {
+            "options": [
+              {
+                "label": "A",
+                "text": {
+                  "zh": "也会觉得有一些压力",
+                  "py": "yě huì jué de yǒu yì xiē yā lì"
+                }
+              },
+              {
+                "label": "B",
+                "text": {
+                  "zh": "她除了复习大学学过的课程",
+                  "py": "tā chú le fù xí dà xué xué guo de kè chéng"
+                }
+              },
+              {
+                "label": "C",
+                "text": {
+                  "zh": "她决定参加硕士研究生考试",
+                  "py": "tā jué dìng cān jiā shuò shì yán jiū shēng kǎo shì"
+                }
+              },
+              {
+                "label": "D",
+                "text": {
+                  "zh": "希望拿到研究生的入学通知书",
+                  "py": "xī wàng ná dào yán jiū shēng de rù xué tōng zhī shū"
+                }
+              }
+            ],
+            "text": {
+              "zh": "李雪还有一年就本科毕业（bìyè, graduate）了，{_}。为了准备考试，{_}，还读了一些新的专业书，希望更多地了解这方面的知识。有时候她学习的时间很长，{_}，但是她还是坚持每天学习。随着考试的时间越来越近，李雪也更努力地复习，{_}，在新的学校里继续学习更多知识。",
+              "py": "lǐ xuě hái yǒu yì nián jiù běn kē bì yè le wèi le zhǔn bèi kǎo shì hái dú le yì xiē xīn de zhuān yè shū xī wàng gèng duō de liǎo jiě zhè fāng miàn de zhī shi yǒu shí hou tā xué xí de shí jiān hěn cháng dàn shì tā hái shi jiān chí měi tiān xué xí suí zhe kǎo shì de shí jiān yuè lái yuè jìn lǐ xuě yě gèng nǔ lì de fù xí zài xīn de xué xiào li jì xù xué xí gèng duō zhī shi"
+            },
+            "answers": [
+              "C",
+              "B",
+              "A",
+              "D"
+            ],
+            "answer_source": "moink",
+            "answer_key": "4a-01-ex-b05-a"
+          }
+        },
+        {
+          "key": "4a-01-ex-b06",
+          "type": "instruction",
+          "page": 10,
+          "source": "book",
+          "data": {
+            "num": null,
+            "text": {
+              "zh": "看图，用词语造句。",
+              "py": "kàn tú yòng cí yǔ zào jù"
+            },
+            "en": "Look at the pictures and write sentences using the given words.",
+            "audio": null
+          }
+        },
+        {
+          "key": "4a-01-ex-b07",
+          "type": "picture_write",
+          "page": 10,
+          "source": "book",
+          "data": {
+            "items": [
+              {
+                "num": "1",
+                "image": {
+                  "src": "4a/01/write-1.webp",
+                  "alt": "A hand filling in a form"
+                },
+                "word": {
+                  "zh": "申请",
+                  "py": "shēn qǐng"
+                },
+                "sample": [
+                  {
+                    "zh": "他在申请大学的奖学金。",
+                    "py": "tā zài shēn qǐng dà xué de jiǎng xué jīn"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-01-ex-b07-i1"
+              },
+              {
+                "num": "2",
+                "image": {
+                  "src": "4a/01/write-2.webp",
+                  "alt": "A boy reading a notice on a board"
+                },
+                "word": {
+                  "zh": "通知",
+                  "py": "tōng zhī"
+                },
+                "sample": [
+                  {
+                    "zh": "他在看学校的通知。",
+                    "py": "tā zài kàn xué xiào de tōng zhī"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-01-ex-b07-i2"
+              },
+              {
+                "num": "3",
+                "image": {
+                  "src": "4a/01/write-3.webp",
+                  "alt": "A stressed person with a pile of papers"
+                },
+                "word": {
+                  "zh": "压力",
+                  "py": "yā lì"
+                },
+                "sample": [
+                  {
+                    "zh": "最近工作太多，他觉得压力很大。",
+                    "py": "zuì jìn gōng zuò tài duō tā jué de yā lì hěn dà"
+                  }
+                ],
+                "sample_source": "moink",
+                "key": "4a-01-ex-b07-i3"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "key": "4a-01-task",
+      "kind": "task",
+      "label_zh": "任务活动",
+      "label_en": "Task-Based Activities",
+      "page": 10,
+      "blocks": [
+        {
+          "key": "4a-01-task-b01",
+          "type": "task",
+          "page": 10,
+          "source": "book",
+          "data": {
+            "title": {
+              "zh": "角色扮演",
+              "py": "jué sè bàn yǎn"
+            },
+            "title_en": "Role-Play",
+            "answer_mode": "notes",
+            "text": {
+              "zh": "你的好朋友计划明年也来中国留学，但他/她对留学手续以及在中国的学习和生活还有很多不了解的地方。今天你们视频通话时，请你根据自己的经历向他/她介绍相关情况并给出建议。",
+              "py": "nǐ de hǎo péng you jì huà míng nián yě lái zhōng guó liú xué dàn tā tā duì liú xué shǒu xù yǐ jí zài zhōng guó de xué xí hé shēng huó hái yǒu hěn duō bù liǎo jiě de dì fang jīn tiān nǐ men shì pín tōng huà shí qǐng nǐ gēn jù zì jǐ de jīng lì xiàng tā tā jiè shào xiāng guān qíng kuàng bìng gěi chū jiàn yì"
+            },
+            "en": "Your good friend is also planning to study in China next year, but he/she still has many questions about the application procedures and studying and living in China. During your video call today, please share relevant information based on your experience and offer your advice.",
+            "answer_key": "4a-01-task-b01-a"
+          }
+        },
+        {
+          "key": "4a-01-task-b02",
+          "type": "task",
+          "page": 10,
+          "source": "book",
+          "data": {
+            "title": {
+              "zh": "写作",
+              "py": "xiě zuò"
+            },
+            "title_en": "Writing",
+            "answer_mode": "text",
+            "min_chars": 120,
+            "text": {
+              "zh": "学校即将举办“留学中国”宣讲会。为了让外国学生更好地了解他们在中国大学的学习和生活，请根据上面谈论的内容，写一段介绍，不少于120字。",
+              "py": "xué xiào jí jiāng jǔ bàn liú xué zhōng guó xuān jiǎng huì wèi le ràng wài guó xué sheng gèng hǎo de liǎo jiě tā men zài zhōng guó dà xué de xué xí hé shēng huó qǐng gēn jù shàng miàn tán lùn de nèi róng xiě yí duàn jiè shào bù shǎo yú zì"
+            },
+            "en": "The university is about to hold a “Study in China” information session. In order to help international students better understand their studies and lives at Chinese universities, please write an introduction based on the content discussed above, with at least 120 characters.",
+            "answer_key": "4a-01-task-b02-a"
+          }
+        }
+      ]
+    },
+    {
+      "key": "4a-01-sum",
+      "kind": "summary",
+      "label_zh": "学习小结",
+      "label_en": "Learning Summary",
+      "page": 11,
+      "blocks": [
+        {
+          "key": "4a-01-sum-b01",
+          "type": "self_check",
+          "page": 11,
+          "source": "book",
+          "data": {
+            "intro": {
+              "zh": "本课你学得怎么样？记住了多少词汇？“小语讲堂”里的语言点你会用了吗？关于留学的话题，你能表达了吗？请想一想，填写下边的表格：",
+              "py": "běn kè nǐ xué de zěn me yàng jì zhù le duō shǎo cí huì xiǎo yǔ jiǎng táng lǐ de yǔ yán diǎn nǐ huì yòng le ma guān yú liú xué de huà tí nǐ néng biǎo dá le ma qǐng xiǎng yi xiǎng tián xiě xià bian de biǎo gé"
+            },
+            "intro_en": "How much did you learn in this lesson? How many words do you remember? Can you apply the language points from “Xiaoyu's Classroom”? Can you communicate effectively on the topic of studying abroad? Please reflect on these questions and complete the table below:",
+            "scale": [
+              {
+                "zh": "没问题",
+                "en": "No Problem"
+              },
+              {
+                "zh": "还可以",
+                "en": "It's OK"
+              },
+              {
+                "zh": "需要努力",
+                "en": "Need to Improve"
+              }
+            ],
+            "rows": [
+              {
+                "text": {
+                  "zh": "能使用本课“入学、奖学金、课程、专业、研究、活动、教育”等词语，谈论留学话题。",
+                  "py": "néng shǐ yòng běn kè rù xué jiǎng xué jīn kè chéng zhuān yè yán jiū huó dòng jiào yù děng cí yǔ tán lùn liú xué huà tí"
+                },
+                "en": "Be able to use key vocabulary from this lesson, such as “入学”, “奖学金”, “课程”, “专业”, “研究”, “活动”, and “教育”, to discuss the topic of studying abroad.",
+                "key": "4a-01-sum-b01-r1"
+              },
+              {
+                "text": {
+                  "zh": "能理解并运用“任何”“要是……，就……”“随着”“一方面……，另一方面……”等语言点。",
+                  "py": "néng lǐ jiě bìng yùn yòng rèn hé yào shi jiù suí zhe yì fāng miàn lìng yì fāng miàn děng yǔ yán diǎn"
+                },
+                "en": "Be able to understand and apply language points such as “任何”, “要是……，就……”, “随着”, and “一方面……，另一方面……”.",
+                "key": "4a-01-sum-b01-r2"
+              },
+              {
+                "text": {
+                  "zh": "能介绍办理入学手续、申请奖学金等信息。",
+                  "py": "néng jiè shào bàn lǐ rù xué shǒu xù shēn qǐng jiǎng xué jīn děng xìn xī"
+                },
+                "en": "Be able to share information on enrollment procedures and scholarship applications.",
+                "key": "4a-01-sum-b01-r3"
+              },
+              {
+                "text": {
+                  "zh": "能表达自己选择专业的理由和未来职业发展方向。",
+                  "py": "néng biǎo dá zì jǐ xuǎn zé zhuān yè de lǐ yóu hé wèi lái zhí yè fā zhǎn fāng xiàng"
+                },
+                "en": "Be able to express the reasons for choosing a major and describe future career development plans.",
+                "key": "4a-01-sum-b01-r4"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

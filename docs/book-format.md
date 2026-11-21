@@ -65,7 +65,7 @@ Sections become the chips at the top of the lesson. `key` is stable.
 | `scene` | `icon` (`pin` = location, `reading` = reading-passage icon), `text`, `en`, optional `audio` | none |
 | `choice` | `items: [{key, num, text, options: [{label, text}], answer, answer_source}]` | pick one option per item |
 | `dialogue` | `image?: {src, alt}`, `lines: [{key, speaker: string[] \| null, text, en?, en_source?}]` | none (notes allowed per line) |
-| `passage` | `image?`, `paragraphs: [{text, en, en_source}]` | none |
+| `passage` | `image?`, `paragraphs: [{text, en, en_source, indent?}]`. `indent: false` = no first-line indent (e.g. a diary date line); default is indented | none |
 | `vocab` | `audio`, `items: [{key, num, hanzi, pinyin, pos, en, extra: {source, text, en}}]` | "add to Training" per word |
 | `prompts` | `answer_mode` (`text` / `none`), `items: [{key, num, text, sample?: [Text], sample_source?}]` | textarea per item |
 | `retell` | `text` (prompt passage with ……), `answer_key` | textarea |

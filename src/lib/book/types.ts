@@ -22,7 +22,8 @@ export interface BlockData {
     items: { key: string; num: string; text: BookText; options: Option[]; answer: Label; answer_source?: string }[];
   };
   dialogue: { image?: Image; lines: DialogueLine[] };
-  passage: { image?: Image; paragraphs: Translated[] };
+  /** indent: false = no first-line indent (a diary's date line, say). */
+  passage: { image?: Image; paragraphs: (Translated & { indent?: boolean })[] };
   vocab: {
     audio: string | null;
     items: {
