@@ -33,8 +33,10 @@ export interface BlockData {
     items: { key: string; num: string; text: BookText; options: Option[]; answer: Label; answer_source?: string }[];
   };
   dialogue: { image?: Image; lines: DialogueLine[] };
-  /** indent: false = no first-line indent (a diary's date line, say). */
-  passage: { image?: Image; paragraphs: (Translated & { indent?: boolean })[] };
+  /** indent: false = no first-line indent (a diary's date line, a letter's
+   *  greeting); align: "right" = right-aligned, never indented (a letter's
+   *  signature and date). */
+  passage: { image?: Image; paragraphs: (Translated & { indent?: boolean; align?: "right" })[] };
   /** proper: a 专有名词 Proper Nouns table (no audio, empty pos; its nums
    *  continue across the lesson's proper-noun tables). */
   vocab: {

@@ -65,7 +65,7 @@ Sections become the chips at the top of the lesson. `key` is stable.
 | `scene` | `icon` (`pin` = location, `reading` = reading-passage icon), `text`, `en`, optional `audio` | none |
 | `choice` | `items: [{key, num, text, options: [{label, text}], answer, answer_source}]` | pick one option per item |
 | `dialogue` | `image?: {src, alt}`, `lines: [{key, speaker: string[] \| null, text, en?, en_source?}]` | none (notes allowed per line) |
-| `passage` | `image?`, `paragraphs: [{text, en, en_source, indent?}]`. `indent: false` = no first-line indent (e.g. a diary date line); default is indented | none |
+| `passage` | `image?`, `paragraphs: [{text, en, en_source, indent?, align?}]`. `indent: false` = no first-line indent (e.g. a diary date line, a letter greeting, a numbered heading); default is indented. `align: "right"` = right-aligned line with no indent (e.g. a letter's signature and date) | none |
 | `vocab` | `audio`, `items: [{key, num, hanzi, pinyin, pos, en, extra: {source, text, en}}]` Optional `proper: true` = a 专有名词 Proper Nouns table (no `audio`, `pos` is empty, numbering is separate from normal vocab and continues across the lesson's proper-noun tables). | "add to Training" per word |
 | `prompts` | `answer_mode` (`text` / `none`), `items: [{key, num, text, sample?: [Text], sample_source?}]` | textarea per item |
 | `retell` | `text` (prompt passage with ……), `answer_key` | textarea |
