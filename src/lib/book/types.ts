@@ -12,7 +12,15 @@ export interface Image { src: string; alt: string }
  *  stage note. */
 export interface DialogueLine { key: string; speaker: string[] | null; text: BookText; en?: string; en_source?: string }
 export interface FillLine { speaker: string | null; text: BookText }
-export interface TaskTable { columns: { text: BookText; en: string }[]; rows: number; numbered: boolean }
+/** A task's table: row_labels head each row (instead of numbers); a
+ *  merged row (index from 0) is one wide cell, saved as a one-item row. */
+export interface TaskTable {
+  columns: { text: BookText; en: string }[];
+  rows: number;
+  numbered?: boolean;
+  row_labels?: { text: BookText; en: string }[];
+  merged_rows?: number[];
+}
 /** A set of image_match labels picked together ("菜名 Dish": A-D). */
 export interface MatchGroup { key: string; label_zh: string; label_en: string; labels: Label[] }
 export interface Translated { text: BookText; en?: string; en_source?: string }

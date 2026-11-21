@@ -567,69 +567,104 @@ export function FillBlank({ itemKey, index, count, label }: { itemKey: string; i
   );
 }
 
-/** A saved table answer as exactly rows × cols strings. */
-const asGrid = (v: Json | undefined, rows: number, cols: number): string[][] =>
-  Array.from({ length: rows }, (_, r) => {
+/** A saved table answer as exactly one string per cell, row by row
+ *  (`widths`: each row's cell count, 1 for a merged row). */
+const asGrid = (v: Json | undefined, widths: number[]): string[][] =>
+  widths.map((n, r) => {
     const row = Array.isArray(v) ? v[r] : undefined;
-    return Array.from({ length: cols }, (_, c) => (Array.isArray(row) && typeof row[c] === "string" ? (row[c] as string) : ""));
+    return Array.from({ length: n }, (_, c) => (Array.isArray(row) && typeof row[c] === "string" ? (row[c] as string) : ""));
   });
 
 /** One cell of a task table: saves the whole grid, like FillBlank does its
- *  list. */
-function TableCell({ answerKey, row, col, rows, cols, label }: { answerKey: string; row: number; col: number; rows: number; cols: number; label: string }) {
+ *  list. `wide`: a merged row's one cell, a growing textarea. */
+function TableCell({
+  answerKey,
+  row,
+  col,
+  widths,
+  label,
+  wide = false,
+}: {
+  answerKey: string;
+  row: number;
+  col: number;
+  widths: number[];
+  label: string;
+  wide?: boolean;
+}) {
   const store = useBookStore();
-  const saved = asGrid(useAnswer(answerKey)?.answer, rows, cols)[row][col];
+  const saved = asGrid(useAnswer(answerKey)?.answer, widths)[row][col];
   const [value, setValue] = useState(saved);
+  const area = useRef<HTMLTextAreaElement>(null);
   // No saving while an IME composition is open.
   const composingRef = useRef(false);
 
+  useLayoutEffect(() => {
+    const el = area.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight + 2}px`;
+  }, [value]);
+
   const save = (text: string, delay: number) => {
-    const grid = asGrid(store.getAnswer(answerKey)?.answer, rows, cols);
+    const grid = asGrid(store.getAnswer(answerKey)?.answer, widths);
     if (grid[row][col] === text) return;
     grid[row][col] = text;
     store.setAnswer(answerKey, grid, null, delay);
   };
 
-  return (
-    <input
-      type="text"
-      value={value}
-      aria-label={label}
-      autoComplete="off"
-      spellCheck={false}
-      lang="zh-CN"
-      onCompositionStart={() => {
-        composingRef.current = true;
-      }}
-      onChange={(e) => {
-        setValue(e.target.value);
-        if (!composingRef.current) save(e.target.value, TEXT_DELAY_MS);
-      }}
-      onCompositionEnd={(e) => {
-        composingRef.current = false;
-        save(e.currentTarget.value, TEXT_DELAY_MS);
-      }}
-      onBlur={(e) => {
-        save(e.currentTarget.value, 0);
-        store.flush(`a:${answerKey}`);
-      }}
-      className="h-11 w-full min-w-0 rounded-md border-[1.5px] border-transparent bg-transparent px-2 font-hanzi text-[16px] text-bark hover:border-line focus:border-rust focus:bg-surface-raised focus:outline-none"
-    />
+  const props = {
+    value,
+    "aria-label": label,
+    spellCheck: false,
+    lang: "zh-CN",
+    onCompositionStart: () => {
+      composingRef.current = true;
+    },
+    onChange: (e: { target: { value: string } }) => {
+      setValue(e.target.value);
+      if (!composingRef.current) save(e.target.value, TEXT_DELAY_MS);
+    },
+    onCompositionEnd: (e: { currentTarget: { value: string } }) => {
+      composingRef.current = false;
+      save(e.currentTarget.value, TEXT_DELAY_MS);
+    },
+    onBlur: (e: { currentTarget: { value: string } }) => {
+      save(e.currentTarget.value, 0);
+      store.flush(`a:${answerKey}`);
+    },
+  };
+  const look =
+    "w-full min-w-0 rounded-md border-[1.5px] border-transparent bg-transparent px-2 font-hanzi text-[16px] text-bark hover:border-line focus:border-rust focus:bg-surface-raised focus:outline-none";
+
+  return wide ? (
+    <textarea ref={area} rows={2} {...props} className={`${look} block resize-none overflow-hidden py-2 leading-[1.7]`} />
+  ) : (
+    <input type="text" autoComplete="off" {...props} className={`${look} h-11`} />
   );
 }
 
-/** A task's survey table (answer_mode "table"), saved under its
- *  answer_key as rows of cell strings. Wider than a phone: it scrolls
+/** A task's table (answer_mode "table"), saved under its answer_key as
+ *  rows of cell strings. Each row starts with its label (row_labels) or
+ *  number (numbered), if any; a merged row is one wide textarea across the
+ *  columns, saved as a one-item row. Wider than a phone: it scrolls
  *  sideways inside its card rather than squeezing the columns. */
 export function TableAnswer({ answerKey, table }: { answerKey: string; table: TaskTable }) {
   const cols = table.columns.length;
+  const merged = new Set(table.merged_rows ?? []);
+  const widths = Array.from({ length: table.rows }, (_, r) => (merged.has(r) ? 1 : cols));
+  const labels = table.row_labels;
+  const lead = Boolean(labels) || table.numbered === true;
+  const rowName = (r: number) => (labels ? `${labels[r].en} (${labels[r].text.zh})` : `Row ${r + 1}`);
+  const line = (r: number, first: boolean) => `${r > 0 ? "border-t-[1.5px]" : ""} ${first ? "" : "border-l-[1.5px]"} border-line`;
+
   return (
     <div className="-mx-4 overflow-x-auto px-4 sm:-mx-5 sm:px-5">
       <table className="w-full min-w-136 border-separate border-spacing-0 rounded-lg border-[1.5px] border-line">
         <thead>
           <tr>
-            {table.numbered && (
-              <th className="w-10 border-b-[1.5px] border-line">
+            {lead && (
+              <th className={`${labels ? "w-32" : "w-10"} border-b-[1.5px] border-line`}>
                 <span className="sr-only">Row</span>
               </th>
             )}
@@ -637,7 +672,7 @@ export function TableAnswer({ answerKey, table }: { answerKey: string; table: Ta
               <th
                 key={i}
                 scope="col"
-                className={`border-b-[1.5px] border-line px-2 pb-1.5 text-left align-bottom font-normal ${i > 0 || table.numbered ? "border-l-[1.5px]" : ""}`}
+                className={`border-b-[1.5px] border-line px-2 pb-1.5 text-left align-bottom font-normal ${i > 0 || lead ? "border-l-[1.5px]" : ""}`}
               >
                 <ZhText text={c.text} className="book-zh block font-bold text-bark" />
                 <span className="book-en block font-body text-[13px]! leading-4">{c.en}</span>
@@ -646,28 +681,31 @@ export function TableAnswer({ answerKey, table }: { answerKey: string; table: Ta
           </tr>
         </thead>
         <tbody>
-          {Array.from({ length: table.rows }, (_, r) => (
+          {widths.map((_, r) => (
             <tr key={r}>
-              {table.numbered && (
-                <th scope="row" className={`text-center font-body text-[15px] font-medium text-bark-muted ${r > 0 ? "border-t-[1.5px] border-line" : ""}`}>
-                  {r + 1}
+              {labels ? (
+                <th scope="row" className={`px-2 py-1 text-left align-top font-normal ${line(r, true)}`}>
+                  <ZhText text={labels[r].text} className="book-zh block font-bold text-bark" />
+                  <span className="book-en block font-body text-[13px]! leading-4">{labels[r].en}</span>
                 </th>
+              ) : (
+                table.numbered && (
+                  <th scope="row" className={`text-center font-body text-[15px] font-medium text-bark-muted ${line(r, true)}`}>
+                    {r + 1}
+                  </th>
+                )
               )}
-              {table.columns.map((c, i) => (
-                <td
-                  key={i}
-                  className={`p-1 ${r > 0 ? "border-t-[1.5px]" : ""} ${i > 0 || table.numbered ? "border-l-[1.5px]" : ""} border-line`}
-                >
-                  <TableCell
-                    answerKey={answerKey}
-                    row={r}
-                    col={i}
-                    rows={table.rows}
-                    cols={cols}
-                    label={`Row ${r + 1}, ${c.en} (${c.text.zh})`}
-                  />
+              {merged.has(r) ? (
+                <td colSpan={cols} className={`p-1 ${line(r, !lead)}`}>
+                  <TableCell answerKey={answerKey} row={r} col={0} widths={widths} label={rowName(r)} wide />
                 </td>
-              ))}
+              ) : (
+                table.columns.map((c, i) => (
+                  <td key={i} className={`p-1 ${line(r, i === 0 && !lead)}`}>
+                    <TableCell answerKey={answerKey} row={r} col={i} widths={widths} label={`${rowName(r)}, ${c.en} (${c.text.zh})`} />
+                  </td>
+                ))
+              )}
             </tr>
           ))}
         </tbody>

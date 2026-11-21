@@ -22,7 +22,8 @@
 //     label_en; a tip has a
 //     Text text
 //   - a task's answer_mode is text, notes or table; a table task has
-//     table: {columns: [{text, en}], rows, numbered}
+//     table: {columns: [{text, en}], rows, numbered?, row_labels?,
+//     merged_rows?}: one row label per row, merged rows in 0..rows-1
 //   - a video has a label, a Text title, a title_en and an image
 //
 // --write uploads the images (upsert, same path as src), then replaces the
@@ -203,7 +204,23 @@ function check(file: BookFile) {
               if (!isObj(c) || !isText(c.text) || typeof c.en !== "string") problems.push(`${at} table.columns[${i}]: needs a Text text and an en`);
             });
             if (typeof t.rows !== "number" || !Number.isInteger(t.rows) || t.rows < 1) problems.push(`${at}: table.rows must be a whole number from 1`);
-            if (typeof t.numbered !== "boolean") problems.push(`${at}: table.numbered must be true or false`);
+            if (t.numbered !== undefined && typeof t.numbered !== "boolean") problems.push(`${at}: table.numbered must be true or false`);
+            if (t.row_labels !== undefined) {
+              const rl = Array.isArray(t.row_labels) ? t.row_labels : [];
+              if (!Array.isArray(t.row_labels) || rl.length !== t.rows) problems.push(`${at}: table.row_labels has ${rl.length} labels for ${t.rows} rows`);
+              rl.forEach((l, i) => {
+                if (!isObj(l) || !isText(l.text) || typeof l.en !== "string") problems.push(`${at} table.row_labels[${i}]: needs a Text text and an en`);
+              });
+            }
+            if (t.merged_rows !== undefined) {
+              const mr = Array.isArray(t.merged_rows) ? t.merged_rows : [];
+              if (!Array.isArray(t.merged_rows)) problems.push(`${at}: table.merged_rows must be a list of row indexes`);
+              const rows = typeof t.rows === "number" ? t.rows : 0;
+              for (const r of mr) {
+                if (typeof r !== "number" || !Number.isInteger(r) || r < 0 || r >= rows) problems.push(`${at}: table.merged_rows has ${r}, not a row index (0-${rows - 1})`);
+              }
+              if (new Set(mr).size !== mr.length) problems.push(`${at}: table.merged_rows lists a row twice`);
+            }
           }
         }
         if (d.tips !== undefined) {
