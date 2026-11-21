@@ -23,7 +23,7 @@ import {
   TableAnswer,
 } from "./Inputs";
 import { SpeakButton } from "./SpeakButton";
-import { speakable, ZhText } from "./ZhText";
+import { paragraphs, speakable, ZhText } from "./ZhText";
 
 // One component per block type (docs/book-format.md), read-only for now:
 // the inputs (answers, checks, notes) slot in later. Server components;
@@ -502,15 +502,25 @@ function PassageFill({ data }: { data: BlockData["passage_fill"] }) {
   return (
     <div className="flex flex-col gap-3">
       <OptionList options={data.options} className="flex-col !gap-y-0" />
-      <div className={BOOK_CARD}>
-        <p className={`${ZH} indent-[2em]`}>
-          <ZhText
-            text={data.text}
-            blank={(i) => (
-              <PassageBlank answerKey={data.answer_key} index={i} count={data.answers.length} options={data.options} answers={data.answers} />
-            )}
-          />
-        </p>
+      {/* A "\n" in zh starts a new paragraph, indented like a passage's;
+          blank numbers run on across paragraphs. */}
+      <div className={`${BOOK_CARD} flex flex-col gap-3`}>
+        {paragraphs(data.text).map((p, n) => (
+          <p key={n} className={`${ZH} indent-[2em]`}>
+            <ZhText
+              text={p.text}
+              blank={(i) => (
+                <PassageBlank
+                  answerKey={data.answer_key}
+                  index={p.blankOffset + i}
+                  count={data.answers.length}
+                  options={data.options}
+                  answers={data.answers}
+                />
+              )}
+            />
+          </p>
+        ))}
       </div>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <PassageCheck answerKey={data.answer_key} answers={data.answers} />

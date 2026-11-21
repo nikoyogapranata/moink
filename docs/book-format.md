@@ -73,7 +73,7 @@ Sections become the chips at the top of the lesson. `key` is stable.
 | `dialogue_fill` | `items: [{key, num, lines: [{speaker: "A"/"B", text}], sample?: [Text], sample_source}]` | one input per `{_}` |
 | `sentence_fill` | same shape as `dialogue_fill` (speaker null), plus optional `hint` (Text, shown in brackets after the sentence) | one input per `{_}` |
 | `word_bank` | `bank: [{label, text}]`, `items: [{key, num, lines: [{speaker, text}], answer, answer_source}]` (one `{_}` per item) | pick a bank label per item |
-| `passage_fill` | `options: [{label, text}]`, `text` (with several `{_}`), `answers: ["C","B",...]`, `answer_source`, `answer_key` | pick a label per blank |
+| `passage_fill` | `options: [{label, text}]`, `text` (with several `{_}`; a `\n` in `zh` starts a new indented paragraph), `answers: ["C","B",...]`, `answer_source`, `answer_key` | pick a label per blank |
 | `image_match` | `images: [{key, src, alt, answer}]`, `options: [{label, text}]`, `answer_source`. Optional `groups: [{key, label_zh, label_en, labels}]`: then each image's `answer` is an object like `{"name": "C", "flavor": "F"}`, one label per group | pick a label per image |
 | `picture_write` | `items: [{key, num, image, word: Text, sample?, sample_source}]` | textarea per item |
 | `task` | `title`, `title_en`, `text`, `en`, `answer_mode` (`text` / `notes` / `table`), `min_chars?`, `answer_key`, optional `tips: {label, label_en, items: [{label, label_en, text}]}` shown under the task text (e.g. 提示 Tips: 正方 Pro side / 反方 Con side); optional `table: {columns: [{text, en}], rows, numbered}` for a survey table the user fills in (answer_mode `table`, answer saved as a 2D array of strings) | textarea (show live character count vs `min_chars`) |

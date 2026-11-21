@@ -24,6 +24,24 @@ export function BlankLine({ index, numbered = false }: { index: number; numbered
 /** zh without blanks, for speech. */
 export const speakable = (text: BookText) => text.zh.split(BLANK).join("");
 
+/** A text split at each "\n" in zh (a new paragraph, as in passage_fill):
+ *  each part gets its own Han characters' syllables, and `blankOffset`, the
+ *  number of {_} before it, so blank numbers run on across paragraphs. */
+export function paragraphs(text: BookText): { text: BookText; blankOffset: number }[] {
+  const syllables = text.py.trim() ? text.py.trim().split(/\s+/) : [];
+  let s = 0;
+  let blanks = 0;
+  return text.zh.split("\n").map((zh) => {
+    const han = (zh.split(BLANK).join("").match(HAN_ALL) ?? []).length;
+    const part = { text: { zh, py: syllables.slice(s, s + han).join(" ") }, blankOffset: blanks };
+    s += han;
+    blanks += zh.split(BLANK).length - 1;
+    return part;
+  });
+}
+
+const HAN_ALL = /\p{Script=Han}/gu;
+
 export function ZhText({
   text,
   blank,
@@ -51,6 +69,9 @@ export function ZhText({
       out.push(<span key={`b${index}`}>{blank ? blank(index) : <BlankLine index={index} />}</span>);
     }
     for (const ch of part) {
+      // A line break is a paragraph break (paragraphs() splits there); one
+      // left in a text takes no syllable and shows as nothing.
+      if (ch === "\n") continue;
       if (!HAN.test(ch)) {
         plain += ch;
         continue;
