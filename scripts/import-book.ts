@@ -14,7 +14,10 @@
 // The file is checked first, and nothing is written if anything fails:
 //   - every Text ({zh, py}): one py syllable per Han character in zh
 //     ({_} blanks and everything non-Han have none)
-//   - section, block and item keys (and answer_keys) are unique
+//   - section, block and item keys (and answer_keys) are unique and start
+//     with the book's slug ("4b-..."), and image srcs sit under it
+//     ("4b/..."): keys are global (answers are stored by key alone), so
+//     two books must never share one
 //   - pages never go down in array order
 //   - choice, word_bank and image_match answers are among their labels
 //     (with image_match groups: one of each group's labels per group),
@@ -108,6 +111,7 @@ function check(file: BookFile) {
     }
     if (typeof v.src === "string") {
       images.add(v.src);
+      if (!v.src.startsWith(`${file.book.slug}/`)) problems.push(`${path}: image ${v.src} isn't under ${file.book.slug}/`);
       if (!existsSync(join(ASSETS_DIR, v.src))) problems.push(`${path}: image ${v.src} not found under ${ASSETS_DIR}`);
     }
     for (const [k, x] of Object.entries(v)) walk(x, `${path}.${k}`);
@@ -118,6 +122,7 @@ function check(file: BookFile) {
   const keys = new Map<string, string>();
   const addKey = (key: unknown, where: string) => {
     if (typeof key !== "string" || !key) return problems.push(`${where}: missing key`);
+    if (!key.startsWith(`${file.book.slug}-`)) problems.push(`${where}: key ${key} doesn't start with ${file.book.slug}-`);
     const prev = keys.get(key);
     if (prev) problems.push(`${where}: key ${key} already used at ${prev}`);
     else keys.set(key, where);

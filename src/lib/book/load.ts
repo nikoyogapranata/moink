@@ -101,7 +101,7 @@ export interface BookNote {
 
 export interface ReaderLesson {
   id: string;
-  book: { slug: string; title_zh: string; title_en: string };
+  book: { slug: string; title_zh: string; title_en: string; level: number };
   kind: BookLessonKind;
   /** Null for the appendix. */
   number: number | null;
@@ -140,7 +140,7 @@ export async function loadReaderLesson(
 ): Promise<ReaderLesson | null> {
   const book = await supabase
     .from("books")
-    .select("id, slug, title_zh, title_en")
+    .select("id, slug, title_zh, title_en, level")
     .eq("slug", bookSlug)
     .maybeSingle();
   if (book.error) throw book.error;
@@ -270,7 +270,7 @@ export async function loadReaderLesson(
 
   return {
     id: lesson.id,
-    book: { slug: book.data.slug, title_zh: book.data.title_zh, title_en: book.data.title_en },
+    book: { slug: book.data.slug, title_zh: book.data.title_zh, title_en: book.data.title_en, level: book.data.level },
     kind: lesson.kind,
     number: lesson.number,
     title: lesson.title,

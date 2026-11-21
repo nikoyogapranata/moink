@@ -212,6 +212,7 @@ export function Reader({
   done: initialDone,
   lastBlockKey,
   header,
+  shelf,
   next,
   children,
 }: {
@@ -226,6 +227,8 @@ export function Reader({
   done: boolean;
   lastBlockKey: string | null;
   header: ReactNode;
+  /** The shelf with this lesson's book open. */
+  shelf: string;
   /** The next lesson's link, or null for the last one. */
   next: string | null;
   children: ReactNode;
@@ -328,7 +331,7 @@ export function Reader({
             </Button>
             <div className="flex w-full flex-wrap justify-center gap-3">
               <Link
-                href="/book"
+                href={shelf}
                 className={`inline-flex min-h-11 items-center gap-1.5 rounded-pill border-[1.5px] border-line bg-surface-raised px-4 font-body text-body font-medium text-bark transition-colors hover:bg-highlight/40 ${FOCUS_RING}`}
               >
                 <ArrowLeft size={18} aria-hidden="true" className="text-rust-dark" />

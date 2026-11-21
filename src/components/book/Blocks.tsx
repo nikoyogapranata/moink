@@ -35,6 +35,8 @@ import { paragraphs, speakable, ZhText } from "./ZhText";
 export interface BlockContext {
   /** For links to the book's lessons (the word index). */
   bookSlug: string;
+  /** The book's HSK level, for "beyond the syllabus" marks. */
+  bookLevel: number;
   images: Record<string, string>;
   vocabWords: Record<string, VocabWord>;
   grammarLinks: Record<string, GrammarLink>;
@@ -84,11 +86,11 @@ function AudioChip({ track }: { track?: string | null }) {
 }
 
 /** The book's * for a word beyond this level's syllabus. */
-function Beyond({ className = "" }: { className?: string }) {
+function Beyond({ level, className = "" }: { level: number; className?: string }) {
   return (
-    <span title="Beyond the HSK 4 syllabus" className={`cursor-help font-body text-bamboo-gold-dark ${className}`}>
+    <span title={`Beyond the HSK ${level} syllabus`} className={`cursor-help font-body text-bamboo-gold-dark ${className}`}>
       <span aria-hidden="true">*</span>
-      <span className="sr-only"> (beyond the HSK 4 syllabus)</span>
+      <span className="sr-only"> (beyond the HSK {level} syllabus)</span>
     </span>
   );
 }
@@ -320,7 +322,7 @@ function Vocab({ data, ctx }: { data: BlockData["vocab"]; ctx: BlockContext }) {
                 <div className="flex flex-wrap items-baseline gap-x-3">
                   <span lang="zh-CN" className="book-vocab-hz font-hanzi text-bark">
                     {item.hanzi}
-                    {item.beyond && <Beyond className="ml-0.5 align-super text-[14px]" />}
+                    {item.beyond && <Beyond level={ctx.bookLevel} className="ml-0.5 align-super text-[14px]" />}
                   </span>
                   <span className="book-vpy font-body font-medium text-rust-dark">{item.pinyin}</span>
                   {!proper && <span className="book-pos font-body italic text-bark-muted">{item.pos}</span>}
@@ -828,7 +830,7 @@ function WordIndex({ data, ctx }: { data: BlockData["word_index"]; ctx: BlockCon
               {g.items.map((it) => (
                 <tr key={it.key} className="border-t-[1.5px] border-line first:border-t-0">
                   <td lang="zh-CN" className="whitespace-nowrap px-3 py-1.5 font-hanzi text-[17px] text-bark">
-                    {it.beyond && <Beyond className="mr-0.5" />}
+                    {it.beyond && <Beyond level={ctx.bookLevel} className="mr-0.5" />}
                     {it.hanzi}
                   </td>
                   <td className="px-3 py-1.5 font-body text-[15px] text-bark-muted">{it.pinyin}</td>

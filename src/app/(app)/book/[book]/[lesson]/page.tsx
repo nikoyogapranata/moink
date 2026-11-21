@@ -94,6 +94,7 @@ export default async function BookLessonPage({ params }: PageProps<"/book/[book]
 
   const ctx: BlockContext = {
     bookSlug: lesson.book.slug,
+    bookLevel: lesson.book.level,
     images: lesson.images,
     vocabWords: lesson.vocabWords,
     grammarLinks: lesson.grammarLinks,
@@ -186,6 +187,7 @@ export default async function BookLessonPage({ params }: PageProps<"/book/[book]
       done={lesson.done}
       lastBlockKey={lesson.lastBlockKey}
       header={header}
+      shelf={`/book?book=${lesson.book.slug}`}
       next={lesson.next !== null ? `/book/${lesson.book.slug}/${lesson.next}` : null}
     >
       {sections}
