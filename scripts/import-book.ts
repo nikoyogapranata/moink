@@ -13,10 +13,11 @@
 //     ({_} blanks and everything non-Han have none)
 //   - section, block and item keys (and answer_keys) are unique
 //   - pages never go down in array order
-//   - choice, word_bank and image_match answers are among their labels,
+//   - choice, word_bank and image_match answers are among their labels
+//     (with image_match groups: one of each group's labels per group),
 //     passage_fill has one answer per {_}, each among the option labels
 //   - every image src exists under scripts/output/book/assets/
-//   - vocab with proper: true has no audio, empty pos and nums 1, 2, 3...;
+//   - vocab with proper: true has no audio and an empty pos;
 //     task tips have a Text label, label_en and Text items; a tip has a
 //     Text text
 //   - a task's answer_mode is text, notes or table; a table task has
@@ -139,8 +140,40 @@ function check(file: BookFile) {
         }
       } else if (b.type === "image_match") {
         const opts = labels(d.options);
-        for (const im of arr(d.images)) {
-          if (!opts.has(im.answer)) problems.push(`${at} ${im.key}: answer ${im.answer} not among the options`);
+        if (d.groups === undefined) {
+          for (const im of arr(d.images)) {
+            if (!opts.has(im.answer)) problems.push(`${at} ${im.key}: answer ${im.answer} not among the options`);
+          }
+        } else {
+          // Each group: a key, its names and its own labels (all options);
+          // each image: exactly one of that group's labels per group.
+          const groups = arr(d.groups);
+          if (!Array.isArray(d.groups) || !groups.length) problems.push(`${at}: groups must be a non-empty list`);
+          const seen = new Set<string>();
+          for (const [i, g] of groups.entries()) {
+            const where = `${at} groups[${i}]`;
+            if (typeof g.key !== "string" || !g.key) problems.push(`${where}: missing key`);
+            else if (seen.has(g.key)) problems.push(`${where}: key ${g.key} used twice`);
+            else seen.add(g.key);
+            if (typeof g.label_zh !== "string" || typeof g.label_en !== "string") problems.push(`${where}: needs label_zh and label_en`);
+            if (!Array.isArray(g.labels) || !g.labels.length) problems.push(`${where}: no labels`);
+            for (const l of Array.isArray(g.labels) ? g.labels : []) {
+              if (!opts.has(l)) problems.push(`${where}: label ${l} not among the options`);
+            }
+          }
+          for (const im of arr(d.images)) {
+            const a = im.answer;
+            if (!isObj(a)) {
+              problems.push(`${at} ${im.key}: with groups, answer must be {${[...seen].join(", ")}}`);
+              continue;
+            }
+            for (const k of Object.keys(a)) if (!seen.has(k)) problems.push(`${at} ${im.key}: answer has ${k}, not a group`);
+            for (const g of groups) {
+              if (typeof g.key !== "string") continue;
+              const own = Array.isArray(g.labels) ? g.labels : [];
+              if (!own.includes(a[g.key])) problems.push(`${at} ${im.key}: answer for ${g.key} is ${a[g.key] ?? "missing"}, not one of ${own.join("")}`);
+            }
+          }
         }
       } else if (b.type === "passage_fill") {
         const answers = Array.isArray(d.answers) ? d.answers : [];
@@ -152,10 +185,9 @@ function check(file: BookFile) {
         if (d.proper !== undefined && typeof d.proper !== "boolean") problems.push(`${at}: proper must be true or false`);
         if (d.proper === true) {
           if (d.audio != null) problems.push(`${at}: a proper-noun table has no audio`);
-          arr(d.items).forEach((it, i) => {
+          for (const it of arr(d.items)) {
             if (it.pos) problems.push(`${at} ${it.key}: a proper noun has no pos (got ${it.pos})`);
-            if (String(it.num) !== String(i + 1)) problems.push(`${at} ${it.key}: num ${it.num}, expected ${i + 1} (numbering restarts at 1)`);
-          });
+          }
         }
       } else if (b.type === "task") {
         if (!["text", "notes", "table"].includes(d.answer_mode as string)) problems.push(`${at}: unknown answer_mode ${d.answer_mode}`);

@@ -14,7 +14,7 @@ import {
 import { createPortal } from "react-dom";
 
 import { hanCount } from "@/lib/book/answers";
-import type { BookText, Option, TaskTable } from "@/lib/book/types";
+import type { BookText, MatchGroup, Option, TaskTable } from "@/lib/book/types";
 import type { Json } from "@/lib/supabase/database.types";
 
 import { TEXT_DELAY_MS, useAnswer, useBookStore, useScore } from "./store";
@@ -328,6 +328,82 @@ export function MatchPicker({ itemKey, num, options, answer }: { itemKey: string
           </>
         ) : (
           <span className="font-body text-[14px] text-bark-muted">Choose</span>
+        )}
+      </Picker>
+      <span className="book-extra">
+        {result === "correct" && <span className="font-body text-[13px] font-medium text-deep-grass">Correct</span>}
+        {result === "wrong" && <span className="font-body text-[13px] font-medium text-danger">Try again</span>}
+      </span>
+    </div>
+  );
+}
+
+/** A grouped image's saved picks, by group key. */
+const asPicks = (v: Json | undefined): Record<string, string> => {
+  const out: Record<string, string> = {};
+  if (v && typeof v === "object" && !Array.isArray(v)) {
+    for (const [k, x] of Object.entries(v)) if (typeof x === "string") out[k] = x;
+  }
+  return out;
+};
+
+/** One group's picker under a grouped image_match picture ("菜名 Dish"),
+ *  offering only that group's labels and checked on its own. The image's
+ *  answer is saved as one label per group; it counts as correct once every
+ *  group is picked right, wrong once any pick is wrong. */
+export function GroupMatchPicker({
+  itemKey,
+  num,
+  options,
+  group,
+  groups,
+  answer,
+}: {
+  itemKey: string;
+  num: number;
+  options: Option[];
+  group: MatchGroup;
+  groups: MatchGroup[];
+  answer: Record<string, string>;
+}) {
+  const store = useBookStore();
+  const picked = asPicks(useAnswer(itemKey)?.answer)[group.key] ?? null;
+  const result = picked ? (picked === answer[group.key] ? "correct" : "wrong") : null;
+  const text = optionText(options, picked);
+  const own = options.filter((o) => group.labels.includes(o.label));
+
+  const pick = (label: string) => {
+    const picks = { ...asPicks(store.getAnswer(itemKey)?.answer), [group.key]: label };
+    const wrong = groups.some((g) => picks[g.key] && picks[g.key] !== answer[g.key]);
+    const done = groups.every((g) => picks[g.key]);
+    store.setAnswer(itemKey, picks, wrong ? false : done ? true : null);
+  };
+
+  return (
+    <div className="flex w-full flex-col items-center">
+      <span className="font-body text-[12px] leading-4 text-bark-muted">
+        <span lang="zh-CN" className="font-hanzi">
+          {group.label_zh}
+        </span>{" "}
+        {group.label_en}
+      </span>
+      <Picker
+        options={own}
+        value={picked}
+        result={result}
+        label={`Picture ${num}, ${group.label_en} (${group.label_zh})`}
+        onPick={pick}
+        className="min-h-11 max-w-full px-2.5"
+      >
+        {picked && text ? (
+          <>
+            <span className="font-body text-[15px] font-medium text-rust-dark">{picked}</span>
+            <ZhText text={text} className="text-[17px] leading-[2.2] text-bark" />
+          </>
+        ) : (
+          <span className="font-body text-[14px] text-bark-muted">
+            Choose {own[0]?.label}–{own[own.length - 1]?.label}
+          </span>
         )}
       </Picker>
       <span className="book-extra">

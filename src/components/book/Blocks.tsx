@@ -11,6 +11,7 @@ import {
   BankBlank,
   ChoicePills,
   FillBlank,
+  GroupMatchPicker,
   ItemFeedback,
   MatchPicker,
   ObjectiveCheck,
@@ -273,7 +274,8 @@ function Passage({ data, ctx }: { data: BlockData["passage"]; ctx: BlockContext 
 }
 
 /** 生词 New words, or with `proper` the 专有名词 Proper Nouns table: no
- *  audio track, no part of speech, numbered from ① whatever the file says. */
+ *  audio track, no part of speech. Numbers as given: proper nouns are
+ *  numbered on their own, continuing across the lesson's tables. */
 function Vocab({ data, ctx }: { data: BlockData["vocab"]; ctx: BlockContext }) {
   const proper = data.proper === true;
   return (
@@ -290,12 +292,12 @@ function Vocab({ data, ctx }: { data: BlockData["vocab"]; ctx: BlockContext }) {
         )}
       </div>
       <ol className="flex flex-col divide-y-[1.5px] divide-line">
-        {data.items.map((item, i) => {
+        {data.items.map((item) => {
           const word = ctx.vocabWords[item.hanzi];
           return (
             <li key={item.key} data-vocab-row className="flex gap-2 py-3 sm:gap-3">
               <span aria-hidden="true" className="w-5 shrink-0 font-body text-[17px] leading-9 text-bark-muted">
-                {circled(proper ? i + 1 : item.num)}
+                {circled(item.num)}
               </span>
               <div className="min-w-0 flex-1">
                 {/* Phones: hanzi, pinyin and part of speech on one line, the
@@ -526,7 +528,24 @@ function ImageMatch({ data, ctx }: { data: BlockData["image_match"]; ctx: BlockC
         {data.images.map((im, i) => (
           <li key={im.key} className="flex flex-col items-center gap-1.5">
             <BookImage image={im} ctx={ctx} className="aspect-[7/6] w-full rounded-lg border-[1.5px] border-line object-cover" />
-            <MatchPicker itemKey={im.key} num={i + 1} options={data.options} answer={im.answer} />
+            {data.groups?.length && typeof im.answer === "object" ? (
+              <>
+                <span className="font-body text-[15px] text-bark-muted">{i + 1}.</span>
+                {data.groups.map((g) => (
+                  <GroupMatchPicker
+                    key={g.key}
+                    itemKey={im.key}
+                    num={i + 1}
+                    options={data.options}
+                    group={g}
+                    groups={data.groups!}
+                    answer={im.answer as Record<string, string>}
+                  />
+                ))}
+              </>
+            ) : (
+              <MatchPicker itemKey={im.key} num={i + 1} options={data.options} answer={im.answer as string} />
+            )}
           </li>
         ))}
       </ul>

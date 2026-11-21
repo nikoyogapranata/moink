@@ -228,6 +228,10 @@ export function useScore() {
       if (item.kind === "single") {
         total += 1;
         if (store.getAnswer(item.key)?.answer === item.answer) right += 1;
+      } else if (item.kind === "group") {
+        total += 1;
+        const saved = store.getAnswer(item.key)?.answer;
+        if (saved && typeof saved === "object" && !Array.isArray(saved) && saved[item.group] === item.answer) right += 1;
       } else {
         total += item.answers.length;
         const saved = store.getAnswer(item.key);

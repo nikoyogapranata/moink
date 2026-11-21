@@ -4,6 +4,7 @@
 //
 // Answer shapes (the jsonb):
 //   choice, word_bank, image_match item   the picked label, "C"
+//   image_match item with groups          a label per group, {"name": "C"}
 //   passage_fill (answer_key)             labels by blank, ["C", null, "B"]
 //   dialogue_fill, sentence_fill item     text by blank, ["是啊", ...]
 //   prompts, picture_write item           text
@@ -31,6 +32,8 @@ export function answerKeys(block: Block): string[] {
 /** An answer the reader checks itself (moink's answer key). */
 export type AutoItem =
   | { kind: "single"; key: string; answer: string }
+  /** One group's pick of a grouped image_match image. */
+  | { kind: "group"; key: string; group: string; answer: string }
   | { kind: "passage"; key: string; answers: string[] };
 
 /** The auto-checked items of a lesson, in book order: the score counts
@@ -42,7 +45,11 @@ export function autoItems(blocks: Block[]): AutoItem[] {
       case "word_bank":
         return b.data.items.map((it) => ({ kind: "single", key: it.key, answer: it.answer }));
       case "image_match":
-        return b.data.images.map((im) => ({ kind: "single", key: im.key, answer: im.answer }));
+        return b.data.images.flatMap((im): AutoItem[] =>
+          typeof im.answer === "string"
+            ? [{ kind: "single", key: im.key, answer: im.answer }]
+            : (b.data.groups ?? []).map((g) => ({ kind: "group", key: im.key, group: g.key, answer: (im.answer as Record<string, string>)[g.key] })),
+        );
       case "passage_fill":
         return [{ kind: "passage", key: b.data.answer_key, answers: b.data.answers }];
       default:

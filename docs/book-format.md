@@ -66,7 +66,7 @@ Sections become the chips at the top of the lesson. `key` is stable.
 | `choice` | `items: [{key, num, text, options: [{label, text}], answer, answer_source}]` | pick one option per item |
 | `dialogue` | `image?: {src, alt}`, `lines: [{key, speaker: string[] \| null, text, en?, en_source?}]` | none (notes allowed per line) |
 | `passage` | `image?`, `paragraphs: [{text, en, en_source, indent?}]`. `indent: false` = no first-line indent (e.g. a diary date line); default is indented | none |
-| `vocab` | `audio`, `items: [{key, num, hanzi, pinyin, pos, en, extra: {source, text, en}}]` Optional `proper: true` = a 专有名词 Proper Nouns table (no `audio`, `pos` is empty, numbering restarts at 1). | "add to Training" per word |
+| `vocab` | `audio`, `items: [{key, num, hanzi, pinyin, pos, en, extra: {source, text, en}}]` Optional `proper: true` = a 专有名词 Proper Nouns table (no `audio`, `pos` is empty, numbering is separate from normal vocab and continues across the lesson's proper-noun tables). | "add to Training" per word |
 | `prompts` | `answer_mode` (`text` / `none`), `items: [{key, num, text, sample?: [Text], sample_source?}]` | textarea per item |
 | `retell` | `text` (prompt passage with ……), `answer_key` | textarea |
 | `grammar` | `num`, `title`, `title_en`, `explain`, `explain_en`, `examples: [{text, en, en_source}]`, `extra: {source, examples: [{text, en}], related: [grammar slugs]}` | none |
@@ -74,7 +74,7 @@ Sections become the chips at the top of the lesson. `key` is stable.
 | `sentence_fill` | same shape as `dialogue_fill` (speaker null), plus optional `hint` (Text, shown in brackets after the sentence) | one input per `{_}` |
 | `word_bank` | `bank: [{label, text}]`, `items: [{key, num, lines: [{speaker, text}], answer, answer_source}]` (one `{_}` per item) | pick a bank label per item |
 | `passage_fill` | `options: [{label, text}]`, `text` (with several `{_}`), `answers: ["C","B",...]`, `answer_source`, `answer_key` | pick a label per blank |
-| `image_match` | `images: [{key, src, alt, answer}]`, `options: [{label, text}]`, `answer_source` | pick a label per image |
+| `image_match` | `images: [{key, src, alt, answer}]`, `options: [{label, text}]`, `answer_source`. Optional `groups: [{key, label_zh, label_en, labels}]`: then each image's `answer` is an object like `{"name": "C", "flavor": "F"}`, one label per group | pick a label per image |
 | `picture_write` | `items: [{key, num, image, word: Text, sample?, sample_source}]` | textarea per item |
 | `task` | `title`, `title_en`, `text`, `en`, `answer_mode` (`text` / `notes` / `table`), `min_chars?`, `answer_key`, optional `tips: {label, label_en, items: [{label, label_en, text}]}` shown under the task text (e.g. 提示 Tips: 正方 Pro side / 反方 Con side); optional `table: {columns: [{text, en}], rows, numbered}` for a survey table the user fills in (answer_mode `table`, answer saved as a 2D array of strings) | textarea (show live character count vs `min_chars`) |
 | `tip` | `text`, `en`. A 小语助力 Xiaoyu's Tip box: a small callout with the label "小语助力 Xiaoyu's Tip" | none |

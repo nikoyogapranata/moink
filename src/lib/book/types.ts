@@ -13,6 +13,8 @@ export interface Image { src: string; alt: string }
 export interface DialogueLine { key: string; speaker: string[] | null; text: BookText; en?: string; en_source?: string }
 export interface FillLine { speaker: string | null; text: BookText }
 export interface TaskTable { columns: { text: BookText; en: string }[]; rows: number; numbered: boolean }
+/** A set of image_match labels picked together ("菜名 Dish": A-D). */
+export interface MatchGroup { key: string; label_zh: string; label_en: string; labels: Label[] }
 export interface Translated { text: BookText; en?: string; en_source?: string }
 
 export interface BlockData {
@@ -25,8 +27,8 @@ export interface BlockData {
   dialogue: { image?: Image; lines: DialogueLine[] };
   /** indent: false = no first-line indent (a diary's date line, say). */
   passage: { image?: Image; paragraphs: (Translated & { indent?: boolean })[] };
-  /** proper: a 专有名词 Proper Nouns table (no audio, empty pos, numbered
-   *  from 1). */
+  /** proper: a 专有名词 Proper Nouns table (no audio, empty pos; its nums
+   *  continue across the lesson's proper-noun tables). */
   vocab: {
     proper?: boolean;
     /** Absent on a proper-noun table. */
@@ -66,7 +68,14 @@ export interface BlockData {
     items: { key: string; num: string; lines: FillLine[]; answer: Label; answer_source?: string }[];
   };
   passage_fill: { options: Option[]; text: BookText; answers: Label[]; answer_source?: string; answer_key: string };
-  image_match: { images: (Image & { key: string; answer: Label })[]; options: Option[]; answer_source?: string };
+  /** With groups, each image gets one pick per group, and its answer is
+   *  one label per group key: {"name": "C", "flavor": "F"}. */
+  image_match: {
+    images: (Image & { key: string; answer: Label | Record<string, Label> })[];
+    options: Option[];
+    groups?: MatchGroup[];
+    answer_source?: string;
+  };
   picture_write: {
     items: { key: string; num: string; image: Image; word: BookText; sample?: BookText[]; sample_source?: string }[];
   };
