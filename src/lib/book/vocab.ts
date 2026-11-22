@@ -12,6 +12,8 @@ type Supabase = Awaited<ReturnType<typeof createClient>>;
 export interface BookVocabWord {
   /** "w:<id>" when the hanzi is in the words table, else "b:<hanzi>". */
   key: DeckKey;
+  /** The book's number for it in the lesson's word list ("1", "2" ...). */
+  num: string;
   hanzi: string;
   pinyin: string;
   pos: string;
@@ -91,6 +93,7 @@ export async function loadBookVocab(supabase: Supabase): Promise<BookVocabBook[]
             return [
               {
                 key: match ? wordKey(match.id) : bookKey(item.hanzi),
+                num: item.num,
                 hanzi: item.hanzi,
                 pinyin: item.pinyin,
                 pos: item.pos,

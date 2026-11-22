@@ -28,10 +28,11 @@ import {
   addToSet,
   deckKeys,
   groupId,
+  mapBookKeys,
   removeKeys,
   removePick,
   splitKeys,
-  toggleLesson,
+  setLesson,
   wordKey,
   type DeckGroup,
   type DeckKey,
@@ -98,6 +99,33 @@ function cachedDue(skill: Skill | null) {
 
 /** The HSK Book's vocab, once loaded (it only changes on a re-import). */
 let bookCache: { books: BookVocabBook[]; at: number } | null = null;
+
+/** Book words that have a words row (all of them since
+ *  scripts/seed-book-words.ts): hanzi to word id. */
+function bookWordIds(books: readonly BookVocabBook[]) {
+  const ids = new Map<string, number>();
+  for (const book of books) {
+    for (const lesson of book.lessons) {
+      for (const word of lesson.words) if (word.wordId !== null && !ids.has(word.hanzi)) ids.set(word.hanzi, word.wordId);
+    }
+  }
+  return ids;
+}
+
+/** `groups` with "b:<hanzi>" keys (saved before the hanzi had a words
+ *  row) mapped to their words' ids. */
+function withBookWords(groups: DeckGroup[], books: readonly BookVocabBook[]): DeckGroup[] {
+  const mapped = mapBookKeys(groups, bookWordIds(books));
+  return mapped.changed ? mapped.groups : groups;
+}
+
+/** The last deck in localStorage with its "b:" keys mapped the same way. */
+function mapLastDeck(books: readonly BookVocabBook[]) {
+  const last = readLastDeck();
+  if (!last) return;
+  const mapped = mapBookKeys(last.groups, bookWordIds(books));
+  if (mapped.changed) saveLastDeck({ ...last, ...splitKeys(deckKeys(mapped.groups)), groups: mapped.groups });
+}
 
 const SESSION_KINDS = [
   { id: "normal" as const, label: "Normal" },
@@ -245,7 +273,9 @@ export function DeckBuilder({
   const flashDeck = flash ? (lastDeck as ReturnType<typeof readLastDeck>) : null;
   const { hasBookAccess } = useAppUser();
   const [plainSelected, setPlainSelected] = useState<ReadonlySet<number>>(() => new Set(lastDeck?.ids));
-  const [groups, setGroups] = useState<DeckGroup[]>(() => flashDeck?.groups ?? []);
+  const [groups, setGroups] = useState<DeckGroup[]>(() =>
+    bookCache && fresh(bookCache.at) ? withBookWords(flashDeck?.groups ?? [], bookCache.books) : (flashDeck?.groups ?? []),
+  );
   const deck = useMemo(() => deckKeys(groups), [groups]);
   const inDeck = useMemo(() => new Set<DeckKey>(deck), [deck]);
   const flashIds = useMemo(() => new Set(splitKeys(deck).ids), [deck]);
@@ -257,6 +287,17 @@ export function DeckBuilder({
   const searching = flash && query.trim() !== "";
   const [bookOpen, setBookOpen] = useState(false);
   const [bookSlug, setBookSlug] = useState<string | null>(null);
+  /** The book lesson whose panel is open (in bookSlug's book). */
+  const [bookLesson, setBookLesson] = useState<number | null>(null);
+  /** Your deck unfolded (below lg). */
+  const [deckOpen, setDeckOpen] = useState(false);
+
+  // Opening a lesson's panel folds Your deck on phones, so the panel (and
+  // its buttons) has the room; the panel scrolls itself into view.
+  function openBookLesson(lesson: number | null) {
+    setBookLesson(lesson);
+    if (lesson !== null && window.matchMedia("(max-width: 1023.98px)").matches) setDeckOpen(false);
+  }
   const [books, setBooks] = useState<BookData>(() => (bookCache && fresh(bookCache.at) ? bookCache.books : null));
   // A saved choice wins; with none, flashcards start unshuffled.
   const [shuffleOn, setShuffleOn] = useState(lastDeck?.shuffle ?? !flash);
@@ -388,6 +429,8 @@ export function DeckBuilder({
         }
         bookCache = { books: result.books, at: Date.now() };
         setBooks(result.books);
+        mapLastDeck(result.books);
+        setGroups((prev) => withBookWords(prev, result.books));
       });
     return () => {
       cancelled = true;
@@ -920,7 +963,7 @@ export function DeckBuilder({
           {searching ? (
             <p className="font-body text-body text-bark-muted">Tap Add to put a word in your deck.</p>
           ) : bookOpen ? (
-            <p className="font-body text-body text-bark-muted">Tap a lesson to add its words; tap again to take them out.</p>
+            <p className="font-body text-body text-bark-muted">Tap a lesson to choose its words: all, a range, or single words.</p>
           ) : (
             <>
               <p className="font-body text-body text-bark-muted" aria-live="polite">
@@ -962,9 +1005,14 @@ export function DeckBuilder({
               <BookSource
                 books={books}
                 book={bookSlug}
-                onBook={setBookSlug}
+                onBook={(slug) => {
+                  setBookSlug(slug);
+                  setBookLesson(null);
+                }}
                 groups={groups}
-                onToggle={(lesson) => setGroups((prev) => toggleLesson(prev, lesson))}
+                openLesson={bookLesson}
+                onOpenLesson={openBookLesson}
+                onSetLesson={(lesson) => setGroups((prev) => setLesson(prev, lesson))}
                 onRetry={() => setBooks(null)}
               />
             ) : !loaded ? (
@@ -1035,6 +1083,16 @@ export function DeckBuilder({
             groups={groups}
             total={deckTotal}
             standard={standard}
+            books={Array.isArray(books) ? books : null}
+            open={deckOpen}
+            onOpenChange={setDeckOpen}
+            onOpenLesson={(book, lesson) => {
+              setQuery("");
+              setPeek(null);
+              setBookOpen(true);
+              setBookSlug(book);
+              openBookLesson(lesson);
+            }}
             onRemoveGroup={(id) => setGroups((prev) => prev.filter((g) => groupId(g) !== id))}
             onRemovePick={(pick) => setGroups((prev) => removePick(prev, pick.key))}
           />

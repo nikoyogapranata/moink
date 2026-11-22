@@ -177,22 +177,22 @@ export async function fetchDeckWords(ids: number[], book: string[] = []): Promis
   if (!userId) return null;
 
   try {
-    const [words, bookWords] = await Promise.all([
-      loadWordsByIds(supabase, [...new Set(ids)]),
-      book.length ? loadBookVocab(supabase) : null,
-    ]);
-    if (!bookWords) return words;
+    // Book hanzi that have a words row now are that word; the rest are
+    // built from the book (session only).
+    const bookWords = book.length ? await loadBookVocab(supabase) : null;
     const byHanzi = new Map<string, { word: BookVocabWord; tag: string }>();
-    for (const b of bookWords) {
+    for (const b of bookWords ?? []) {
       for (const lesson of b.lessons) {
         for (const word of lesson.words) {
           if (!byHanzi.has(word.hanzi)) byHanzi.set(word.hanzi, { word, tag: `${b.short} L${lesson.number}` });
         }
       }
     }
+    const resolved = book.flatMap((hanzi) => byHanzi.get(hanzi)?.word.wordId ?? []);
+    const words = await loadWordsByIds(supabase, [...new Set([...ids, ...resolved])]);
     const extra = [...new Set(book)].flatMap((hanzi, i): QueueWord[] => {
       const found = byHanzi.get(hanzi);
-      if (!found) return [];
+      if (!found || found.word.wordId !== null) return [];
       const { word, tag } = found;
       return [
         {

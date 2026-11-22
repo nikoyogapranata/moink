@@ -7,7 +7,9 @@ import { parseAnyDeckSet, type DeckSet } from "./deck";
 
 /** A card in a deck: "w:<id>" for a word in the words table, "b:<hanzi>"
  *  for an HSK Book word that has no words row (the card is built from the
- *  book's pinyin, part of speech and English). */
+ *  book's pinyin, part of speech and English). A "b:" key whose hanzi has
+ *  since got a words row is mapped to its "w:" key (mapBookKeys, and
+ *  fetchDeckWords for a deck started without the builder). */
 export type DeckKey = `w:${number}` | `b:${string}`;
 
 export const wordKey = (id: number): DeckKey => `w:${id}`;
@@ -35,8 +37,10 @@ export interface SearchPick {
 export type DeckGroup =
   /** Words picked in a set's grid (My words, Due soon, an HSK level). */
   | { kind: "set"; set: DeckSet; keys: DeckKey[] }
-  /** Every word of a book lesson but its proper nouns. */
-  | { kind: "lesson"; book: string; label: string; lesson: number; keys: DeckKey[] }
+  /** A book lesson's words (never its proper nouns): all of them or some,
+   *  in the book's order. `size` is the group size they were picked with
+   *  (LessonSize), for describing the pick as ranges. */
+  | { kind: "lesson"; book: string; label: string; lesson: number; keys: DeckKey[]; size?: LessonSize }
   | { kind: "search"; picks: SearchPick[] };
 
 export const groupKeys = (g: DeckGroup): DeckKey[] => (g.kind === "search" ? g.picks.map((p) => p.key) : g.keys);
@@ -104,10 +108,97 @@ export function removePick(groups: readonly DeckGroup[], key: DeckKey): DeckGrou
   });
 }
 
-/** `groups` with the lesson group added, or taken out when it's there. */
-export function toggleLesson(groups: readonly DeckGroup[], lesson: Extract<DeckGroup, { kind: "lesson" }>): DeckGroup[] {
+/** `groups` with the lesson's group set to `lesson` (in place, or added
+ *  last), or taken out when `lesson` has no keys. */
+export function setLesson(groups: readonly DeckGroup[], lesson: Extract<DeckGroup, { kind: "lesson" }>): DeckGroup[] {
   const id = groupId(lesson);
-  return groups.some((g) => groupId(g) === id) ? groups.filter((g) => groupId(g) !== id) : [...groups, lesson];
+  if (!lesson.keys.length) return groups.filter((g) => groupId(g) !== id);
+  const at = groups.findIndex((g) => groupId(g) === id);
+  if (at === -1) return [...groups, lesson];
+  const next = [...groups];
+  next[at] = lesson;
+  return next;
+}
+
+/* Part of a lesson */
+
+/** Words per range when taking part of a lesson; 0 is the whole lesson. */
+export type LessonSize = 10 | 20 | 30 | 0;
+export const LESSON_SIZES: readonly LessonSize[] = [10, 20, 30, 0];
+
+export function parseLessonSize(value: unknown): LessonSize | null {
+  return LESSON_SIZES.includes(value as LessonSize) ? (value as LessonSize) : null;
+}
+
+/** A lesson of `count` words in ranges of `size` (1-based, inclusive):
+ *  41 by 10 is 1–10, 11–20, 21–30, 31–41 (the last takes the rest). */
+export function lessonRanges(count: number, size: LessonSize): [number, number][] {
+  if (count === 0) return [];
+  if (size === 0 || size >= count) return [[1, count]];
+  const ranges: [number, number][] = [];
+  for (let start = 1; start <= count; start += size) ranges.push([start, Math.min(start + size - 1, count)]);
+  return ranges;
+}
+
+/** What a lesson group holds, against the lesson's words in order: all of
+ *  them, whole ranges of its size (adjacent ones joined: 1–20), or a
+ *  number picked word by word. */
+export type LessonPick = { kind: "all" } | { kind: "ranges"; ranges: [number, number][] } | { kind: "picked"; count: number };
+
+export function describeLessonPick(lessonKeys: readonly DeckKey[], keys: readonly DeckKey[], size: LessonSize = 10): LessonPick {
+  const have = new Set(keys);
+  const taken = lessonKeys.map((k) => have.has(k));
+  const count = taken.filter(Boolean).length;
+  if (count === lessonKeys.length && count > 0) return { kind: "all" };
+  const ranges = lessonRanges(lessonKeys.length, size);
+  const whole = ranges.filter(([a, b]) => taken.slice(a - 1, b).every(Boolean));
+  const clean = ranges.every(([a, b]) => {
+    const part = taken.slice(a - 1, b);
+    return part.every(Boolean) || !part.some(Boolean);
+  });
+  if (!clean || !whole.length) return { kind: "picked", count };
+  const joined: [number, number][] = [];
+  for (const [a, b] of whole) {
+    const last = joined.at(-1);
+    if (last && last[1] + 1 === a) last[1] = b;
+    else joined.push([a, b]);
+  }
+  return { kind: "ranges", ranges: joined };
+}
+
+/** "words 1–10, 21–30", "12 picked", or "41 words". */
+export function lessonPickText(pick: LessonPick, total: number) {
+  if (pick.kind === "all") return `${total} ${total === 1 ? "word" : "words"}`;
+  if (pick.kind === "picked") return `${pick.count} picked`;
+  return `words ${pick.ranges.map(([a, b]) => (a === b ? `${a}` : `${a}–${b}`)).join(", ")}`;
+}
+
+/** `groups` with each "b:<hanzi>" key whose hanzi is in `ids` as its
+ *  word's "w:" key (once per group); the same groups when none is.
+ *  `changed` says whether any key was mapped. */
+export function mapBookKeys(
+  groups: readonly DeckGroup[],
+  ids: ReadonlyMap<string, number>,
+): { groups: DeckGroup[]; changed: boolean } {
+  let changed = false;
+  const map = (key: DeckKey): DeckKey => {
+    const id = key.startsWith("b:") ? ids.get(key.slice(2)) : undefined;
+    if (id === undefined) return key;
+    changed = true;
+    return wordKey(id);
+  };
+  const next = groups.map((g): DeckGroup => {
+    if (g.kind === "search") {
+      const picks: SearchPick[] = [];
+      for (const pick of g.picks) {
+        const key = map(pick.key);
+        if (!picks.some((p) => p.key === key)) picks.push({ ...pick, key });
+      }
+      return { ...g, picks };
+    }
+    return { ...g, keys: [...new Set(g.keys.map(map))] };
+  });
+  return { groups: changed ? next : [...groups], changed };
 }
 
 /* Parsing a saved deck's groups */
@@ -133,7 +224,16 @@ function parseGroup(value: unknown): DeckGroup | null {
     const keys = parseKeys(g.keys);
     const ok =
       typeof g.book === "string" && typeof g.label === "string" && Number.isSafeInteger(g.lesson) && keys?.length;
-    return ok ? { kind: "lesson", book: g.book as string, label: g.label as string, lesson: g.lesson as number, keys: keys! } : null;
+    if (!ok) return null;
+    const size = parseLessonSize(g.size);
+    return {
+      kind: "lesson",
+      book: g.book as string,
+      label: g.label as string,
+      lesson: g.lesson as number,
+      keys: keys!,
+      ...(size !== null && { size }),
+    };
   }
   if (g.kind === "search" && Array.isArray(g.picks) && g.picks.length <= MAX_KEYS) {
     const picks = g.picks.flatMap((p): SearchPick[] => {
