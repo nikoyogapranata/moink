@@ -18,7 +18,7 @@ import { WORD_STAT_INFO, type WordStats } from "@/lib/training/stats";
 import type { TodayReview } from "@/lib/training/today";
 
 import { DeckBuilder } from "./DeckBuilder";
-import { practiceDeckHref, practiceQuizHref, practiceWritingHref, useLastDeck, useLastQuiz, useLastWriting } from "./deckStore";
+import { deckSize, practiceDeckHref, practiceQuizHref, practiceWritingHref, useLastDeck, useLastQuiz, useLastWriting } from "./deckStore";
 import { InfoTip } from "./InfoTip";
 import { TodayCard } from "./TodayCard";
 
@@ -175,14 +175,14 @@ function FlashcardsCard({ defaultSet }: { defaultSet: DeckSet }) {
           ))}
         </div>
         <div className={LAST_SLOT}>
-          {lastDeck && lastDeck.ids.length > 0 && (
+          {lastDeck && deckSize(lastDeck) > 0 && (
             <Link
               href={`/training/flashcards?dir=${lastDeck.direction}`}
               onClick={() => practiceDeckHref(lastDeck)}
               className={LAST_LINK}
             >
               <Play size={16} aria-hidden="true" />
-              Last deck · {lastDeck.ids.length} {lastDeck.ids.length === 1 ? "card" : "cards"}
+              Last deck · {deckSize(lastDeck)} {deckSize(lastDeck) === 1 ? "card" : "cards"}
               <span className="sr-only">, {DIRECTION_LABELS[lastDeck.direction]}</span>
             </Link>
           )}

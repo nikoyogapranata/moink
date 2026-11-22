@@ -18,6 +18,11 @@ export interface QueueWord {
   /** HSK 3.0 (2025 syllabus) level; null when the word has none. */
   hsk3_2025_level: number | null;
   classifiers: string[] | null;
+  /** An HSK Book word with no words row (a negative id, for this session
+   *  only): the book's part of speech, shown before the meaning. */
+  pos?: string;
+  /** Such a word's source, shown in place of a level: "4下 L20". */
+  tag?: string;
 }
 
 export interface QueueItem {

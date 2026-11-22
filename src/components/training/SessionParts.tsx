@@ -36,11 +36,14 @@ export function SegmentedControl<T extends string>({
   options,
   value,
   onChange,
+  large = false,
 }: {
   label: string;
   options: readonly { id: T; label: string }[];
   value: T;
   onChange: (next: T) => void;
+  /** 44px buttons, for touch. */
+  large?: boolean;
 }) {
   return (
     <div role="group" aria-label={label} className="inline-flex rounded-pill bg-highlight p-1">
@@ -50,7 +53,7 @@ export function SegmentedControl<T extends string>({
           type="button"
           aria-pressed={value === id}
           onClick={() => onChange(id)}
-          className={`h-9 rounded-pill px-3.5 font-body text-body font-medium transition-colors ${FOCUS_RING} ${
+          className={`${large ? "h-11 px-4" : "h-9 px-3.5"} rounded-pill font-body text-body font-medium transition-colors ${FOCUS_RING} ${
             value === id ? "bg-surface-raised text-bark shadow-float" : "text-bark-muted hover:text-bark"
           }`}
         >
@@ -63,8 +66,16 @@ export function SegmentedControl<T extends string>({
 
 const DIRECTIONS = (["hanzi", "meaning"] as const).map((id) => ({ id, label: DIRECTION_LABELS[id] }));
 
-export function DirectionToggle({ value, onChange }: { value: Direction; onChange: (next: Direction) => void }) {
-  return <SegmentedControl label="Card direction" options={DIRECTIONS} value={value} onChange={onChange} />;
+export function DirectionToggle({
+  value,
+  onChange,
+  large,
+}: {
+  value: Direction;
+  onChange: (next: Direction) => void;
+  large?: boolean;
+}) {
+  return <SegmentedControl label="Card direction" options={DIRECTIONS} value={value} onChange={onChange} large={large} />;
 }
 
 /** Shuffle on or off, with its tooltip. The tooltip is for sighted mouse
@@ -320,7 +331,7 @@ export function DoneScreen({
         {title}
       </h1>
       {stats.length > 0 && (
-        <dl className="grid w-full grid-cols-2 gap-3">
+        <dl className={`grid w-full gap-3 ${stats.length === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
           {stats.map(({ label, value }) => (
             <div key={label} className="rounded-lg border-[1.5px] border-line bg-surface-raised px-3 py-4">
               <dt className="font-body text-body text-bark-muted">{label}</dt>
@@ -376,7 +387,8 @@ export function useAddToTraining(items: QueueItem[]) {
 
   useEffect(() => {
     let cancelled = false;
-    fetchUntrainedIds(items.map((item) => item.word.id))
+    // Book-only words (negative ids) have no words row to add.
+    fetchUntrainedIds(items.flatMap((item) => (item.word.id > 0 ? [item.word.id] : [])))
       .catch((error) => {
         devError("useAddToTraining: fetchUntrainedIds threw.", error);
         return null;

@@ -11,6 +11,7 @@ import { byGridOrder, shuffle, type Direction } from "@/lib/training/deck";
 import type { QueueItem } from "@/lib/training/queue";
 
 import { usePracticeDeck, type PracticeDeck as Deck } from "./deckStore";
+import { EndlessSession } from "./EndlessSession";
 import { PracticeSession } from "./PracticeSession";
 import { DoneScreen } from "./SessionParts";
 import { SessionSkeleton } from "./SessionSkeleton";
@@ -26,7 +27,7 @@ export function PracticeDeck({ initialDirection }: { initialDirection: Direction
   useEffect(() => {
     if (!deck) return;
     let cancelled = false;
-    fetchDeckWords(deck.ids)
+    fetchDeckWords(deck.ids, deck.book)
       .catch((error) => {
         devError("PracticeDeck: fetchDeckWords threw.", error);
         return null;
@@ -34,7 +35,7 @@ export function PracticeDeck({ initialDirection }: { initialDirection: Direction
       .then((words) => {
         if (cancelled) return;
         if (!words) {
-          devError(`PracticeDeck: couldn't load the deck's ${deck.ids.length} words (fetchDeckWords returned null; see the server log).`);
+          devError(`PracticeDeck: couldn't load the deck's ${deck.ids.length + deck.book.length} words (fetchDeckWords returned null; see the server log).`);
           setLoaded({ deck, error: true });
           return;
         }
@@ -54,6 +55,9 @@ export function PracticeDeck({ initialDirection }: { initialDirection: Direction
     return <NoDeck title="No deck to practice">Build a deck from Flashcards in Training.</NoDeck>;
   }
 
+  if (current.deck.session === "endless") {
+    return <EndlessSession items={current.items} initialDirection={initialDirection} />;
+  }
   return <PracticeSession items={current.items} shuffled={current.deck.shuffle} initialDirection={initialDirection} />;
 }
 

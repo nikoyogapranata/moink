@@ -39,7 +39,7 @@ function measureWords(word: QueueWord) {
 /** What the back shows, as one line for screen readers. */
 function backText(word: QueueWord, direction: Direction) {
   const parts = [word.simplified, word.pinyin];
-  if (direction === "hanzi") parts.push(word.gloss ?? MISSING_GLOSS);
+  if (direction === "hanzi") parts.push(`${word.pos ? `${word.pos} ` : ""}${word.gloss ?? MISSING_GLOSS}`);
   const measure = measureWords(word);
   return `${parts.join(", ")}.${measure ? ` Measure word: ${measure}.` : ""}`;
 }
@@ -98,7 +98,11 @@ export function FlashCard({
         <div aria-hidden="true" inert={flipped} className={`fc-front ${face}`}>
           <div className="flex items-start justify-between gap-2">
             {item.isNew ? <span className={`${PILL} bg-good-tint text-good-ink`}>New</span> : <span />}
-            {level !== null && <span className={`${PILL} bg-highlight text-bark`}>{levelLabel(level, standard)}</span>}
+            {level !== null ? (
+              <span className={`${PILL} bg-highlight text-bark`}>{levelLabel(level, standard)}</span>
+            ) : (
+              word.tag && <span className={`${PILL} bg-highlight text-bark`}>{word.tag}</span>
+            )}
           </div>
           <div className="flex min-h-0 flex-1 items-center justify-center text-center">
             {direction === "hanzi" ? (
@@ -142,6 +146,7 @@ export function FlashCard({
           </div>
           {direction === "hanzi" && (
             <p aria-hidden="true" className="mt-2 font-heading text-h1 font-bold wrap-break-word text-bark">
+              {word.pos && <span className="mr-2 font-body text-h3 font-medium italic text-bark-muted">{word.pos}</span>}
               {gloss}
             </p>
           )}

@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, LoaderCircle, X } from "lucide-react";
+import { ArrowRight, LoaderCircle, Search, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -8,18 +8,35 @@ import {
   useEffectEvent,
   useEffect,
   useId,
+  useMemo,
   useRef,
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
   type PointerEvent as ReactPointerEvent,
 } from "react";
 
+import { useAppUser } from "@/components/app/AppShell";
 import { useHskStandard } from "@/components/app/HskStandard";
+import type { BookVocabBook } from "@/lib/book/vocab";
 import { devError } from "@/lib/dev";
 import type { HskStandard } from "@/lib/hsk";
 import type { Skill } from "@/lib/supabase/database.types";
-import { fetchDeckSet } from "@/lib/training/actions";
+import { fetchBookVocab, fetchDeckSet } from "@/lib/training/actions";
 import { deckSets, type DeckSet, type Direction } from "@/lib/training/deck";
+import {
+  addPick,
+  addToSet,
+  deckKeys,
+  groupId,
+  removeKeys,
+  removePick,
+  splitKeys,
+  toggleLesson,
+  wordKey,
+  type DeckGroup,
+  type DeckKey,
+  type SessionKind,
+} from "@/lib/training/flashDeck";
 import type { QueueWord } from "@/lib/training/queue";
 import { FORMAT_LABELS, LISTEN_FORMATS, QUIZ_FORMATS, type QuestionFormat } from "@/lib/training/quiz";
 import { isWritable, WRITING_STYLE_LABELS, type WritingStyle } from "@/lib/training/writing";
@@ -35,6 +52,7 @@ import {
   saveLastQuiz,
   saveLastWriting,
 } from "./deckStore";
+import { BookSource, DeckPanel, SearchResults, type BookData } from "./DeckSources";
 import { useReducedMotion } from "./hooks";
 import { DirectionToggle, SegmentedControl } from "./SessionParts";
 
@@ -77,6 +95,14 @@ function cachedDue(skill: Skill | null) {
   const hit = skill ? dueCache.get(skill) : undefined;
   return hit && fresh(hit.at) ? hit.ids : null;
 }
+
+/** The HSK Book's vocab, once loaded (it only changes on a re-import). */
+let bookCache: { books: BookVocabBook[]; at: number } | null = null;
+
+const SESSION_KINDS = [
+  { id: "normal" as const, label: "Normal" },
+  { id: "endless" as const, label: "Endless" },
+];
 
 type Drag = {
   pointerId: number;
@@ -213,7 +239,25 @@ export function DeckBuilder({
   const [set, setSet] = useState<DeckSet>(() =>
     lastDeck && setList.some((s) => s.id === lastDeck.set) ? lastDeck.set : defaultSet,
   );
-  const [selected, setSelected] = useState<ReadonlySet<number>>(() => new Set(lastDeck?.ids));
+  // Flashcards build a deck of groups (sets, book lessons, search picks);
+  // the other modes keep a plain set of ids.
+  const flash = mode === "flashcards";
+  const flashDeck = flash ? (lastDeck as ReturnType<typeof readLastDeck>) : null;
+  const { hasBookAccess } = useAppUser();
+  const [plainSelected, setPlainSelected] = useState<ReadonlySet<number>>(() => new Set(lastDeck?.ids));
+  const [groups, setGroups] = useState<DeckGroup[]>(() => flashDeck?.groups ?? []);
+  const deck = useMemo(() => deckKeys(groups), [groups]);
+  const inDeck = useMemo(() => new Set<DeckKey>(deck), [deck]);
+  const flashIds = useMemo(() => new Set(splitKeys(deck).ids), [deck]);
+  const selected = flash ? flashIds : plainSelected;
+  /** Cards (flashcards) or words in the deck. */
+  const deckTotal = flash ? deck.length : selected.size;
+  const [session, setSession] = useState<SessionKind>(flashDeck?.session ?? "normal");
+  const [query, setQuery] = useState("");
+  const searching = flash && query.trim() !== "";
+  const [bookOpen, setBookOpen] = useState(false);
+  const [bookSlug, setBookSlug] = useState<string | null>(null);
+  const [books, setBooks] = useState<BookData>(() => (bookCache && fresh(bookCache.at) ? bookCache.books : null));
   const [shuffleOn, setShuffleOn] = useState(lastDeck?.shuffle ?? true);
   const [sets, setSets] = useState<Partial<Record<DeckSet, SetData>>>(() => cachedSets(standard));
   const [focusIndex, setFocusIndex] = useState(0);
@@ -323,6 +367,32 @@ export function DeckBuilder({
     };
   }, [set, standard, loaded, needDue, dueSkill]);
 
+  // The HSK Book's vocab, for its source and for search: flashcards only,
+  // and only on the book allowlist.
+  const needBooks = flash && hasBookAccess && books === null;
+  useEffect(() => {
+    if (!needBooks) return;
+    let cancelled = false;
+    fetchBookVocab()
+      .catch((error) => {
+        devError("DeckBuilder: fetchBookVocab threw.", error);
+        return { ok: false } as const;
+      })
+      .then((result) => {
+        if (cancelled) return;
+        if (!result.ok) {
+          devError("DeckBuilder: couldn't load the HSK Book's vocab (see the server log).");
+          setBooks("error");
+          return;
+        }
+        bookCache = { books: result.books, at: Date.now() };
+        setBooks(result.books);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [needBooks]);
+
   // Touch painting runs on touch events. After a long press Chrome sends
   // touchmove uncancelable and cancels the pointer once it starts a pan,
   // so the scroller is frozen when painting arms (see onPointerDown) and
@@ -371,9 +441,10 @@ export function DeckBuilder({
       saveLastWriting(deck);
       return () => practiceWritingHref(deck);
     }
-    const deck = { direction, set, ids, shuffle: shuffleOn };
-    saveLastDeck(deck);
-    return () => practiceDeckHref(deck);
+    const { ids: deckIds, book } = splitKeys(deck);
+    const saved = { direction, set, ids: deckIds, book, shuffle: shuffleOn, session, groups };
+    saveLastDeck(saved);
+    return () => practiceDeckHref(saved);
   }
 
   function close() {
@@ -382,7 +453,7 @@ export function DeckBuilder({
   }
 
   function start() {
-    if (selected.size === 0) {
+    if (deckTotal === 0) {
       setNotice("Pick at least one word first.");
       if (!reducedMotion) setShaking(true);
       return;
@@ -404,6 +475,8 @@ export function DeckBuilder({
   }
 
   function chooseSet(next: DeckSet) {
+    setQuery("");
+    setBookOpen(false);
     if (next === set) return;
     setSet(next);
     setFocusIndex(0);
@@ -420,7 +493,13 @@ export function DeckBuilder({
       if (indices.length === 1 && words[indices[0]]) setNotice(`${words[indices[0]].simplified} has no stroke data, so it can't be written.`);
       return;
     }
-    setSelected((prev) => {
+    if (flash) {
+      // On: into this set's group. Off: out of the deck, whatever added it.
+      const keys = ids.map(wordKey);
+      setGroups((prev) => (value ? addToSet(prev, set, keys) : removeKeys(prev, keys)));
+      return;
+    }
+    setPlainSelected((prev) => {
       if (ids.every((id) => prev.has(id) === value)) return prev;
       const next = new Set(prev);
       for (const id of ids) {
@@ -689,7 +768,7 @@ export function DeckBuilder({
 
   const peekWord = peek ? words[peek.index] : null;
   const chip = (pressed: boolean) =>
-    `h-9 shrink-0 rounded-pill border-[1.5px] px-3.5 font-body text-body font-medium transition-colors ${FOCUS_RING} ${
+    `${flash ? "h-11" : "h-9"} shrink-0 rounded-pill border-[1.5px] px-3.5 font-body text-body font-medium transition-colors ${FOCUS_RING} ${
       pressed ? "border-rust-dark bg-highlight text-bark" : "border-line text-bark hover:bg-highlight/60"
     }`;
   const textButton = `rounded-sm font-body text-body font-medium text-rust-dark underline-offset-4 hover:underline disabled:text-bark-muted disabled:no-underline ${FOCUS_RING}`;
@@ -706,7 +785,9 @@ export function DeckBuilder({
         // A close event that lands while the dialog is open again is stale.
         if (!e.currentTarget.open) onCloseRef.current();
       }}
-      className="deck-dialog m-0 hidden h-dvh max-h-none w-full max-w-none border-0 bg-surface-raised p-0 text-bark open:flex backdrop:bg-black/50 md:m-auto md:h-[min(85vh,780px)] md:w-[calc(100%-48px)] md:max-w-170 md:rounded-[22px] lg:max-w-215 md:border-[1.5px] md:border-line"
+      className={`deck-dialog m-0 hidden h-dvh max-h-none w-full max-w-none border-0 bg-surface-raised p-0 text-bark open:flex backdrop:bg-black/50 md:m-auto md:h-[min(85vh,780px)] md:w-[calc(100%-48px)] md:max-w-170 md:rounded-[22px] md:border-[1.5px] md:border-line ${
+        flash ? "lg:h-[min(88vh,820px)] lg:max-w-265" : "lg:max-w-215"
+      }`}
     >
       <div
         ref={panelRef}
@@ -760,7 +841,45 @@ export function DeckBuilder({
             </div>
           ) : (
             <div>
-              <DirectionToggle value={direction} onChange={setDirection} />
+              <DirectionToggle value={direction} onChange={setDirection} large />
+            </div>
+          )}
+          {flash && (
+            <div role="search" className="relative">
+              <Search
+                size={18}
+                aria-hidden="true"
+                className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-bark-muted"
+              />
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  // Escape clears a search before it closes the builder.
+                  if (e.key === "Escape" && query) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setQuery("");
+                  }
+                }}
+                placeholder="Search to add: 车, che, chē, che1, car"
+                aria-label="Search words to add"
+                enterKeyHint="search"
+                autoComplete="off"
+                spellCheck={false}
+                className="h-11 w-full rounded-pill border-[1.5px] border-line bg-background pl-10 pr-11 font-body text-body text-bark placeholder:text-bark-muted focus-visible:border-rust focus-visible:outline-none [&::-webkit-search-cancel-button]:hidden"
+              />
+              {query && (
+                <button
+                  type="button"
+                  onClick={() => setQuery("")}
+                  aria-label="Clear search"
+                  className={`absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-full text-bark-muted hover:text-bark ${FOCUS_RING}`}
+                >
+                  <X size={18} aria-hidden="true" />
+                </button>
+              )}
             </div>
           )}
           <div
@@ -768,26 +887,54 @@ export function DeckBuilder({
             aria-label="Set"
             className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:px-6 md:flex-wrap md:overflow-visible"
           >
-            {setList.map(({ id, label }) => (
-              <button key={id} type="button" aria-pressed={set === id} onClick={() => chooseSet(id)} className={chip(set === id)}>
-                {label}
+            {setList.map(({ id, label }) => {
+              const on = set === id && !bookOpen && !searching;
+              return (
+                <button key={id} type="button" aria-pressed={on} onClick={() => chooseSet(id)} className={chip(on)}>
+                  {label}
+                </button>
+              );
+            })}
+            {flash && hasBookAccess && (
+              <button
+                type="button"
+                aria-pressed={bookOpen && !searching}
+                onClick={() => {
+                  setQuery("");
+                  setBookOpen(true);
+                  setPeek(null);
+                  scrollRef.current?.scrollTo({ top: 0 });
+                }}
+                className={chip(bookOpen && !searching)}
+              >
+                HSK Book
               </button>
-            ))}
+            )}
           </div>
         </header>
 
-        <div className="flex shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-3 sm:px-6">
-          <p className="font-body text-body text-bark-muted" aria-live="polite">
-            {setLabel} · {selectedHere} of {words.length} selected
-          </p>
-          <div className="flex items-center gap-4">
-            <button type="button" className={textButton} disabled={!words.length} onClick={() => setAll(true)}>
-              Select all
-            </button>
-            <button type="button" className={textButton} disabled={!selectedHere} onClick={() => setAll(false)}>
-              Clear
-            </button>
-          </div>
+        <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
+        <div className="flex min-h-0 flex-1 flex-col">
+        <div className="flex min-h-14 shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-2 sm:px-6">
+          {searching ? (
+            <p className="font-body text-body text-bark-muted">Tap Add to put a word in your deck.</p>
+          ) : bookOpen ? (
+            <p className="font-body text-body text-bark-muted">Tap a lesson to add its words; tap again to take them out.</p>
+          ) : (
+            <>
+              <p className="font-body text-body text-bark-muted" aria-live="polite">
+                {setLabel} · {selectedHere} of {words.length} selected
+              </p>
+              <div className="flex items-center gap-4">
+                <button type="button" className={`${textButton} ${flash ? "min-h-11 min-w-11" : ""}`} disabled={!words.length} onClick={() => setAll(true)}>
+                  Select all
+                </button>
+                <button type="button" className={`${textButton} ${flash ? "min-h-11 min-w-11" : ""}`} disabled={!selectedHere} onClick={() => setAll(false)}>
+                  Clear
+                </button>
+              </div>
+            </>
+          )}
         </div>
 
         <div
@@ -802,7 +949,24 @@ export function DeckBuilder({
             }}
             className="min-h-0 flex-1 overflow-y-auto overscroll-contain border-y-[1.5px] border-line px-4 py-3 sm:px-6"
           >
-            {!loaded ? (
+            {searching ? (
+              <SearchResults
+                query={query}
+                standard={standard}
+                books={Array.isArray(books) ? books : null}
+                inDeck={inDeck}
+                onToggle={(pick, add) => setGroups((prev) => (add ? addPick(prev, pick) : removeKeys(prev, [pick.key])))}
+              />
+            ) : bookOpen ? (
+              <BookSource
+                books={books}
+                book={bookSlug}
+                onBook={setBookSlug}
+                groups={groups}
+                onToggle={(lesson) => setGroups((prev) => toggleLesson(prev, lesson))}
+                onRetry={() => setBooks(null)}
+              />
+            ) : !loaded ? (
               <p className="flex items-center justify-center gap-2 py-12 font-body text-body text-bark-muted">
                 <LoaderCircle size={20} aria-hidden="true" className="spin" />
                 Loading words
@@ -864,6 +1028,17 @@ export function DeckBuilder({
             )}
           </div>
         </div>
+        </div>
+        {flash && (
+          <DeckPanel
+            groups={groups}
+            total={deckTotal}
+            standard={standard}
+            onRemoveGroup={(id) => setGroups((prev) => prev.filter((g) => groupId(g) !== id))}
+            onRemovePick={(pick) => setGroups((prev) => removePick(prev, pick.key))}
+          />
+        )}
+        </div>
 
         {selectedDue > 0 && (
           <p className="shrink-0 px-4 pt-3 font-body text-body-sm text-bark-muted sm:px-6">
@@ -882,8 +1057,18 @@ export function DeckBuilder({
           <p className="font-body text-body-sm text-bark-muted">
             Practice doesn&apos;t change your schedule. Use Today&apos;s review to save progress.
           </p>
+          {flash && (
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <SegmentedControl label="Session" options={SESSION_KINDS} value={session} onChange={setSession} large />
+              <p className="font-body text-body-sm text-bark-muted">
+                {session === "endless"
+                  ? "Rounds reshuffle until you end. Got it only marks a card."
+                  : "One pass; Still learning cards come back."}
+              </p>
+            </div>
+          )}
           <div className="flex items-center justify-between gap-3">
-            <label className="flex cursor-pointer items-center gap-2 font-body text-body font-medium text-bark">
+            <label className={`flex cursor-pointer items-center gap-2 font-body text-body font-medium text-bark ${flash ? "min-h-11 pr-2" : ""}`}>
               <input
                 type="checkbox"
                 checked={shuffleOn}
@@ -895,16 +1080,16 @@ export function DeckBuilder({
             <button
               type="button"
               onClick={start}
-              aria-disabled={selected.size === 0}
+              aria-disabled={deckTotal === 0}
               className={`inline-flex h-11 items-center justify-center whitespace-nowrap rounded-pill px-5 font-heading text-[19px] font-bold leading-6 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rust/40 ${
-                selected.size === 0
+                deckTotal === 0
                   ? "cursor-default bg-highlight text-bark-muted"
                   : "bg-rust text-background hover:bg-rust-dark"
               }`}
             >
-              {selected.size === 0
+              {deckTotal === 0
                 ? "Pick some words"
-                : `Start ${selected.size} ${quiz || writing ? (selected.size === 1 ? "word" : "words") : selected.size === 1 ? "card" : "cards"}`}
+                : `Start ${deckTotal} ${quiz || writing ? (deckTotal === 1 ? "word" : "words") : deckTotal === 1 ? "card" : "cards"}${flash && session === "endless" ? " · Endless" : ""}`}
             </button>
           </div>
         </footer>

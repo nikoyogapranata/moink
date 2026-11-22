@@ -4,6 +4,7 @@ import { useMemo, useSyncExternalStore } from "react";
 
 import { devErrorOnce } from "@/lib/dev";
 import { MAX_DECK_WORDS, parseAnyDeckSet, parseDirection, type DeckSet, type Direction } from "@/lib/training/deck";
+import { parseGroups, parseSessionKind, wordKey, type DeckGroup, type SessionKind } from "@/lib/training/flashDeck";
 import { LISTEN_FORMATS, parseFormats, QUIZ_FORMATS, type QuestionFormat } from "@/lib/training/quiz";
 import { parseWritingStyle, type WritingStyle } from "@/lib/training/writing";
 
@@ -17,14 +18,26 @@ import { parseWritingStyle, type WritingStyle } from "@/lib/training/writing";
 export interface SavedDeck {
   direction: Direction;
   set: DeckSet;
+  /** Word ids in the deck (the union of the groups' w: keys). */
   ids: number[];
+  /** HSK Book words with no words row, by hanzi (the groups' b: keys). */
+  book: string[];
   shuffle: boolean;
+  session: SessionKind;
+  /** What the builder's Your deck panel lists; a deck saved before groups
+   *  existed gets one set group with its ids. */
+  groups: DeckGroup[];
 }
 
 export interface PracticeDeck {
   ids: number[];
+  book: string[];
   shuffle: boolean;
+  session: SessionKind;
 }
+
+/** Cards in a saved deck. */
+export const deckSize = (deck: Pick<SavedDeck, "ids" | "book">) => deck.ids.length + deck.book.length;
 
 /** Question decks: the quiz and listening, stored apart but alike. */
 export type QuestionKind = "quiz" | "listening";
@@ -120,13 +133,22 @@ function parseJson(raw: string | null): Record<string, unknown> | null {
   }
 }
 
+function parseBook(value: unknown): string[] {
+  return Array.isArray(value) && value.length <= MAX_DECK_WORDS
+    ? value.filter((h): h is string => typeof h === "string" && h.length > 0 && h.length <= 20)
+    : [];
+}
+
 export function parseSavedDeck(raw: string | null): SavedDeck | null {
   const value = parseJson(raw);
   const direction = parseDirection(value?.direction);
   const set = parseAnyDeckSet(value?.set);
   const ids = parseIds(value?.ids);
   if (!direction || !set || !ids) return null;
-  return { direction, set, ids, shuffle: value?.shuffle !== false };
+  const book = parseBook(value?.book);
+  const groups =
+    parseGroups(value?.groups) ?? (ids.length ? [{ kind: "set" as const, set, keys: ids.map(wordKey) }] : []);
+  return { direction, set, ids, book, shuffle: value?.shuffle !== false, session: parseSessionKind(value?.session), groups };
 }
 
 export function readLastDeck() {
@@ -151,7 +173,7 @@ export function useLastDeck() {
 
 /** Hands the deck to the practice page and returns where to go. */
 export function practiceDeckHref(deck: SavedDeck) {
-  const practice: PracticeDeck = { ids: deck.ids, shuffle: deck.shuffle };
+  const practice: PracticeDeck = { ids: deck.ids, book: deck.book, shuffle: deck.shuffle, session: deck.session };
   write(session, PRACTICE_DECK_KEY, JSON.stringify(practice));
   return `/training/flashcards?dir=${deck.direction}`;
 }
@@ -159,7 +181,9 @@ export function practiceDeckHref(deck: SavedDeck) {
 function parsePracticeDeck(raw: string | null): PracticeDeck | null {
   const value = parseJson(raw);
   const ids = parseIds(value?.ids);
-  return ids ? { ids, shuffle: value?.shuffle !== false } : null;
+  return ids
+    ? { ids, book: parseBook(value?.book), shuffle: value?.shuffle !== false, session: parseSessionKind(value?.session) }
+    : null;
 }
 
 /** The deck to practice: undefined until the page is on the client, then

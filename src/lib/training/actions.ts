@@ -2,6 +2,7 @@
 
 import { refresh } from "next/cache";
 
+import { loadBookVocab, type BookVocabBook, type BookVocabWord } from "@/lib/book/vocab";
 import { isHskStandard } from "@/lib/hsk";
 import { createClient, signedInUserId } from "@/lib/supabase/server";
 
@@ -153,20 +154,81 @@ export async function fetchDeckSet(set: string, standard: string, dueSkill?: str
   }
 }
 
-/** The words of a built deck, for the practice page. Reads only; null on
- *  a bad id list or a failed load. */
-export async function fetchDeckWords(ids: number[]): Promise<QueueWord[] | null> {
-  if (!isIdList(ids)) return null;
+function isHanziList(list: unknown): list is string[] {
+  return (
+    Array.isArray(list) &&
+    list.length <= MAX_DECK_WORDS &&
+    list.every((h) => typeof h === "string" && h.length > 0 && h.length <= 20)
+  );
+}
+
+/**
+ * The words of a built deck, for the practice page: `ids` from the words
+ * table, and `book`, HSK Book words with no words row (by hanzi), built
+ * from the book's pinyin, part of speech and English with negative ids
+ * that only last the session. A book word no longer in the book is
+ * skipped. Reads only; null on bad input or a failed load.
+ */
+export async function fetchDeckWords(ids: number[], book: string[] = []): Promise<QueueWord[] | null> {
+  if (!isIdList(ids) || !isHanziList(book)) return null;
 
   const supabase = await createClient();
   const userId = await signedInUserId(supabase);
   if (!userId) return null;
 
   try {
-    return await loadWordsByIds(supabase, [...new Set(ids)]);
+    const [words, bookWords] = await Promise.all([
+      loadWordsByIds(supabase, [...new Set(ids)]),
+      book.length ? loadBookVocab(supabase) : null,
+    ]);
+    if (!bookWords) return words;
+    const byHanzi = new Map<string, { word: BookVocabWord; tag: string }>();
+    for (const b of bookWords) {
+      for (const lesson of b.lessons) {
+        for (const word of lesson.words) {
+          if (!byHanzi.has(word.hanzi)) byHanzi.set(word.hanzi, { word, tag: `${b.short} L${lesson.number}` });
+        }
+      }
+    }
+    const extra = [...new Set(book)].flatMap((hanzi, i): QueueWord[] => {
+      const found = byHanzi.get(hanzi);
+      if (!found) return [];
+      const { word, tag } = found;
+      return [
+        {
+          id: -(i + 1),
+          simplified: word.hanzi,
+          pinyin: word.pinyin,
+          gloss: word.en || null,
+          hsk_level: null,
+          hsk3_2025_level: null,
+          classifiers: null,
+          pos: word.pos || undefined,
+          tag,
+        },
+      ];
+    });
+    return [...words, ...extra];
   } catch (error) {
     console.error("fetchDeckWords failed", error);
     return null;
+  }
+}
+
+export type BookVocabResult = { ok: true; books: BookVocabBook[] } | { ok: false };
+
+/** The HSK Book's lesson vocab for the deck builder: its HSK Book source
+ *  and search. No books without book_access (RLS). Reads only. */
+export async function fetchBookVocab(): Promise<BookVocabResult> {
+  const supabase = await createClient();
+  const userId = await signedInUserId(supabase);
+  if (!userId) return { ok: false };
+
+  try {
+    return { ok: true, books: await loadBookVocab(supabase) };
+  } catch (error) {
+    console.error("fetchBookVocab failed", error);
+    return { ok: false };
   }
 }
 
