@@ -123,3 +123,17 @@ export function shuffle<T>(items: readonly T[], random: () => number = Math.rand
   }
   return out;
 }
+
+/** `cards` in their order in `deck`, continuing from `fromId`'s place
+ *  there: the cards behind it first, then from the deck's top. Cards not
+ *  in the deck go last. */
+export function inDeckOrderFrom<T extends QueueItem>(cards: readonly T[], deck: readonly QueueItem[], fromId: number): T[] {
+  const n = deck.length;
+  const index = new Map(deck.map((item, i) => [item.word.id, i]));
+  const from = index.get(fromId) ?? -1;
+  const key = (item: T) => {
+    const i = index.get(item.word.id);
+    return i === undefined ? n : (i - from - 1 + n) % n;
+  };
+  return [...cards].sort((a, b) => key(a) - key(b));
+}

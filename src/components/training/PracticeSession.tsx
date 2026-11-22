@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 import { Rating } from "ts-fsrs";
 
 import { useHskStandard } from "@/components/app/HskStandard";
 import { Button } from "@/components/ui/Button";
-import { inGridOrder, shuffle, type Direction } from "@/lib/training/deck";
+import { inDeckOrderFrom, inGridOrder, shuffle, type Direction } from "@/lib/training/deck";
 import {
   afterPractice,
   reorderUnanswered,
@@ -25,15 +25,16 @@ import { AddToTraining, DoneScreen, SessionFrame, SessionHeader, Toast, useAddTo
  * A built deck. Nothing here is saved: Still learning cards go to the end
  * of the round. Reset starts the whole deck over, and Practice again runs
  * its Still learning cards; both shuffle when Shuffle is on and use grid
- * order when it's off. Toggling Shuffle reorders only the cards not
- * answered yet, behind the current one, and is remembered for the builder.
+ * order when it's off. Toggling Shuffle (or S) reorders only the cards
+ * not answered yet, behind the current one: shuffled, or back in deck
+ * order from the current card's place. It's remembered for the builder.
  */
 export function PracticeSession({
   items,
   shuffled,
   initialDirection,
 }: {
-  /** In deck order: already shuffled, or in grid order. */
+  /** In deck order (grid order); shuffled here when Shuffle is on. */
   items: QueueItem[];
   /** Shuffle's starting state, from the builder. */
   shuffled: boolean;
@@ -41,7 +42,7 @@ export function PracticeSession({
 }) {
   const [direction, setDirection] = useDirection("practice", initialDirection);
   const standard = useHskStandard();
-  const [run, setRun] = useState(() => startPractice(items));
+  const [run, setRun] = useState(() => startPractice(shuffled ? shuffle(items) : items));
   const [round, setRound] = useState(0);
   const [shuffleOn, setShuffleOn] = useState(shuffled);
   const [toast, showToast] = useToast();
@@ -59,10 +60,27 @@ export function PracticeSession({
   function toggleShuffle() {
     const next = !shuffleOn;
     setShuffleOn(next);
-    setRun((r) => reorderUnanswered(r, next ? shuffle : (items) => inGridOrder(items, standard)));
+    setRun((r) =>
+      reorderUnanswered(r, next ? shuffle : (cards) => (r.queue[0] ? inDeckOrderFrom(cards, items, r.queue[0].word.id) : cards)),
+    );
     saveLastDeckShuffle(next);
     showToast(next ? "Shuffled" : "In order");
   }
+
+  const onKeyDown = useEffectEvent((e: KeyboardEvent) => {
+    if (!current || e.metaKey || e.ctrlKey || e.altKey || e.repeat) return;
+    const target = e.target instanceof HTMLElement ? e.target : null;
+    if (target?.closest("input, textarea, select, [role=dialog]")) return;
+    if (e.key === "s" || e.key === "S") {
+      e.preventDefault();
+      toggleShuffle();
+    }
+  });
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => onKeyDown(e);
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
 
   // Applied to the latest run, so a toggle during the throw isn't lost.
   async function answer(gotIt: boolean) {
@@ -102,7 +120,7 @@ export function PracticeSession({
         direction={direction}
         onDirection={setDirection}
         onReset={() => restart(items)}
-        shuffle={{ on: shuffleOn, onToggle: toggleShuffle }}
+        shuffle={{ on: shuffleOn, onToggle: toggleShuffle, labelled: true }}
         notSaved="practice"
       />
       <main className="relative flex flex-1 flex-col pb-[calc(16px+env(safe-area-inset-bottom))]">

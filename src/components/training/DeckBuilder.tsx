@@ -258,7 +258,8 @@ export function DeckBuilder({
   const [bookOpen, setBookOpen] = useState(false);
   const [bookSlug, setBookSlug] = useState<string | null>(null);
   const [books, setBooks] = useState<BookData>(() => (bookCache && fresh(bookCache.at) ? bookCache.books : null));
-  const [shuffleOn, setShuffleOn] = useState(lastDeck?.shuffle ?? true);
+  // A saved choice wins; with none, flashcards start unshuffled.
+  const [shuffleOn, setShuffleOn] = useState(lastDeck?.shuffle ?? !flash);
   const [sets, setSets] = useState<Partial<Record<DeckSet, SetData>>>(() => cachedSets(standard));
   const [focusIndex, setFocusIndex] = useState(0);
   const [peek, setPeek] = useState<Peek | null>(null);
@@ -1062,7 +1063,7 @@ export function DeckBuilder({
               <SegmentedControl label="Session" options={SESSION_KINDS} value={session} onChange={setSession} large />
               <p className="font-body text-body-sm text-bark-muted">
                 {session === "endless"
-                  ? "Rounds reshuffle until you end. Got it only marks a card."
+                  ? "Rounds repeat until you end. Got it only marks a card."
                   : "One pass; Still learning cards come back."}
               </p>
             </div>

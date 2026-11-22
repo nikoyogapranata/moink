@@ -5,12 +5,13 @@ import Link from "next/link";
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
-import { shuffle, type Direction } from "@/lib/training/deck";
+import { inDeckOrderFrom, shuffle, type Direction } from "@/lib/training/deck";
 import type { QueueItem } from "@/lib/training/queue";
 
 import { CARD_HEIGHT, FlashCard, HINT, PILL } from "./FlashCard";
 import { useDirection, useMarkPracticed } from "./hooks";
-import { DirectionToggle, DoneScreen, SessionFrame } from "./SessionParts";
+import { saveLastDeckShuffle } from "./deckStore";
+import { DirectionToggle, DoneScreen, SessionFrame, ShuffleButton } from "./SessionParts";
 
 const FOCUS_RING =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rust focus-visible:ring-offset-2 focus-visible:ring-offset-background";
@@ -26,38 +27,53 @@ interface Endless {
   round: number;
 }
 
-function start(items: QueueItem[]): Endless {
-  const [first, ...rest] = items;
+function start(items: QueueItem[], shuffled: boolean): Endless {
+  const [first, ...rest] = shuffled ? shuffle(items) : items;
   return { shown: [first], roundOf: [1], at: 0, rest, round: 1 };
 }
 
-/** A new round's order: shuffled, never opening with the card just shown
- *  (with two or more cards). */
-function nextRound(items: QueueItem[], last: QueueItem) {
+/** A new round's order: deck order, or shuffled and never opening with
+ *  the card just shown (with two or more cards). */
+function nextRound(items: QueueItem[], last: QueueItem, shuffled: boolean) {
+  if (!shuffled) return items;
   const order = shuffle(items);
   if (order.length > 1 && order[0].word.id === last.word.id) [order[0], order[1]] = [order[1], order[0]];
   return order;
 }
 
-function forward(s: Endless, items: QueueItem[]): Endless {
+function forward(s: Endless, items: QueueItem[], shuffled: boolean): Endless {
   if (s.at < s.shown.length - 1) return { ...s, at: s.at + 1 };
   const fresh = s.rest.length === 0;
-  const [card, ...rest] = fresh ? nextRound(items, s.shown[s.at]) : s.rest;
+  const [card, ...rest] = fresh ? nextRound(items, s.shown[s.at], shuffled) : s.rest;
   const round = fresh ? s.round + 1 : s.round;
   return { shown: [...s.shown, card], roundOf: [...s.roundOf, round], at: s.at + 1, rest, round };
 }
 
 /**
- * Endless flashcards: the deck over and over, reshuffled into a new round
- * after its last card. Previous and Next move through the cards shown
- * (Next past the last one deals a new card); Got it only marks the card
- * for this session, so it keeps coming. Nothing is saved: no reviews, no
- * schedule or due dates (like Normal, the first card marks today
- * practiced). End, or the browser's Back, shows the summary.
+ * Endless flashcards: the deck over and over, a new round after its last
+ * card. Rounds go in deck order; with Shuffle on (S), the rest of this
+ * round and every later round are shuffled, and turning it off puts them
+ * back in deck order from the last card dealt. Previous and Next move
+ * through the cards shown (Next past the last one deals a new card); Got
+ * it only marks the card for this session, so it keeps coming. Nothing is
+ * saved: no reviews, no schedule or due dates (like Normal, the first
+ * card marks today practiced). End, or the browser's Back, shows the
+ * summary.
  */
-export function EndlessSession({ items, initialDirection }: { items: QueueItem[]; initialDirection: Direction | null }) {
+export function EndlessSession({
+  items,
+  shuffled,
+  initialDirection,
+}: {
+  /** In deck order. */
+  items: QueueItem[];
+  /** Shuffle's starting state, from the builder. */
+  shuffled: boolean;
+  initialDirection: Direction | null;
+}) {
   const [direction, setDirection] = useDirection("practice", initialDirection);
-  const [state, setState] = useState(() => start(items));
+  const [shuffleOn, setShuffleOn] = useState(shuffled);
+  const [state, setState] = useState(() => start(items, shuffled));
   const [flipped, setFlipped] = useState(false);
   const [gotIt, setGotIt] = useState<ReadonlySet<number>>(() => new Set());
   const [ended, setEnded] = useState(false);
@@ -99,7 +115,19 @@ export function EndlessSession({ items, initialDirection }: { items: QueueItem[]
 
   function goNext() {
     markPracticed();
-    move((s) => forward(s, items));
+    move((s) => forward(s, items, shuffleOn));
+  }
+
+  // Reorders only the cards still to come in this round, after the last
+  // card dealt; the card on screen and the cards shown stay put.
+  function toggleShuffle() {
+    const next = !shuffleOn;
+    setShuffleOn(next);
+    setState((s) => {
+      const last = s.shown[s.shown.length - 1];
+      return { ...s, rest: next ? shuffle(s.rest) : inDeckOrderFrom(s.rest, items, last.word.id) };
+    });
+    saveLastDeckShuffle(next);
   }
 
   function goPrevious() {
@@ -139,6 +167,9 @@ export function EndlessSession({ items, initialDirection }: { items: QueueItem[]
     } else if ((e.key === "g" || e.key === "G") && !e.repeat) {
       e.preventDefault();
       toggleGotIt();
+    } else if ((e.key === "s" || e.key === "S") && !e.repeat) {
+      e.preventDefault();
+      toggleShuffle();
     }
   });
   useEffect(() => {
@@ -175,16 +206,20 @@ export function EndlessSession({ items, initialDirection }: { items: QueueItem[]
   return (
     <SessionFrame>
       <header className="sticky top-0 z-10 -mx-4 flex flex-col gap-3 bg-background px-4 pb-4 pt-[calc(12px+env(safe-area-inset-top))] sm:-mx-6 sm:px-6">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <span className={`${PILL} gap-1 bg-rust text-background`}>
             <InfinityIcon size={14} aria-hidden="true" />
             Endless
           </span>
-          <p className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-0.5 font-body text-body font-medium tabular-nums text-bark">
+          {/* Its own line under the buttons on phones. */}
+          <p className="order-last flex w-full min-w-0 flex-wrap items-center gap-x-3 gap-y-0.5 font-body text-body font-medium tabular-nums text-bark sm:order-none sm:w-auto sm:flex-1">
             <span>Round {state.round}</span>
             <span className="text-bark-muted">{state.shown.length} seen</span>
             <span className="text-good-ink">{gotIt.size} got it</span>
           </p>
+          <span className="ml-auto sm:ml-0">
+            <ShuffleButton on={shuffleOn} onToggle={toggleShuffle} />
+          </span>
           <button
             type="button"
             onClick={end}
@@ -264,7 +299,7 @@ export function EndlessSession({ items, initialDirection }: { items: QueueItem[]
               <ChevronRight size={22} aria-hidden="true" />
             </button>
           </div>
-          <p className={HINT}>← Previous · Space flip · G got it · → Next</p>
+          <p className={HINT}>← Previous · Space flip · G got it · S shuffle · → Next</p>
         </div>
       </main>
     </SessionFrame>

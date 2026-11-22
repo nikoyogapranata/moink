@@ -153,7 +153,7 @@ export function parseGroups(value: unknown): DeckGroup[] | null {
 }
 
 /** Normal: one pass, Still learning comes back (the current behaviour).
- *  Endless: rounds that reshuffle forever, Got it only marks the card. */
+ *  Endless: rounds that repeat forever, Got it only marks the card. */
 export type SessionKind = "normal" | "endless";
 
 export function parseSessionKind(value: unknown): SessionKind {

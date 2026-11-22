@@ -7,7 +7,7 @@ import { useHskStandard } from "@/components/app/HskStandard";
 import { Button } from "@/components/ui/Button";
 import { devError } from "@/lib/dev";
 import { fetchDeckWords } from "@/lib/training/actions";
-import { byGridOrder, shuffle, type Direction } from "@/lib/training/deck";
+import { byGridOrder, type Direction } from "@/lib/training/deck";
 import type { QueueItem } from "@/lib/training/queue";
 
 import { usePracticeDeck, type PracticeDeck as Deck } from "./deckStore";
@@ -39,7 +39,8 @@ export function PracticeDeck({ initialDirection }: { initialDirection: Direction
           setLoaded({ deck, error: true });
           return;
         }
-        const ordered = deck.shuffle ? shuffle(words) : [...words].sort(byGridOrder(standard));
+        // Deck order; a session shuffles it when Shuffle is on.
+        const ordered = [...words].sort(byGridOrder(standard));
         setLoaded({ deck, items: ordered.map((word) => ({ word, card: null, isNew: false })) });
       });
     return () => {
@@ -56,7 +57,7 @@ export function PracticeDeck({ initialDirection }: { initialDirection: Direction
   }
 
   if (current.deck.session === "endless") {
-    return <EndlessSession items={current.items} initialDirection={initialDirection} />;
+    return <EndlessSession items={current.items} shuffled={current.deck.shuffle} initialDirection={initialDirection} />;
   }
   return <PracticeSession items={current.items} shuffled={current.deck.shuffle} initialDirection={initialDirection} />;
 }

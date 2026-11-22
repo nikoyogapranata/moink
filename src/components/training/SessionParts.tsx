@@ -104,6 +104,24 @@ function ShuffleToggle({ on, onToggle }: { on: boolean; onToggle: () => void }) 
   );
 }
 
+/** Shuffle on or off with its name showing (flashcards): S toggles it. */
+export function ShuffleButton({ on, onToggle }: { on: boolean; onToggle: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-pressed={on}
+      aria-keyshortcuts="S"
+      className={`inline-flex h-11 shrink-0 items-center gap-1.5 rounded-pill border-[1.5px] px-3.5 font-body text-body font-medium transition-colors ${FOCUS_RING} ${
+        on ? "border-rust bg-highlight text-rust-dark" : "border-line text-bark-muted hover:bg-highlight/60 hover:text-bark"
+      }`}
+    >
+      <Shuffle size={18} aria-hidden="true" />
+      Shuffle
+    </button>
+  );
+}
+
 /** Close, progress (cards answered at least once, see runProgress), the
  *  counter and the cards coming back, Shuffle (practice only) and Reset;
  *  then the direction toggle (flashcards), or another `control`, the
@@ -128,7 +146,8 @@ export function SessionHeader({
   onDirection?: (next: Direction) => void;
   onReset: () => void;
   confirmReset?: boolean;
-  shuffle?: { on: boolean; onToggle: () => void };
+  /** `labelled`: the named ShuffleButton (flashcards) for the icon. */
+  shuffle?: { on: boolean; onToggle: () => void; labelled?: boolean };
   /** In place of the direction toggle. */
   control?: ReactNode;
   /** "practice" for a built deck, "round" for a practice round after
@@ -164,7 +183,12 @@ export function SessionHeader({
           )}
         </p>
         <div className="-mr-2 flex items-center gap-1">
-          {shuffle && <ShuffleToggle on={shuffle.on} onToggle={shuffle.onToggle} />}
+          {shuffle &&
+            (shuffle.labelled ? (
+              <ShuffleButton on={shuffle.on} onToggle={shuffle.onToggle} />
+            ) : (
+              <ShuffleToggle on={shuffle.on} onToggle={shuffle.onToggle} />
+            ))}
           <button
             ref={resetRef}
             type="button"
