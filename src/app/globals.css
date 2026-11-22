@@ -171,6 +171,14 @@ body {
   font-family: var(--font-body), sans-serif;
 }
 
+/* While a display switch is being applied, useKeepReadingPosition keeps the
+   line being read in place itself; the browser's own scroll anchoring would
+   fight it. Only then: the rest of the time that anchoring keeps the page
+   still as lazy images (no reserved size) load above the screen. */
+[data-anchoring] {
+  overflow-anchor: none;
+}
+
 /* Bao mascot animations (landing hero). Loop is seamless: bob starts and
    ends at translateY(0). */
 @keyframes bao-bob {

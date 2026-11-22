@@ -2,10 +2,12 @@
 
 import { ArrowLeft, Check, ChevronLeft, ChevronRight, X } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { CARD } from "@/components/app/card";
 import { AudioButton } from "@/components/dictionary/AudioButton";
+import { DisplayToggles, ReadingBar, SectionChips } from "@/components/reading/ReadingBar";
+import { useKeepReadingPosition } from "@/components/reading/useKeepReadingPosition";
 import { Button } from "@/components/ui/Button";
 import { levelLabel } from "@/lib/hsk";
 import { categoryName, ROLE_CLASSES } from "@/lib/grammar/display";
@@ -19,29 +21,21 @@ import { Sentence, type OpenWord } from "./Sentence";
 
 const FOCUS_RING = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rust";
 const SECTION_TITLE = "font-heading text-h2 font-bold text-bark";
-/** Room above a section scrolled to from the contents. */
-const ANCHOR_OFFSET = "scroll-mt-6";
+/** Room above a section scrolled to from the contents: clear of the
+ *  sticky bar. */
+const ANCHOR_OFFSET = "scroll-mt-20";
 
 interface TocItem {
   id: string;
   title: string;
 }
 
-function Toggle({ pref, label }: { pref: LessonPref; label: string }) {
-  const shown = useLessonPref(pref);
-  return (
-    <button
-      type="button"
-      aria-pressed={shown}
-      onClick={() => storeLessonPref(pref, !shown)}
-      className={`h-full rounded-pill px-3 font-body text-[13px] font-medium transition-colors ${FOCUS_RING} ${
-        shown ? "bg-highlight text-bark" : "text-bark-muted hover:text-bark"
-      }`}
-    >
-      {label}
-    </button>
-  );
-}
+/** What a switch removes (Sentence's data-reading), so it can't be the
+ *  reading position kept for that switch. */
+const REMOVED_BY: Record<LessonPref, string> = {
+  pinyin: '[data-reading="pinyin"]',
+  english: '[data-reading="en"]',
+};
 
 /** The section in view: the first of `ids` crossing the upper part of the
  *  viewport. */
@@ -71,30 +65,7 @@ function useActiveSection(ids: string[]) {
   return active;
 }
 
-function Contents({ items, active, variant }: { items: TocItem[]; active: string; variant: "side" | "chips" }) {
-  if (variant === "chips") {
-    return (
-      <nav aria-label="Lesson contents" className="-mx-4 overflow-x-auto px-4 sm:-mx-6 sm:px-6 lg:hidden">
-        <ul className="flex w-max gap-2 pb-1">
-          {items.map((item) => (
-            <li key={item.id}>
-              <a
-                href={`#${item.id}`}
-                aria-current={item.id === active ? "location" : undefined}
-                className={`inline-flex h-9 items-center whitespace-nowrap rounded-pill border-[1.5px] px-3.5 font-body text-[13px] font-medium transition-colors ${FOCUS_RING} ${
-                  item.id === active
-                    ? "border-transparent bg-highlight text-bark"
-                    : "border-line text-bark-muted hover:bg-highlight/50 hover:text-bark"
-                }`}
-              >
-                {item.title}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
-    );
-  }
+function Contents({ items, active }: { items: TocItem[]; active: string }) {
   return (
     <nav aria-label="Lesson contents" className="sticky top-10 hidden lg:block">
       {/* min-h-7: level with the label row above the lesson title. */}
@@ -221,22 +192,25 @@ export function LessonView({ lesson }: { lesson: Lesson }) {
     />
   );
 
+  // Pinyin and English lines come and go all over the page: keep the line
+  // being read where it is.
+  const root = useRef<HTMLDivElement>(null);
+  const content = useRef<HTMLElement>(null);
+  const bar = useRef<HTMLDivElement>(null);
+  const shown = { pinyin: showPinyin, english: showEnglish };
+  const { capture, spacer } = useKeepReadingPosition({
+    root,
+    content,
+    bar,
+    blocks: "article > *",
+    display: `${showPinyin}|${showEnglish}`,
+  });
+
   const first = lesson.examples[0];
   const level = levelLabel(lesson.level, "hsk3");
 
-  const toggles = (className: string) => (
-    <div
-      role="group"
-      aria-label="Show"
-      className={`h-9 shrink-0 items-center rounded-pill border-[1.5px] border-line p-0.5 ${className}`}
-    >
-      <Toggle pref="pinyin" label="Pinyin" />
-      <Toggle pref="english" label="English" />
-    </div>
-  );
-
   return (
-    <div className="flex flex-col gap-5">
+    <div ref={root} className="flex flex-col gap-5">
       <Link
         href={`/grammar?level=${lesson.level}`}
         className={`inline-flex min-h-11 items-center gap-1.5 self-start rounded-pill border-[1.5px] border-line bg-surface-raised py-2 pl-[11px] pr-4 font-body text-[15px] font-medium leading-6 text-bark transition-colors hover:border-bark-muted/50 hover:bg-highlight/40 ${FOCUS_RING}`}
@@ -250,10 +224,10 @@ export function LessonView({ lesson }: { lesson: Lesson }) {
           RichText). Both columns start at the same top. */}
       <div className="lg:grid lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-8">
         <div className="hidden lg:block">
-          <Contents items={toc} active={active} variant="side" />
+          <Contents items={toc} active={active} />
         </div>
 
-        <article aria-labelledby="lesson-title" className="flex min-w-0 flex-col gap-5">
+        <article ref={content} aria-labelledby="lesson-title" className="flex min-w-0 flex-col gap-5">
           <header className="flex flex-col gap-3">
             {/* The label row, as tall as the contents heading beside it.
                 Mobile: HSK, Draft, category, then the toggles at the end.
@@ -270,22 +244,35 @@ export function LessonView({ lesson }: { lesson: Lesson }) {
               <span className="order-3 min-w-0 truncate font-body text-body-sm text-bark-muted">
                 {categoryName(lesson.category)}
               </span>
-              {toggles("order-5 ml-auto inline-flex lg:hidden")}
             </div>
-            <div className="flex items-center justify-between gap-4">
-              <h1 id="lesson-title" className="min-w-0 font-heading text-h1 font-bold text-bark lg:text-[1.875rem] lg:leading-[2.375rem]">
-                {hanziRuns(lesson.name_en)}
-              </h1>
-              {toggles("hidden lg:inline-flex")}
-            </div>
+            <h1 id="lesson-title" className="min-w-0 font-heading text-h1 font-bold text-bark lg:text-[1.875rem] lg:leading-[2.375rem]">
+              {hanziRuns(lesson.name_en)}
+            </h1>
             <p lang="zh-CN" className="-mt-2 font-hanzi text-body-sm text-bark-muted">
               {lesson.name_zh}
             </p>
-            <p aria-live="polite" className="font-body text-body-sm text-bark-muted empty:hidden">
+            <p aria-live="polite" data-reading="pinyin" className="font-body text-body-sm text-bark-muted empty:hidden">
               {showPinyin ? "" : "Tap a sentence to see its pinyin."}
             </p>
-            <Contents items={toc} active={active} variant="chips" />
           </header>
+
+          {/* Mobile: the contents as chips (desktop has them on the left). */}
+          <ReadingBar ref={bar} className="-mt-1">
+            <SectionChips items={toc.map((t) => ({ id: t.id, label: t.title }))} active={active} className="lg:hidden" />
+            <DisplayToggles
+              className="ml-auto"
+              toggles={(["pinyin", "english"] as const).map((pref) => ({
+                key: pref,
+                label: pref === "pinyin" ? "Pinyin" : "English",
+                title: pref === "pinyin" ? "Pinyin" : "English",
+                shown: shown[pref],
+                onToggle: () => {
+                  capture(REMOVED_BY[pref]);
+                  storeLessonPref(pref, !shown[pref]);
+                },
+              }))}
+            />
+          </ReadingBar>
 
           <section
             id="overview"
@@ -421,6 +408,7 @@ export function LessonView({ lesson }: { lesson: Lesson }) {
           </div>
         </article>
       </div>
+      <div ref={spacer} aria-hidden="true" className="-mt-5" />
     </div>
   );
 }

@@ -223,14 +223,22 @@ export function Sentence({
         <p lang="zh-CN" className="font-hanzi text-[19px] leading-[30px] text-bark">
           {rendered}
         </p>
-        {pinyinShown && <p className="font-body text-body text-rust-dark">{pinyin}</p>}
+        {pinyinShown && (
+          <p data-reading="pinyin" className="font-body text-body text-rust-dark">
+            {pinyin}
+          </p>
+        )}
       </div>
       {showEnglish && literal && (
-        <p className="font-body text-body italic text-bark-muted">
+        <p data-reading="en" className="font-body text-body italic text-bark-muted">
           Word by word: {hanziRuns(literal)}
         </p>
       )}
-      {showEnglish && <p className="font-body text-body text-bark-muted">{translation}</p>}
+      {showEnglish && (
+        <p data-reading="en" className="font-body text-body text-bark-muted">
+          {translation}
+        </p>
+      )}
       {popoverWord && openWord && <WordPopover word={popoverWord} open={openWord} onClose={onCloseWord} />}
     </div>
   );
