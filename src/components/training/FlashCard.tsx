@@ -296,7 +296,7 @@ export function CardStage({
             type="button"
             onClick={() => void answer(true)}
             aria-keyshortcuts="2 ArrowRight"
-            className="flex h-14 items-center justify-center gap-2 rounded-pill bg-got-it px-3 font-heading text-h3 font-bold text-white transition-colors hover:bg-got-it-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rust focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            className="flex h-14 items-center justify-center gap-2 rounded-pill bg-got-it px-3 font-heading text-h3 font-bold text-on-got-it transition-colors hover:bg-got-it-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rust focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
             <Check size={20} aria-hidden="true" />
             Got it

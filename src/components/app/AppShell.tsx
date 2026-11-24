@@ -20,10 +20,12 @@ import { createContext, useContext, useEffect, useRef, type ReactNode } from "re
 import { Wordmark } from "@/components/Wordmark";
 import { devError } from "@/lib/dev";
 import { levelLabel, type HskStandard } from "@/lib/hsk";
+import type { ThemePref } from "@/lib/theme";
 import { browserTimeZone, FALLBACK_TIME_ZONE } from "@/lib/time";
 import { adoptBrowserTimeZone } from "@/lib/time-actions";
 
 import { HskStandardProvider } from "./HskStandard";
+import { ThemeSync } from "./Theme";
 
 // No gamification data yet. Flip to true once streaks and coins exist.
 const SHOW_GAME_STATS = false;
@@ -38,6 +40,8 @@ export interface AppUser {
   timeZone: string;
   /** False until the zone came from the browser or Settings. */
   timeZoneConfirmed: boolean;
+  /** profiles.theme (Appearance); null when it couldn't be read. */
+  theme: ThemePref | null;
   /** On the HSK Book allowlist (book_access). */
   hasBookAccess: boolean;
   avatarUrl: string | null;
@@ -288,6 +292,7 @@ export function AppShell({
 
   return (
     <AppUserContext.Provider value={user}>
+      <ThemeSync theme={user.theme} />
       <HskStandardProvider standard={user.hskStandard}>
         <div className="min-h-dvh bg-background">
           <Sidebar pathname={pathname} user={user} nav={nav} />

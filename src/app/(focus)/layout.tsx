@@ -3,6 +3,7 @@ import { Suspense, type ReactNode } from "react";
 
 import { AccountError } from "@/components/app/AccountError";
 import { HskStandardProvider } from "@/components/app/HskStandard";
+import { ThemeSync } from "@/components/app/Theme";
 import { SessionSkeleton } from "@/components/training/SessionSkeleton";
 import { getAppUser } from "@/lib/supabase/app-user";
 
@@ -15,7 +16,12 @@ export const viewport: Viewport = {
 async function FocusGuard({ children }: { children: ReactNode }) {
   const user = await getAppUser();
   if (!user) return <AccountError />;
-  return <HskStandardProvider standard={user.hskStandard}>{children}</HskStandardProvider>;
+  return (
+    <HskStandardProvider standard={user.hskStandard}>
+      <ThemeSync theme={user.theme} />
+      {children}
+    </HskStandardProvider>
+  );
 }
 
 // The guard has its own boundary: loading.tsx sits below this layout, so it

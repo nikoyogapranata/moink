@@ -4,6 +4,9 @@ import { cache } from "react";
 
 import type { AppUser } from "@/components/app/AppShell";
 
+import { devErrorOnce } from "@/lib/dev";
+import { isThemePref } from "@/lib/theme";
+
 import { isTransientAuthError } from "./auth-errors";
 import type { Profile } from "./profile";
 import { createClient } from "./server";
@@ -20,7 +23,11 @@ export type AccountProfile = Pick<
   | "daily_new_writing"
   | "timezone"
   | "timezone_confirmed"
+  | "theme"
 >;
+
+const PROFILE_COLUMNS =
+  "username, display_name, hsk_level_target, hsk_standard, daily_new_words, daily_new_writing, timezone, timezone_confirmed";
 
 /** The signed-in user as the session's JWT describes them. */
 export interface AccountUser {
@@ -56,18 +63,21 @@ export const loadAccount = cache(
     if (!claims?.sub) return { status: "signed-out" };
     const user: AccountUser = { id: claims.sub, metadata: claims.user_metadata ?? {} };
 
-    const [{ data: profile, error }, access] = await Promise.all([
-      supabase
-        .from("profiles")
-        .select(
-          "username, display_name, hsk_level_target, hsk_standard, daily_new_words, daily_new_writing, timezone, timezone_confirmed",
-        )
-        .eq("id", user.id)
-        .maybeSingle<AccountProfile>(),
+    const readProfile = (columns: string) =>
+      supabase.from("profiles").select(columns).eq("id", user.id).maybeSingle<AccountProfile>();
+    const [first, access] = await Promise.all([
+      readProfile(`${PROFILE_COLUMNS}, theme`),
       // The HSK Book allowlist (RLS shows only the user's own row). A
       // failed read only hides the section, it never fails the account.
       supabase.from("book_access").select("user_id").eq("user_id", user.id).maybeSingle(),
     ]);
+    // 42703, no such column: the theme migration (20270201120000_theme.sql)
+    // isn't applied yet. Read the rest; the theme stays in this browser.
+    let { data: profile, error } = first;
+    if (error?.code === "42703") {
+      devErrorOnce("profiles.theme", "loadAccount: profiles.theme is missing; apply 20270201120000_theme.sql.", error);
+      ({ data: profile, error } = await readProfile(PROFILE_COLUMNS));
+    }
     if (error) {
       console.error(`loadAccount: couldn't load the profile of ${user.id}.`, error);
       return { status: "error" };
@@ -99,6 +109,7 @@ export async function getAppUser(): Promise<AppUser | null> {
     hskStandard: profile.hsk_standard,
     timeZone: profile.timezone,
     timeZoneConfirmed: profile.timezone_confirmed,
+    theme: isThemePref(profile.theme) ? profile.theme : null,
     hasBookAccess: bookAccess,
     avatarUrl:
       typeof meta.avatar_url === "string"

@@ -190,7 +190,7 @@
   font-style: normal;
   line-height: 1;
   letter-spacing: -0.02em;
-  color: var(--color-bark-muted);
+  color: var(--color-pinyin);
   user-select: none;
   /* Sides: just enough that neighbouring syllables never touch (the ruby
      widens its character to fit). Bottom: the gap to the character.
@@ -232,6 +232,19 @@
 .book-reader[data-en="off"] .book-en,
 .book-reader[data-extras="off"] .book-extra {
   display: none !important;
+}
+
+/* ---------------------------------------------------------------------------
+   Images. The textbook crops are white pages: in dark they keep their colors
+   (never inverted) on a light rounded card, a little dimmed so they don't
+   glare. The card is a ring outside the image (a shadow, not padding), so
+   switching theme moves nothing on the page.
+   --------------------------------------------------------------------------- */
+
+[data-theme="dark"] .book-img {
+  background-color: var(--color-paper);
+  box-shadow: 0 0 0 6px var(--color-paper);
+  filter: brightness(0.9);
 }
 
 /* ---------------------------------------------------------------------------

@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import Link from "next/link";
 import { Fragment, useEffect, useLayoutEffect, useRef, useState, useTransition, type ReactNode } from "react";
 
+import { ThemeToggle } from "@/components/app/Theme";
 import { DisplayToggles, ReadingBar, SectionChips } from "@/components/reading/ReadingBar";
 import { useKeepReadingPosition } from "@/components/reading/useKeepReadingPosition";
 import { Button } from "@/components/ui/Button";
@@ -319,6 +320,7 @@ export function Reader({
         >
           <SectionChips items={chips} active={active} hanzi />
           <LessonNotes blocks={blocks} />
+          <ThemeToggle className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-[1.5px] border-line bg-surface-raised text-bark-muted transition-colors hover:text-bark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rust" />
           <DisplayToggles
             toggles={TOGGLES.map((t) => ({ ...t, key: t.pref, shown: prefs[t.pref], onToggle: () => toggle(t.pref) }))}
           />

@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* dark: follows data-theme (set from the Appearance choice, lib/theme.ts),
+   not the OS setting directly, so a manual choice wins. Matches inside a
+   dark island too (the flashcards deck builder). */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 @theme {
   --color-background: #fdfbf6;
   --color-rust: #e06b2e;
@@ -65,6 +70,12 @@
   --color-role-gray-ink: #4a4a46;
   /* Loading placeholders (ui/Skeleton). */
   --color-skeleton: #f1e9dc;
+  /* Ruby pinyin (book.css): bark-muted in light. */
+  --color-pinyin: #8a6a4f;
+  /* Label on a Got it fill. */
+  --color-on-got-it: #ffffff;
+  /* Dialog backdrops and the play badge on a video still. */
+  --color-scrim: rgb(0 0 0 / 0.5);
 
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -107,56 +118,70 @@
   --font-hanzi: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", sans-serif;
 }
 
-/* Dark palette. Overrides the @theme color variables for any subtree with
-   data-theme="dark"; color utilities (bg-rust, text-bark, ...) pick this up
-   automatically. No toggle UI wired yet. */
-:root[data-theme="dark"] {
-  --color-background: #18181a;
-  --color-surface: #232325;
-  --color-rust: #f0793c;
-  --color-rust-dark: #ff8a4d;
-  --color-bamboo-gold: #ffc163;
-  --color-bamboo-gold-dark: #ffcf80;
-  --color-bamboo-green: #8bc65a;
-  --color-deep-grass: #5fa83a;
-  --color-bark: #f2efe9;
-  --color-bark-muted: #a8a6a0;
-  --color-danger: #ff6b6b;
-  /* Deep, saturated gold rather than a washed-out tint; ~6.3:1 contrast
-     against dark-mode text-bark. */
+/* Dark palette: a warm dark gray (not black, not blue-black), off-white
+   text, moink orange softened for the dark. Overrides the @theme color
+   variables for any subtree with data-theme="dark", so color utilities
+   (bg-rust, text-bark, ...) follow; on <html> for a whole page, or on one
+   element for a dark island. Contrast (WCAG): text 14.0:1 on the page,
+   muted text and pinyin at least 5.6:1, accent text at least 6.3:1 on
+   every surface; filled buttons flip to a dark label on the bright fill
+   (at least 6.3:1); focus ring and outlines at least 3:1. */
+[data-theme="dark"] {
+  color-scheme: dark;
+  --color-background: #1c1916;
+  --color-surface: #2e2925;
+  --color-surface-raised: #262220;
+  --color-line: #3a342f;
+  --color-highlight: #3b2d23;
+  --color-blush: #3b2d23;
+  --color-skeleton: #322c28;
+  --color-bark: #ece5da;
+  --color-bark-muted: #b3a797;
+  --color-pinyin: #b3a797;
+  --color-rust: #e8804a;
+  /* Accent text and the hover of a rust fill: lighter, not darker, here. */
+  --color-rust-dark: #f2a06e;
+  --color-bamboo-gold: #e5aa52;
+  --color-bamboo-gold-dark: #efc17a;
+  --color-bamboo-green: #86b55a;
+  --color-deep-grass: #9ccb78;
+  --color-danger: #f28474;
   --color-band-gold: #7a4e0e;
-  --color-surface-raised: #232325;
-  --color-line: #38383b;
-  --color-highlight: #3d2c22;
-  /* Training ramps flipped: deep tint, light ink, at least 7.1:1. */
-  --color-again-ink: #ffc2b8;
-  --color-learning-tint: #46341a;
-  --color-learning-ink: #ffd88f;
-  --color-learning-line: #d9a03c;
-  --color-good-tint: #2c3d22;
-  --color-good-ink: #c3e8a0;
-  /* deep-grass is too light here for white text; 5.2:1 and 6.5:1. */
-  --color-got-it: #3f7a24;
-  --color-got-it-strong: #356a1d;
-  /* Ink on tint 8.7:1, the line 4.6:1; white on miss as in light. */
-  --color-again-tint: #4a2420;
-  --color-again-line: #e07a6c;
+  /* Training ramps: deep tint, light ink, at least 8.4:1. */
+  --color-again-ink: #ffbcaf;
+  --color-again-tint: #46261f;
+  --color-again-line: #e0806f;
+  --color-learning-tint: #41321d;
+  --color-learning-ink: #f4d08c;
+  --color-learning-line: #cf9d45;
+  --color-good-tint: #283723;
+  --color-good-ink: #bfe29e;
+  /* Got it: a bright green with a dark label (7.3:1, 9.4:1 on hover),
+     like the rust buttons; as an outline 6.6:1 against the card. */
+  --color-got-it: #7fb658;
+  --color-got-it-strong: #9ccb78;
+  --color-on-got-it: #1c1916;
   --color-miss: #b3261e;
   --color-miss-strong: #93201a;
-  /* White on the brighter rust is only 2.8:1, so the icon goes dark
-     (6.3:1). Blue ink on tint 9.3:1. */
-  --color-on-rust: #18181a;
+  /* The icon on a rust fill goes dark (6.3:1). */
+  --color-on-rust: #1c1916;
   --color-listen-tint: #1e2c3d;
   --color-listen-ink: #b9d4f5;
-  /* Pattern blocks: deep tint, light ink, at least 9.1:1. */
   --color-role-blue-tint: #1e2c3d;
   --color-role-blue-ink: #b9d4f5;
   --color-role-purple-tint: #2f2640;
   --color-role-purple-ink: #d9c8f5;
-  --color-role-gray-tint: #2e2e30;
-  --color-role-gray-ink: #d6d4ce;
-  /* A step up from the #232325 card surface. */
-  --color-skeleton: #2e2e31;
+  --color-role-gray-tint: #302c29;
+  --color-role-gray-ink: #d8d1c7;
+  --color-scrim: rgb(0 0 0 / 0.6);
+  /* Behind the white HSK Book textbook crops (book.css). */
+  --color-paper: #ece5da;
+  --shadow-float: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="dark"] ::selection {
+  background-color: #633d28;
+  color: var(--color-bark);
 }
 
 /* Keep the scrollbar's room when a page is short (a skeleton, say), so classic

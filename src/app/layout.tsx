@@ -3,6 +3,8 @@ import { Baloo_2, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
 import { NavProgress } from "@/components/app/NavProgress";
+import { ThemeController } from "@/components/app/Theme";
+import { THEME_SCRIPT } from "@/lib/theme";
 
 const fontHeading = Baloo_2({
   variable: "--font-heading",
@@ -25,13 +27,21 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
+  // data-theme is set before the first paint by the inline script (and kept
+  // by ThemeController), so React's server value for <html> can't match:
+  // suppressHydrationWarning accepts the DOM's.
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       data-scroll-behavior="smooth"
       className={`${fontHeading.variable} ${fontBody.variable} h-full antialiased motion-safe:scroll-smooth`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body className="min-h-full flex flex-col">
+        <ThemeController />
         <NavProgress />
         {children}
       </body>

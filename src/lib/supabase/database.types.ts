@@ -112,6 +112,8 @@ export type Database = {
           show_pinyin: boolean;
           show_english: boolean;
           show_extras: boolean;
+          /** Appearance: light, dark, or system (follow the device). */
+          theme: "light" | "dark" | "system";
           created_at: string;
           updated_at: string;
         };
@@ -134,6 +136,7 @@ export type Database = {
           show_pinyin?: boolean;
           show_english?: boolean;
           show_extras?: boolean;
+          theme?: "light" | "dark" | "system";
           created_at?: string;
           updated_at?: string;
         };
@@ -156,6 +159,7 @@ export type Database = {
           show_pinyin?: boolean;
           show_english?: boolean;
           show_extras?: boolean;
+          theme?: "light" | "dark" | "system";
           created_at?: string;
           updated_at?: string;
         };

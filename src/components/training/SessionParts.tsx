@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 
 import { AudioButton } from "@/components/dictionary/AudioButton";
+import { ThemeToggle } from "@/components/app/Theme";
 import { Button } from "@/components/ui/Button";
 import { devError } from "@/lib/dev";
 import { addToTraining, fetchUntrainedIds } from "@/lib/training/actions";
@@ -138,6 +139,7 @@ export function SessionHeader({
   shuffle,
   control,
   notSaved,
+  themeToggle = false,
 }: {
   progress: { answered: number; total: number; comingBack: number };
   gotIt: number;
@@ -153,6 +155,9 @@ export function SessionHeader({
   /** "practice" for a built deck, "round" for a practice round after
    *  Today's review: neither saves anything. */
   notSaved?: "practice" | "round";
+  /** The sun/moon switch: flashcards only, the sessions that follow the
+   *  Appearance choice for now. */
+  themeToggle?: boolean;
 }) {
   const { answered, total, comingBack } = progress;
   const [confirming, setConfirming] = useState(false);
@@ -189,6 +194,7 @@ export function SessionHeader({
             ) : (
               <ShuffleToggle on={shuffle.on} onToggle={shuffle.onToggle} />
             ))}
+          {themeToggle && <ThemeToggle className={ICON_BUTTON} />}
           <button
             ref={resetRef}
             type="button"
@@ -269,7 +275,7 @@ function ResetConfirm({ onConfirm, onClose }: { onConfirm: () => void; onClose: 
         onCloseRef.current();
         if (confirmed.current) onConfirmRef.current();
       }}
-      className="m-auto hidden w-[calc(100%-32px)] max-w-100 open:animate-[fade-in_150ms_ease-out] flex-col gap-4 rounded-[22px] border-[1.5px] border-line bg-surface-raised p-5 text-bark open:flex backdrop:bg-black/50"
+      className="m-auto hidden w-[calc(100%-32px)] max-w-100 open:animate-[fade-in_150ms_ease-out] flex-col gap-4 rounded-[22px] border-[1.5px] border-line bg-surface-raised p-5 text-bark open:flex backdrop:bg-scrim"
     >
       <h2 id={titleId} className="font-heading text-h2 font-bold text-bark">
         Restart as practice?

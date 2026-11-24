@@ -4,6 +4,7 @@ import { Check, ChevronLeft, ChevronRight, Infinity as InfinityIcon } from "luci
 import Link from "next/link";
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 
+import { ThemeToggle } from "@/components/app/Theme";
 import { Button } from "@/components/ui/Button";
 import { inDeckOrderFrom, shuffle, type Direction } from "@/lib/training/deck";
 import type { QueueItem } from "@/lib/training/queue";
@@ -220,6 +221,9 @@ export function EndlessSession({
           <span className="ml-auto sm:ml-0">
             <ShuffleButton on={shuffleOn} onToggle={toggleShuffle} />
           </span>
+          <ThemeToggle
+            className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-[1.5px] border-line text-bark-muted transition-colors hover:bg-highlight/60 hover:text-bark ${FOCUS_RING}`}
+          />
           <button
             type="button"
             onClick={end}
@@ -281,7 +285,7 @@ export function EndlessSession({
               aria-keyshortcuts="G"
               className={`flex h-14 items-center justify-center gap-2 rounded-pill px-3 font-heading text-h3 font-bold transition-colors ${FOCUS_RING} ${
                 marked
-                  ? "bg-got-it text-white hover:bg-got-it-strong"
+                  ? "bg-got-it text-on-got-it hover:bg-got-it-strong"
                   : "border-2 border-got-it bg-surface-raised text-good-ink hover:bg-good-tint"
               }`}
             >

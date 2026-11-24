@@ -116,7 +116,7 @@ function BookImage({ image, ctx, className }: { image: Image; ctx: BlockContext;
   // A plain img: the signed URL changes on every load, so next/image's
   // cache would only add a round trip.
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src={url} alt={image.alt} loading="lazy" className={className} />;
+  return <img src={url} alt={image.alt} loading="lazy" className={`book-img ${className}`} />;
 }
 
 /** "A 护照" chips for an exercise's choices. */
@@ -691,7 +691,7 @@ function Video({ data, ctx }: { data: BlockData["video"]; ctx: BlockContext }) {
       <div className="relative mx-auto w-full max-w-105">
         <BookImage image={data.image} ctx={ctx} className={`${FIGURE} border-[1.5px] border-line`} />
         <span aria-hidden="true" className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-black/50 text-white">
+          <span className="flex h-14 w-14 items-center justify-center rounded-full bg-scrim text-white">
             <Play size={26} fill="currentColor" className="ml-1" />
           </span>
         </span>
