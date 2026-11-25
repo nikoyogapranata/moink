@@ -2,7 +2,7 @@
 
 /* dark: follows data-theme (set from the Appearance choice, lib/theme.ts),
    not the OS setting directly, so a manual choice wins. Matches inside a
-   dark island too (the flashcards deck builder). */
+   dark island too (data-theme on one element). */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @theme {
@@ -74,6 +74,11 @@
   --color-pinyin: #8a6a4f;
   /* Label on a Got it fill. */
   --color-on-got-it: #ffffff;
+  /* Label on the quiz's red Continue (miss), in both themes: 6.5:1. */
+  --color-on-miss: #ffffff;
+  /* The writing box's practice grid (thin dashed lines): the line color in
+     light, 1.36:1 on the box. */
+  --color-guide: #f3d9b8;
   /* Dialog backdrops and the play badge on a video still. */
   --color-scrim: rgb(0 0 0 / 0.5);
 
@@ -132,6 +137,9 @@
   --color-surface: #2e2925;
   --color-surface-raised: #262220;
   --color-line: #3a342f;
+  /* Thin guides need a little more than the decorative line to read on
+     dark: 1.83:1 on the box, quiet under the strokes (6.9:1 above it). */
+  --color-guide: #544a42;
   --color-highlight: #3b2d23;
   --color-blush: #3b2d23;
   --color-skeleton: #322c28;

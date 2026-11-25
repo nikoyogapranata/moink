@@ -16,7 +16,7 @@ export const isThemePref = (value: unknown): value is ThemePref =>
 export const THEME_KEY = "moink-theme";
 
 /** The pages that follow the choice, with everything under them. */
-export const THEMED_PATHS = ["/book", "/training/flashcards"] as const;
+export const THEMED_PATHS = ["/book", "/training"] as const;
 
 export function isThemedPath(pathname: string) {
   return THEMED_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));

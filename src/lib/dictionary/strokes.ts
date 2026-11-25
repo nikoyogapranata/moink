@@ -37,6 +37,17 @@ export function loadStrokes(char: string) {
   return pending;
 }
 
+/** The training writing box's colors, from the tokens of the theme on the
+ *  page now (read again when it changes: WritingStage). */
+export function writerColors() {
+  return {
+    strokeColor: tokenColor("--color-bark"),
+    outlineColor: tokenColor("--color-bark", 0.14),
+    drawingColor: tokenColor("--color-rust-dark"),
+    highlightColor: tokenColor("--color-rust"),
+  };
+}
+
 /** A design token's current value (hanzi-writer needs real colors, not
  *  var()), optionally with an alpha. */
 export function tokenColor(name: string, alpha?: number) {

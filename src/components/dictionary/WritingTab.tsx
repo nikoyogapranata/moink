@@ -26,11 +26,11 @@ type Loaded =
   | { status: "missing" }
   | { status: "ready"; strokes: CharacterStrokes; HanziWriter: HanziWriterClass };
 
-/** Practice grid: border, center cross, diagonals, in the line token. */
+/** Practice grid: border, center cross, diagonals, in the guide token. */
 export function GuideLines({ size }: { size: number }) {
   const m = size / 2;
   return (
-    <g stroke="var(--color-line)" strokeWidth={1}>
+    <g stroke="var(--color-guide)" strokeWidth={1}>
       <rect x={0.5} y={0.5} width={size - 1} height={size - 1} fill="none" />
       <line x1={0} y1={m} x2={size} y2={m} strokeDasharray="4 4" />
       <line x1={m} y1={0} x2={m} y2={size} strokeDasharray="4 4" />

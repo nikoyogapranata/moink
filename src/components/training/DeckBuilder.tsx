@@ -17,7 +17,6 @@ import {
 
 import { useAppUser } from "@/components/app/AppShell";
 import { useHskStandard } from "@/components/app/HskStandard";
-import { useResolvedTheme } from "@/components/app/Theme";
 import type { BookVocabBook } from "@/lib/book/vocab";
 import { devError } from "@/lib/dev";
 import type { HskStandard } from "@/lib/hsk";
@@ -271,7 +270,6 @@ export function DeckBuilder({
   // Flashcards build a deck of groups (sets, book lessons, search picks);
   // the other modes keep a plain set of ids.
   const flash = mode === "flashcards";
-  const theme = useResolvedTheme();
   const flashDeck = flash ? (lastDeck as ReturnType<typeof readLastDeck>) : null;
   const { hasBookAccess } = useAppUser();
   const [plainSelected, setPlainSelected] = useState<ReadonlySet<number>>(() => new Set(lastDeck?.ids));
@@ -831,9 +829,6 @@ export function DeckBuilder({
         // A close event that lands while the dialog is open again is stale.
         if (!e.currentTarget.open) onCloseRef.current();
       }}
-      // Flashcards follow the Appearance choice, so their builder does too,
-      // on the (light) Training page; quiz, listening and writing stay light.
-      data-theme={flash ? (theme ?? undefined) : undefined}
       className={`deck-dialog m-0 hidden h-dvh max-h-none w-full max-w-none border-0 bg-surface-raised p-0 text-bark open:flex backdrop:bg-scrim md:m-auto md:h-[min(85vh,780px)] md:w-[calc(100%-48px)] md:max-w-170 md:rounded-[22px] md:border-[1.5px] md:border-line ${
         flash ? "lg:h-[min(88vh,820px)] lg:max-w-265" : "lg:max-w-215"
       }`}

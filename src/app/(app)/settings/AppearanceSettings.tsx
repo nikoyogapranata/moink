@@ -18,7 +18,7 @@ const OPTIONS: { id: ThemePref; label: string; icon: LucideIcon }[] = [
 /**
  * Appearance: light, dark, or the device's setting. Applies at once (no
  * Save): on this device right away, and to the profile so other devices
- * follow. For now only the HSK Book and Flashcards use it.
+ * follow. For now only the HSK Book and Training use it.
  */
 export function AppearanceSettings({ saved }: { saved: ThemePref }) {
   const pref = useThemePref(saved);
@@ -32,7 +32,7 @@ export function AppearanceSettings({ saved }: { saved: ThemePref }) {
           Appearance
         </h2>
         <p id={hintId} className="font-body text-body text-bark-muted">
-          For the HSK Book and Flashcards for now. Other pages stay light.
+          For the HSK Book and Training for now. Other pages stay light.
         </p>
       </div>
       <fieldset aria-labelledby={titleId} aria-describedby={hintId} className="flex flex-wrap gap-2">

@@ -3,11 +3,12 @@
 import { Lightbulb } from "lucide-react";
 import { useEffect, useEffectEvent, useImperativeHandle, useRef, useState, type Ref } from "react";
 
+import { useResolvedTheme } from "@/components/app/Theme";
 import { AudioButton } from "@/components/dictionary/AudioButton";
 import { GuideLines } from "@/components/dictionary/WritingTab";
 import { Button } from "@/components/ui/Button";
 import { devError } from "@/lib/dev";
-import { loadHanziWriter, loadStrokes, tokenColor, type CharacterStrokes, type HanziWriterClass } from "@/lib/dictionary/strokes";
+import { loadHanziWriter, loadStrokes, writerColors, type CharacterStrokes, type HanziWriterClass } from "@/lib/dictionary/strokes";
 import type { QueueWord } from "@/lib/training/queue";
 import { allowedMistakes, RECALL_HINT_AFTER, recallGotIt, TRACE_HINT_AFTER } from "@/lib/training/writing";
 
@@ -85,10 +86,7 @@ function WritingPad({
       padding: Math.round(size * 0.06),
       showCharacter: false,
       showOutline: trace,
-      strokeColor: tokenColor("--color-bark"),
-      outlineColor: tokenColor("--color-bark", 0.14),
-      drawingColor: tokenColor("--color-rust-dark"),
-      highlightColor: tokenColor("--color-rust"),
+      ...writerColors(),
       drawingWidth: Math.max(4, Math.round(size / 45)),
       strokeFadeDuration: reducedMotion ? 0 : 400,
       // "I don't know" draws the character: quick, so the answer isn't a wait.
@@ -112,6 +110,18 @@ function WritingPad({
       container.innerHTML = "";
     };
   }, [HanziWriter, char, strokes, trace, reducedMotion]);
+
+  // hanzi-writer takes real colors, not var(): when the theme changes
+  // mid-character, recolor it in place. The quiz, its strokes so far and
+  // the one being drawn all stay.
+  const theme = useResolvedTheme();
+  useEffect(() => {
+    const writer = writerRef.current;
+    if (!writer) return;
+    for (const [name, value] of Object.entries(writerColors())) {
+      void writer.updateColor(name as Parameters<Writer["updateColor"]>[0], value, { duration: 0 });
+    }
+  }, [theme]);
 
   useImperativeHandle(ref, () => ({
     flashHint() {

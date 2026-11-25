@@ -139,7 +139,6 @@ export function SessionHeader({
   shuffle,
   control,
   notSaved,
-  themeToggle = false,
 }: {
   progress: { answered: number; total: number; comingBack: number };
   gotIt: number;
@@ -155,9 +154,6 @@ export function SessionHeader({
   /** "practice" for a built deck, "round" for a practice round after
    *  Today's review: neither saves anything. */
   notSaved?: "practice" | "round";
-  /** The sun/moon switch: flashcards only, the sessions that follow the
-   *  Appearance choice for now. */
-  themeToggle?: boolean;
 }) {
   const { answered, total, comingBack } = progress;
   const [confirming, setConfirming] = useState(false);
@@ -194,7 +190,7 @@ export function SessionHeader({
             ) : (
               <ShuffleToggle on={shuffle.on} onToggle={shuffle.onToggle} />
             ))}
-          {themeToggle && <ThemeToggle className={ICON_BUTTON} />}
+          <ThemeToggle className={ICON_BUTTON} />
           <button
             ref={resetRef}
             type="button"

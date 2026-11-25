@@ -122,7 +122,7 @@ function DirectionTile({
         >
           {tile.front}
         </span>
-        <span className="absolute left-[66px] top-[81px] z-10 flex h-6 w-6 items-center justify-center rounded-full bg-rust text-white ring-2 ring-background transition-transform duration-350 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:rotate-180 group-focus-visible:rotate-180 motion-reduce:transition-none">
+        <span className="absolute left-[66px] top-[81px] z-10 flex h-6 w-6 items-center justify-center rounded-full bg-rust text-on-rust ring-2 ring-background transition-transform duration-350 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:rotate-180 group-focus-visible:rotate-180 motion-reduce:transition-none">
           <ArrowLeftRight size={14} strokeWidth={2.5} />
         </span>
       </span>
@@ -390,7 +390,7 @@ function DailyLimitsDialog({
         // A close event that lands while the dialog is open again is stale.
         if (!e.currentTarget.open) onCloseRef.current();
       }}
-      className="deck-dialog mx-0 mb-0 mt-auto hidden max-h-dvh w-full max-w-none flex-col gap-5 overflow-y-auto rounded-t-[22px] border-0 bg-surface-raised px-4 pb-[calc(16px+env(safe-area-inset-bottom))] pt-5 text-bark open:flex backdrop:bg-black/50 sm:px-6 md:m-auto md:w-[calc(100%-48px)] md:max-w-120 md:rounded-[22px] md:border-[1.5px] md:border-line md:pb-5"
+      className="deck-dialog mx-0 mb-0 mt-auto hidden max-h-dvh w-full max-w-none flex-col gap-5 overflow-y-auto rounded-t-[22px] border-0 bg-surface-raised px-4 pb-[calc(16px+env(safe-area-inset-bottom))] pt-5 text-bark open:flex backdrop:bg-scrim sm:px-6 md:m-auto md:w-[calc(100%-48px)] md:max-w-120 md:rounded-[22px] md:border-[1.5px] md:border-line md:pb-5"
     >
       <h2 id={titleId} className="font-heading text-h1 font-bold text-bark">
         Daily limits

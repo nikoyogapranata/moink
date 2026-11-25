@@ -240,7 +240,7 @@ export function QuizQuestion({
 
 /** The result under a quiz question or the writing pad: green or red,
  *  a title (and a detail line), the full word with audio, and Continue
- *  (white text on got-it 5.1:1, on miss 6.5:1). */
+ *  (label on got-it 5.1:1, dark 7.3:1; on miss 6.5:1 in both). */
 export function ResultBar({
   right,
   title,
@@ -280,10 +280,10 @@ export function ResultBar({
         ref={continueRef}
         type="button"
         onClick={onContinue}
-        className={`mt-3 flex h-12 w-full items-center justify-center rounded-pill font-heading text-h3 font-bold text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rust focus-visible:ring-offset-2 ${
+        className={`mt-3 flex h-12 w-full items-center justify-center rounded-pill font-heading text-h3 font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rust focus-visible:ring-offset-2 ${
           right
-            ? "bg-got-it hover:bg-got-it-strong focus-visible:ring-offset-good-tint"
-            : "bg-miss hover:bg-miss-strong focus-visible:ring-offset-again-tint"
+            ? "bg-got-it text-on-got-it hover:bg-got-it-strong focus-visible:ring-offset-good-tint"
+            : "bg-miss text-on-miss hover:bg-miss-strong focus-visible:ring-offset-again-tint"
         }`}
       >
         Continue

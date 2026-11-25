@@ -114,7 +114,6 @@ export function PracticeSession({
   return (
     <SessionFrame>
       <SessionHeader
-        themeToggle
         progress={runProgress(run)}
         gotIt={stats.gotIt}
         stillLearning={stats.stillLearning}
